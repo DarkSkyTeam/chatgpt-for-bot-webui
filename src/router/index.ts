@@ -9,18 +9,20 @@ const router = createRouter({
       path: '/',
       component: AppLayout,
       children: [
-        {
+{
           path: 'platforms/',
           name: 'platforms',
           component: HomeView,
           children: [
             {
-              path: 'onebot',
-              name: 'onebot',
-              component: () => import('@/views/platforms/OneBotView.vue'),
+              path: ':name',
+              name: 'platforms-config',
+              component: () => import('@/components/ConfigurationList.vue'),
+              props: (route) => ({ title: route.params.name + ' 配置', path: route.params.name }),
             }
           ]
         }
+
       ]
     },
     {
