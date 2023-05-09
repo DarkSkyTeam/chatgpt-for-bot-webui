@@ -6,7 +6,7 @@
 
     <div class="content-wrapper">
       <div class="sidebar-wrapper">
-        <SideBar :navList="navList"/>
+        <SideBar :navList="navList" :icon-only="true"/>
       </div>
       <div class="main-content-wrapper">
         <router-view />
@@ -18,31 +18,34 @@
 <script setup lang="ts">
 import TopBar from '@/components/TopBar.vue'
 import SideBar, {Nav} from '@/components/Sidebar.vue'
+import { h, Component } from 'vue'
+import { NIcon, useMessage } from 'naive-ui'
+import { AlbumsOutline, BarChartOutline, ChatboxOutline, IdCardOutline, SettingsOutline } from '@vicons/ionicons5';
 
 const navList: Nav[] = [
     {
         text: "总览",
-        icon: "dashboard",
+        icon: h(NIcon, null, { default: () => h(BarChartOutline) }),
         path: "/dashboard",
     },
     {
         text: "接入平台",
-        icon: "platforms",
+        icon: h(NIcon, null, { default: () => h(ChatboxOutline)}),
         path: "/platforms",
     },
     {
-        text: "接入 AI",
-        icon: "llms",
-        path: "/llms",
+        text: "账号管理",
+        icon: h(NIcon, null, { default: () => h(IdCardOutline)}),
+        path: "/accounts",
     },
     {
         text: "功能设置",
-        icon: "utilites",
+        icon: h(NIcon, null, { default: () => h(SettingsOutline)}),
         path: "/utilites",
     },
     {
         text: "预设管理",
-        icon: "presets",
+        icon: h(NIcon, null, { default: () => h(AlbumsOutline)}),
         path: "/presets",
     }
 ]
@@ -63,9 +66,8 @@ const navList: Nav[] = [
 }
 
 .sidebar-wrapper {
-  width: 256px;
+  /* width: 256px; */
   background-color: var(--vt-c-white-mute);
-  padding: 16px;
 }
 
 .main-content-wrapper {

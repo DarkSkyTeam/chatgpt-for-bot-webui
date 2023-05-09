@@ -1,16 +1,16 @@
 <template>
   <div class="topbar">
-    <p>{{ title.toLocaleUpperCase() }}</p>
-
+    <p>{{ props.title.toLocaleUpperCase() }}</p>
     <n-space>
-      <n-button @click="resetForm">
+      <slot name="tools"></slot>
+      <n-button quaternary @click="resetForm">
         <template #icon>
           <n-icon>
             <reload-icon />
           </n-icon>
         </template>
       </n-button>
-      <n-button @click="saveToServer">
+      <n-button quaternary @click="saveToServer">
         <template #icon>
           <n-icon>
             <save-icon />
@@ -19,37 +19,124 @@
       </n-button>
     </n-space>
   </div>
+  <n-scrollbar style="max-height: 90vh">
+    <div style="max-width: 66%; margin: 0 auto; padding-top: 16px" class="configuration-container">
 
-  <div style="max-width: 66%; margin: 0 auto; padding-top: 16px">
-    <n-form ref="formRef" label-placement="left">
-      <div v-for="(group, i) in configurationGroups" :key="i">
-        <h2 style="text-align: left; padding: 16px 0;">{{ group.title }}</h2>
-        <div style="margin-bottom: 20px;" v-for="(config, j) in group.properties" :key="j">
-          <n-form-item :label="config.title" path="inputValue">
-            <n-input v-model:value="configurationValue[j]" type="text" :placeholder="config.default" />
-          </n-form-item>
-          <p>{{ config.description }}</p>
+      <n-form ref="formRef" label-placement="left" v-model:value="props.configurationValue">
+        <div v-for="(group, i) in configurationGroups" :key="i">
+          <h2 style="text-align: left; padding: 16px 0;">{{ group.title }}</h2>
+          <Markdown :source="group.description" v-if="group.description"></Markdown>
           <n-divider></n-divider>
+
+          <div style="margin-bottom: 20px;" v-for="(config, j) in group.properties" :key="j">
+
+            <n-form-item
+              :label="config.title"
+              v-if="config.type == 'boolean'"
+            >
+              <n-switch v-model:value="props.configurationValue[j]">
+                <template #checked-icon>
+                  😁
+                </template>
+                <template #unchecked-icon>
+                  🤔
+                </template>
+              </n-switch>
+            </n-form-item>
+              
+
+            <template v-else-if="config.type == 'object'">
+
+              <p style="padding: 10px 0">{{ config.title }}</p>
+
+              <template v-for="(_, keyName) in props.configurationValue[j]" :key="keyName">
+
+              <p style="padding: 10px 0">
+                <span contenteditable="true" @input="changeObjectKey(j, keyName, $event.target.innerText)">{{ keyName }}</span> 
+                <n-button style="margin-left: 12px" @click="removeObjectKey(j, keyName)">
+                  删除
+                </n-button>
+                <n-button attr-type="button" @click="addObjectArrayItem(j, keyName)">
+                    增加
+                </n-button>
+              </p> 
+
+              <n-form-item
+                v-for="(__, childIndex) in props.configurationValue[j][keyName]"
+                :key="childIndex"
+                :label="`${childIndex}`"
+              >
+                <n-input v-model:value="props.configurationValue[j][keyName][childIndex]" clearable  style="min-width: 25%" />
+                <n-button style="margin-left: 12px" @click="removeObjectArrayItem(j, keyName, childIndex)">
+                  删除
+                </n-button>
+              </n-form-item>
+            </template>
+            
+            <n-form-item>
+                <n-space>
+                  <n-button attr-type="button" @click="addObjectKey(j, '请输入 AI 名')">
+                    增加
+                </n-button>
+              </n-space>
+            </n-form-item>
+
+            </template>
+
+            <template v-else-if="config.type == 'array'">
+              <p style="padding: 10px 0">{{ config.title }}</p>
+              <n-form-item
+                v-for="(item, index) in props.configurationValue[j]"
+                :key="index"
+                :label="`第${index + 1}项`"
+              >
+                <n-input v-model:value="props.configurationValue[j][index]" clearable  style="min-width: 25%" />
+                <n-button style="margin-left: 12px" @click="removeArrayItem(j, index)">
+                  删除
+                </n-button>
+              </n-form-item>
+
+              <n-form-item>
+                <n-space>
+                  <n-button attr-type="button" @click="addArrayItem(j)">
+                    增加
+                  </n-button>
+                </n-space>
+              </n-form-item>
+            </template>
+
+            <n-form-item :label="config.title" path="inputValue" v-else-if="config.type == 'integer'">
+              <n-input-number v-model:value="props.configurationValue[j]" :placeholder="config.default"  style="min-width: 25%" />
+            </n-form-item>
+            <n-form-item :label="config.title" path="inputValue" v-else>
+              <n-input v-model:value="props.configurationValue[j]" type="text" :placeholder="config.default"  style="min-width: 25%" />
+            </n-form-item>
+            <Markdown :source="config.description" v-if="config.description"></Markdown>
+
+            <n-divider></n-divider>
+          </div>
         </div>
-      </div>
-    </n-form>
-  </div>
+      </n-form>
+    </div>
+  </n-scrollbar>
 </template>
 
 <script setup lang="ts">
 import { SaveOutline as SaveIcon, ReloadOutline as ReloadIcon } from '@vicons/ionicons5'
-import { NDivider, NInput, NFormItem, NForm, NSpace, NButton, NIcon } from 'naive-ui'
-import { ref, onUpdated } from 'vue'
-import { useLoadingBar } from 'naive-ui'
+import { NDivider, NInput, NFormItem, NForm, NSpace, NButton, NIcon, NScrollbar, NSwitch, NAnchor, NAnchorLink, NInputNumber } from 'naive-ui'
+import Markdown from 'vue3-markdown-it'
 
 export type Configuration = {
   title: string,
   isRequired: boolean,
-  value: string,
-  description: string
+  value: any,
+  description: string,
+  default?: any,
+  type: string,
 }
 export type ConfigurationGroup = {
   title: string,
+  description?: string,
   properties: Array<Configuration>
 }
 
@@ -58,73 +145,57 @@ const props = defineProps({
     type: String,
     required: true
   },
-  path: {
-    type: String,
+  configurationGroups: {
+    type: Array as () => Array<ConfigurationGroup>,
+    required: true
+  },
+  configurationValue: {
+    type: Object,
     required: true
   }
 })
 
 
-const configurationGroups = ref([]);
-const configurationValue = ref({});
-
-const loadingBar = useLoadingBar();
-
-const formRef = ref(null)
+const emit = defineEmits<{
+  (e: 'reset'): void
+  (e: 'save', configurationValue: any): void
+}>()
 
 
 const resetForm = () => {
   // Reset form fields to their original values
-  loadingBar.start()
-  getConfigurationValue().then(() => {
-    loadingBar.finish()
-  }).catch(err => {
-    loadingBar.error();
-  })
+  emit('reset');
 }
 
 const saveToServer = () => {
-  // Save cloned model
-  loadingBar.start()
-  fetch('/backend-api/v1/config?key=' + props.path, {
-    method: 'POST',
-    body: JSON.stringify(configurationValue.value),
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-  })
-    .then(res => {
-      if (res.ok) {
-        console.log('finish')
-
-        loadingBar.finish()
-        return res.text();
-      }
-
-      throw new Error('Something went wrong.');
-
-    })
-    .catch(err => {
-      console.log('err')
-      loadingBar.error()
-    })
-}
-async function getConfigurationSchema() {
-  const response = await fetch('/backend-api/v1/config?key=' + props.path + '&type=schema');
-  const data = await response.json();
-  configurationGroups.value = [data];
+  emit('save', props.configurationValue);
 }
 
-async function getConfigurationValue() {
-  const response = await fetch('/backend-api/v1/config?key=' + props.path + '&type=value');
-  const data = await response.json();
-  configurationValue.value = data;
+const removeArrayItem = (arr: number, index: number) => {
+  props.configurationValue[arr].splice(index, 1)
 }
-onUpdated(() => {
-  getConfigurationSchema()
-    .then(getConfigurationValue)
-})
+const addArrayItem = (arr: number) => {
+  props.configurationValue[arr].push('')
+}
+
+const addObjectArrayItem = (arr: number, keyName: string) => {
+  props.configurationValue[arr][keyName].push('')
+}
+const removeObjectArrayItem= (arr: number, keyName: string, index: number) => {
+  props.configurationValue[arr][keyName].splice(index, 1)
+}
+const removeObjectKey = (arr: number, keyName: string) => {
+  delete props.configurationValue[arr][keyName]
+}
+
+const addObjectKey = (arr: number, keyName: string) => {
+  props.configurationValue[arr][keyName] = []
+}
+
+const changeObjectKey = (arr: number, keyName: string, newKeyName: string) => {
+  props.configurationValue[arr][newKeyName] = props.configurationValue[arr][keyName]
+  delete props.configurationValue[arr][keyName]
+}
 </script>
 
 <style scoped>
@@ -156,5 +227,3 @@ a:hover {
   text-decoration: underline;
 }
 </style>
-
-<!-- The reload button calls the resetForm function, which clones all configurations on reset and resets the form fields. The save button calls the saveToServer function, which sends a POST request to save the current cloned configurations to the server. -->
