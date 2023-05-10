@@ -12,6 +12,7 @@ export default defineConfig({
       '/backend-api': 'http://127.0.0.1:8080'
     }
   },
+  base: './',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))

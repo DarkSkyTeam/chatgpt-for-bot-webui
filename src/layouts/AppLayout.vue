@@ -21,6 +21,7 @@ import SideBar, {Nav} from '@/components/Sidebar.vue'
 import { h, Component } from 'vue'
 import { NIcon, useMessage } from 'naive-ui'
 import { AlbumsOutline, BarChartOutline, ChatboxOutline, IdCardOutline, SettingsOutline } from '@vicons/ionicons5';
+import { useRouter } from 'vue-router';
 
 const navList: Nav[] = [
     {
@@ -49,6 +50,11 @@ const navList: Nav[] = [
         path: "/presets",
     }
 ]
+
+const $router = useRouter()
+if(localStorage.getItem('token') == null) {
+    $router.push('/login')
+}
 </script>
 
 <style scoped>
