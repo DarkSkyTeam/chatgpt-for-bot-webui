@@ -130,7 +130,6 @@ import { NDivider, NInput, NFormItem, NForm, NSpace, NButton, NIcon, NScrollbar,
 import Markdown from 'vue3-markdown-it'
 
 import CryptoJS from 'crypto-js';
-import { property } from 'lodash';
 
 
 export type Configuration = {
