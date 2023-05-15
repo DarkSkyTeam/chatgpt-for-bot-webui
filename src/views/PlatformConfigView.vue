@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import ConfigurationList from '@/components/ConfigurationList.vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import TheWelcome from '@/components/TheWelcome.vue'
 import SideBar, { Nav } from '@/components/Sidebar.vue'
 import { useLoadingBar, useMessage } from 'naive-ui';
-import { ref } from 'vue';
+import { ref, type Component } from 'vue';
 
 const $router = useRouter()
+const $route = useRoute()
 
 const navList: Nav[] = [
   {
@@ -38,7 +39,7 @@ const navList: Nav[] = [
 ]
 
 const loadingBar = useLoadingBar();
-const selectPlatform = ref('onebot')
+const selectPlatform = ref($route.params.name || 'onebot')
 
 const configurationGroups = ref([])
 const configurationValue = ref({})
@@ -113,8 +114,11 @@ resetConfig()
       <SideBar :nav-list="navList" @onSelect="onPlatformSelect" :icon-only="false" title="平台设置"/>
     </div>
     <div class="sub-main-content-wrapper">
+      <router-view :title="selectPlatform" :configuration-groups="configurationGroups"
+        :configurationValue="configurationValue" @save="saveConfig" @reset="resetConfig"></router-view>
+      <!-- <router-view ></router-view>
       <ConfigurationList :title="selectPlatform" :configuration-groups="configurationGroups"
-        :configurationValue="configurationValue" @save="saveConfig" @reset="resetConfig"></ConfigurationList>
+        :configurationValue="configurationValue" @save="saveConfig" @reset="resetConfig"></ConfigurationList> -->
     </div>
   </div>
 </template>

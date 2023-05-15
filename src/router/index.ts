@@ -14,14 +14,14 @@ const router = createRouter({
       component: AppLayout,
       children: [
         {
-          path: 'platforms/',
+          path: 'platforms/:name?',
           name: 'platforms',
           component: () => import('@/views/PlatformConfigView.vue'),
           children: [
             {
-              path: ':name',
+              path: '',
               name: 'platforms-config',
-              component: () => import('@/views/PlatformConfigView.vue'),
+              component: () => import('@/components/ConfigurationList.vue'),
               props: (route) => ({ title: route.params.name + ' 配置', path: route.params.name }),
             }
           ]

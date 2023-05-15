@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@vicons/ionicons5": "^0.12.0",
+    "crypto-js": "^4.1.1",
     "naive-ui": "^2.34.3",
     "pinia": "^2.0.35",
     "vue": "^3.2.47",

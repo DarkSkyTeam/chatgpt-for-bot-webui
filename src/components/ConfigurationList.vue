@@ -106,10 +106,13 @@
             </template>
 
             <n-form-item :label="config.title" path="inputValue" v-else-if="config.type == 'integer'">
-              <n-input-number v-model:value="props.configurationValue[j]" :placeholder="config.default"  style="min-width: 25%" />
+              <n-input-number v-model:value="props.configurationValue[j]" :placeholder="'' + config.default"  style="min-width: 25%" />
+            </n-form-item>
+            <n-form-item :label="config.title" path="inputValue" v-else-if="config.form_type == 'password'">
+              <n-input v-model:value="props.configurationValue[j]" type="password" :placeholder="'' + config.default"  style="min-width: 25%" />
             </n-form-item>
             <n-form-item :label="config.title" path="inputValue" v-else>
-              <n-input v-model:value="props.configurationValue[j]" type="text" :placeholder="config.default"  style="min-width: 25%" />
+              <n-input v-model:value="props.configurationValue[j]" type="text" :placeholder="'' + config.default"  style="min-width: 25%" />
             </n-form-item>
             <Markdown :source="config.description" v-if="config.description"></Markdown>
 
@@ -126,6 +129,10 @@ import { SaveOutline as SaveIcon, ReloadOutline as ReloadIcon } from '@vicons/io
 import { NDivider, NInput, NFormItem, NForm, NSpace, NButton, NIcon, NScrollbar, NSwitch, NInputNumber } from 'naive-ui'
 import Markdown from 'vue3-markdown-it'
 
+import CryptoJS from 'crypto-js';
+import { property } from 'lodash';
+
+
 export type Configuration = {
   title: string,
   isRequired: boolean,
@@ -133,6 +140,7 @@ export type Configuration = {
   description: string,
   default?: any,
   type: string,
+  form_type?: string,
 }
 export type ConfigurationGroup = {
   title: string,
@@ -161,6 +169,30 @@ const emit = defineEmits<{
   (e: 'save', configurationValue: any): void
 }>()
 
+function generateSalt() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let salt = '';
+  for (let i = 0; i < 10; i++) {
+    salt += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return salt;
+}
+
+
+function createHash(originalStr: string, method: string) {
+  const hashFunc = method
+  let hash;
+  if (hashFunc.startsWith('Hmac')) {
+    const key = generateSalt()
+    const saltedData = `${originalStr}`;
+    hash = CryptoJS[hashFunc](saltedData, key);
+    return `${hashFunc.replace('Hmac', '').toLocaleLowerCase()}$${key}$${hash.toString(CryptoJS.enc.Hex)}`;
+  } else {
+    hash = CryptoJS[hashFunc](originalStr);
+    return `${hashFunc}$${hash.toString(CryptoJS.enc.Hex)}`;
+  }
+}
+
 
 const resetForm = () => {
   // Reset form fields to their original values
@@ -168,6 +200,13 @@ const resetForm = () => {
 }
 
 const saveToServer = () => {
+  console.log(JSON.stringify(props.configurationValue))
+  for(let property: string in props.configurationValue) {
+    if(props.configurationGroups[0].properties[property].form_type == 'password') {
+    console.log(props.configurationGroups[0].properties[property].password)
+      props.configurationValue[property] = createHash(props.configurationValue[property], props.configurationGroups[0].properties[property].password)
+    }
+  }
   emit('save', props.configurationValue);
 }
 
