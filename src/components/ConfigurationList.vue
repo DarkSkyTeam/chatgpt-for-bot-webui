@@ -106,13 +106,13 @@
             </template>
 
             <n-form-item :label="config.title" path="inputValue" v-else-if="config.type == 'integer'">
-              <n-input-number v-model:value="props.configurationValue[j]" :placeholder="'' + config.default"  style="min-width: 25%" />
+              <n-input-number v-model:value="props.configurationValue[j]" :placeholder="'' + (config.default || '请输入……')"  style="min-width: 25%" />
             </n-form-item>
             <n-form-item :label="config.title" path="inputValue" v-else-if="config.form_type == 'password'">
-              <n-input v-model:value="props.configurationValue[j]" type="password" :placeholder="'' + config.default"  style="min-width: 25%" />
+              <n-input v-model:value="props.configurationValue[j]" type="password" :placeholder="'' + (config.default || '请输入……')"  style="min-width: 25%" />
             </n-form-item>
             <n-form-item :label="config.title" path="inputValue" v-else>
-              <n-input v-model:value="props.configurationValue[j]" type="text" :placeholder="'' + config.default"  style="min-width: 25%" />
+              <n-input v-model:value="props.configurationValue[j]" type="text" :placeholder="'' + (config.default || '请输入……')"  style="min-width: 25%" />
             </n-form-item>
             <Markdown :source="config.description" v-if="config.description"></Markdown>
 
