@@ -82,6 +82,9 @@ function saveConfig(config: object) {
             throw new Error('Something went wrong.');
         })
         .then(getConfigurationValue)
+        .then(() => {
+            newAccountModel.value = null
+        })
         .catch(err => {
             $message.error('配置保存失败！')
             loadingBar.error()
@@ -102,8 +105,6 @@ function deleteAccount(type: string, index: Number) {
         positiveText: '很确定',
         negativeText: '点错了',
         onPositiveClick: () => {
-            selectAccountIndex.value = -1
-            newAccountModel.value = null
             fetch('/backend-api/v1/accounts/' + selectAccountModelName.value + '/' + selectAccountIndex.value, {
                 method: 'DELETE',
                 headers: {
@@ -124,6 +125,8 @@ function deleteAccount(type: string, index: Number) {
                     $message.error('账号删除失败')
                     loadingBar.error()
                 })
+            selectAccountIndex.value = -1
+            newAccountModel.value = null
         }
     })
 }
