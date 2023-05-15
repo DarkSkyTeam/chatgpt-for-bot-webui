@@ -156,7 +156,8 @@ resetConfig()
                             <li :class="{'sidebar-nav-sub-item': true, 'sidebar-nav-sub-item-active': selectAccountIndex == childIndex && selectAccountModelName == type}" v-for="(account, childIndex) in accountList[type]"
                                 @click="onAccountSelect(type, childIndex)" :key="childIndex">
                                 <div>
-                                    <p class="account-remark">账号 {{ childIndex + 1 }}</p>
+                                    <p class="account-remark" v-if="account.remarks">{{ account.remarks }}</p>
+                                    <p class="account-remark" v-else>账号 {{ childIndex + 1 }}</p>
                                     <p class="account-status" style="color: mediumseagreen" v-if="account.ok">可用</p>
                                     <p class="account-status" style="color:brown" v-else>不可用</p>
                                 </div>

@@ -199,13 +199,17 @@ const resetForm = () => {
 }
 
 const saveToServer = () => {
-  console.log(JSON.stringify(props.configurationValue))
-  for(let property: string in props.configurationValue) {
-    if(props.configurationGroups[0].properties[property].form_type == 'password') {
-    console.log(props.configurationGroups[0].properties[property].password)
-      props.configurationValue[property] = createHash(props.configurationValue[property], props.configurationGroups[0].properties[property].password)
+  try{
+    for(let property: string in props.configurationValue) {
+      if(props.configurationGroups[0].properties[property].form_type == 'password') {
+      console.log(props.configurationGroups[0].properties[property].password)
+        props.configurationValue[property] = createHash(props.configurationValue[property], props.configurationGroups[0].properties[property].password)
+      }
     }
+  }catch(e){
+    console.error(e)
   }
+
   emit('save', props.configurationValue);
 }
 
