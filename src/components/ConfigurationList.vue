@@ -123,7 +123,7 @@
 
 <script setup lang="ts">
 import { SaveOutline as SaveIcon, ReloadOutline as ReloadIcon } from '@vicons/ionicons5'
-import { NDivider, NInput, NFormItem, NForm, NSpace, NButton, NIcon, NScrollbar, NSwitch, NAnchor, NAnchorLink, NInputNumber } from 'naive-ui'
+import { NDivider, NInput, NFormItem, NForm, NSpace, NButton, NIcon, NScrollbar, NSwitch, NInputNumber } from 'naive-ui'
 import Markdown from 'vue3-markdown-it'
 
 export type Configuration = {

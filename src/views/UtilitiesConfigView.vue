@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 
 import TheWelcome from '@/components/TheWelcome.vue'
 import SideBar, { Nav } from '@/components/Sidebar.vue'
-import { useLoadingBar } from 'naive-ui';
+import { useLoadingBar, useMessage } from 'naive-ui';
 import { ref } from 'vue';
 
 const $router = useRouter()
@@ -58,6 +58,7 @@ const navList: Nav[] = [
 ]
 
 const loadingBar = useLoadingBar();
+const $message = useMessage()
 const selectPlatform = ref('onebot')
 
 const configurationGroups = ref([])
@@ -90,7 +91,7 @@ function resetConfig() {
       loadingBar.finish()
     })
     .catch((err) => {
-      console.error(err)
+      $message.error('配置读取失败：' + err)
       loadingBar.error()
     })
 }
@@ -108,15 +109,16 @@ function saveConfig(config: object) {
   })
     .then(res => {
       if (res.ok) {
+        $message.success('配置已保存')
         loadingBar.finish()
         return res.text();
       }
 
-      throw new Error('Something went wrong.');
+      throw new Error(res.text());
 
     })
     .catch(err => {
-      console.log('err')
+      $message.error('配置保存失败：' + err)
       loadingBar.error()
     })
 }

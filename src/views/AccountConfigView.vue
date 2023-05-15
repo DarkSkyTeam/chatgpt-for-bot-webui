@@ -2,11 +2,12 @@
 import { PersonAddOutline as AddIcon, TrashOutline as TrashIcon } from '@vicons/ionicons5'
 import ConfigurationList from '@/components/ConfigurationList.vue'
 import { useRouter } from 'vue-router'
-import { NSpace, NButton, NIcon, useLoadingBar, useDialog } from 'naive-ui'
+import { NSpace, NButton, NIcon, useLoadingBar, useDialog, useMessage } from 'naive-ui'
 
 import { getCurrentInstance, onMounted, onUpdated, ref } from 'vue'
 
 const $router = useRouter()
+const $message = useMessage()
 const loadingBar = useLoadingBar();
 const dialog = useDialog()
 
@@ -55,6 +56,7 @@ function resetConfig() {
             loadingBar.finish()
         })
         .catch((err) => {
+            $message.error('配置读取失败！')
             console.error(err)
             loadingBar.error()
         })
@@ -73,6 +75,7 @@ function saveConfig(config: object) {
     })
         .then(res => {
             if (res.ok) {
+                $message.success('配置保存成功！')
                 loadingBar.finish()
                 return res.json();
             }
@@ -80,6 +83,7 @@ function saveConfig(config: object) {
         })
         .then(getConfigurationValue)
         .catch(err => {
+            $message.error('配置保存失败！')
             loadingBar.error()
         })
 }
@@ -109,6 +113,7 @@ function deleteAccount(type: string, index: Number) {
             })
                 .then(res => {
                     if (res.ok) {
+                        $message.success('账号已删除')
                         loadingBar.finish()
                         return res.json();
                     }
@@ -116,6 +121,7 @@ function deleteAccount(type: string, index: Number) {
                 })
                 .then(getConfigurationValue)
                 .catch(err => {
+                    $message.error('账号删除失败')
                     loadingBar.error()
                 })
         }
