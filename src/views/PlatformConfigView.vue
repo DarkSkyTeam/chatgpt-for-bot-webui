@@ -35,6 +35,11 @@ const navList: Nav[] = [
     key: "http",
     text: "HTTP 接口",
     path: "/platforms/http",
+  },
+  {
+    key: "qqrobot",
+    text: "QQ 官方机器人",
+    path: "/platforms/qqrobot",
   }
 ]
 

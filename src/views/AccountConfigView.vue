@@ -143,7 +143,7 @@ resetConfig()
                 <ul class="sidebar-nav">
                     <li v-for="type in Object.keys(accountList)" :key="type">
                         <div class="sidebar-nav-item">
-                            <div class="sidebar-nav-text">{{ type }}</div>
+                            <div class="sidebar-nav-text">{{ accountList[type].model.title }}</div>
                             <n-space class="sidebar-nav-action">
                                 <n-button quaternary size="tiny" @click="addAccount(type)">
                                     <template #icon>
@@ -156,7 +156,7 @@ resetConfig()
                         </div>
                         <!-- nested sidebar -->
                         <ul class="sidebar-nav-child">
-                            <li :class="{'sidebar-nav-sub-item': true, 'sidebar-nav-sub-item-active': selectAccountIndex == childIndex && selectAccountModelName == type}" v-for="(account, childIndex) in accountList[type]"
+                            <li :class="{'sidebar-nav-sub-item': true, 'sidebar-nav-sub-item-active': selectAccountIndex == childIndex && selectAccountModelName == type}" v-for="(account, childIndex) in accountList[type].accounts"
                                 @click="onAccountSelect(type, childIndex)" :key="childIndex">
                                 <div>
                                     <p class="account-remark" v-if="account.remarks">{{ account.remarks }}</p>
@@ -172,7 +172,7 @@ resetConfig()
         </div>
         <div class="sub-main-content-wrapper" v-if="selectAccountIndex >= 0">
             <ConfigurationList title="修改账号" :configuration-groups="configurationGroups"
-                :configurationValue="accountList[selectAccountModelName][selectAccountIndex]" @save="saveConfig"
+                :configurationValue="accountList[selectAccountModelName].accounts[selectAccountIndex]" @save="saveConfig"
                 @reset="resetConfig">
                 <template v-slot:tools>
                     <n-button quaternary @click="deleteAccount(selectAccountModelName, selectAccountIndex)">
