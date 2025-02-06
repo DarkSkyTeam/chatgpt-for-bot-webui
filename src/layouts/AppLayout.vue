@@ -1,83 +1,79 @@
 <template>
-  <div class="app-wrapper">
-    <!-- <div class="top-bar-wrapper">
-      <TopBar />
-    </div> -->
+  <n-layout has-sider position="absolute">
+    <!-- 左侧主导航栏 -->
+    <n-layout-sider
+      bordered
+      collapse-mode="width"
+      :collapsed="appStore.siderCollapsed"
+      :collapsed-width="64"
+      :width="240"
+      show-trigger
+      @collapse="appStore.toggleSider"
+      @expand="appStore.toggleSider"
+      class="main-sider"
+    >
+      <!-- <main-sidebar /> -->
+    </n-layout-sider>
+    <p>123</p>
+    <!-- 二级菜单栏 -->
+    <n-layout-sider
+      bordered
+      collapse-mode="width"
+      :collapsed="appStore.secondarySiderCollapsed"
+      :collapsed-width="0"
+      :width="240"
+      show-trigger
+      @collapse="appStore.toggleSecondarySider"
+      @expand="appStore.toggleSecondarySider"
+      class="secondary-sider"
+    >
+      <!-- <secondary-sidebar /> -->
+    </n-layout-sider>
 
-    <div class="content-wrapper">
-      <div class="sidebar-wrapper">
-        <SideBar :navList="navList" :icon-only="true"/>
-      </div>
-      <div class="main-content-wrapper">
-        <router-view />
-      </div>
-    </div>
-  </div>
+    <!-- 主内容区域 -->
+    <n-layout>
+      <n-layout-content class="main-content">
+        <!-- <router-view /> -->
+      </n-layout-content>
+      <!-- 底部状态栏 -->
+      <n-layout-footer bordered position="absolute" class="status-bar">
+        <!-- <status-bar /> -->
+      </n-layout-footer>
+    </n-layout>
+  </n-layout>
 </template>
   
 <script setup lang="ts">
-import TopBar from '@/components/TopBar.vue'
-import SideBar, {Nav} from '@/components/Sidebar.vue'
-import { h, Component } from 'vue'
-import { NIcon, useMessage } from 'naive-ui'
-import { AlbumsOutline, BarChartOutline, ChatboxOutline, IdCardOutline, SettingsOutline } from '@vicons/ionicons5';
-import { useRouter } from 'vue-router';
+import { NLayout, NLayoutSider, NLayoutContent, NLayoutFooter } from 'naive-ui'
+import { RouterView } from 'vue-router'
+import { useAppStore } from '@/stores/app'
+import MainSidebar from '@/components/layout/MainSidebar.vue'
+import SecondarySidebar from '@/components/layout/SecondarySidebar.vue' 
+import StatusBar from '@/components/layout/StatusBar.vue'
 
-const navList: Nav[] = [
-    {
-        text: "总览",
-        icon: h(NIcon, null, { default: () => h(BarChartOutline) }),
-        path: "/dashboard",
-    },
-    {
-        text: "接入平台",
-        icon: h(NIcon, null, { default: () => h(ChatboxOutline)}),
-        path: "/platforms",
-    },
-    {
-        text: "账号管理",
-        icon: h(NIcon, null, { default: () => h(IdCardOutline)}),
-        path: "/accounts",
-    },
-    {
-        text: "功能设置",
-        icon: h(NIcon, null, { default: () => h(SettingsOutline)}),
-        path: "/utilites",
-    },
-    {
-        text: "预设管理",
-        icon: h(NIcon, null, { default: () => h(AlbumsOutline)}),
-        path: "/presets",
-    }
-]
-
-const $router = useRouter()
-if(localStorage.getItem('token') == null) {
-    $router.push('/login')
-}
+const appStore = useAppStore()
 </script>
 
 <style scoped>
-.app-wrapper {
-  /* display: flex; */
-  /* flex-direction: column; */
+.main-sider {
   height: 100vh;
+  background: var(--n-color);
 }
 
-.content-wrapper {
-  display: flex;
-  flex-grow: 1;
-  /* padding-top: 60px; */
+.secondary-sider {
   height: 100vh;
+  background: var(--n-color);
 }
 
-.sidebar-wrapper {
-  /* width: 256px; */
-  background-color: var(--vt-c-white-mute);
+.main-content {
+  padding: 16px;
+  height: calc(100vh - 28px); /* 减去状态栏高度 */
 }
 
-.main-content-wrapper {
-  flex-grow: 1;
-  /* padding: 16px; */
+.status-bar {
+  height: 28px;
+  padding: 4px 12px;
+  font-size: 12px;
+  line-height: 20px;
 }
 </style>

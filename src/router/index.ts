@@ -1,87 +1,60 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from '@/layouts/AppLayout.vue'
 
 const router = createRouter({
-  history: createWebHashHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    {
-      path: '/login',
-      name: 'login',
-      component: () => import('@/views/LoginView.vue'),
-    },
     {
       path: '/',
       component: AppLayout,
       children: [
         {
-          path: 'platforms/:name?',
-          name: 'platforms',
-          component: () => import('@/views/PlatformConfigView.vue'),
-          children: [
-            {
-              path: '',
-              name: 'platforms-config',
-              component: () => import('@/components/ConfigurationList.vue'),
-              props: (route) => ({ title: route.params.name + ' 配置', path: route.params.name }),
-            }
-          ]
+          path: '',
+          redirect: '/im'
         },
         {
-          path: 'accounts/',
-          name: 'accounts',
-          component: () => import('@/views/AccountConfigView.vue'),
-          children: [
-            {
-              path: ':name',
-              name: 'accounts-config',
-              component: () => import('@/components/ConfigurationList.vue'),
-              props: (route) => ({ title: route.params.name + ' 配置', path: route.params.name }),
-            }
-          ]
+          path: '/im',
+          name: 'im',
+          component: () => import('@/views/im/IMView.vue')
         },
         {
-          path: 'utilites/',
-          name: 'utilites',
-          component: () => import('@/views/UtilitiesConfigView.vue'),
-          children: [
-            {
-              path: ':name',
-              name: 'utilites-config',
-              component: () => import('@/components/ConfigurationList.vue'),
-              props: (route) => ({ title: route.params.name + ' 配置', path: route.params.name }),
-            }
-          ]
+          path: '/llm',
+          name: 'llm',
+          component: () => import('@/views/llm/LLMView.vue')
         },
         {
-          path: 'presets/',
-          name: 'presets',
-          component: () => import('@/views/AboutView.vue'),
-          children: [
-            {
-              path: ':name',
-              name: 'presets-config',
-              component: () => import('@/components/ConfigurationList.vue'),
-              props: (route) => ({ title: route.params.name + ' 配置', path: route.params.name }),
-            }
-          ]
+          path: '/workflow',
+          name: 'workflow',
+          component: () => import('@/views/workflow/WorkflowView.vue')
         },
         {
-          path: 'dashboard/',
-          name: 'dashboard',
-          component: () => import('@/views/AboutView.vue')
+          path: '/plugins',
+          name: 'plugins',
+          component: () => import('@/views/plugins/PluginList.vue')
+        },
+        {
+          path: '/plugins/market',
+          name: 'plugin-market',
+          component: () => import('@/views/plugins/PluginMarket.vue')
         }
-
       ]
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue')
+      path: '/login',
+      name: 'login',
+      component: () => import('@/views/LoginView.vue')
     }
   ]
+})
+
+// 路由守卫
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token')
+  if (to.name !== 'login' && !token) {
+    next({ name: 'login' })
+  } else {
+    next()
+  }
 })
 
 export default router

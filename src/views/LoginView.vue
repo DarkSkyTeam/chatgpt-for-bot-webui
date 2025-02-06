@@ -1,167 +1,209 @@
 <template>
-    <div class="login-page">
-        <form class="login-form" @submit.prevent="submitForm">
-            <h1 class="login-title">ChatGPT for Bot 控制台</h1>
-            <div class="form-group">
-                <label for="password" class="sr-only">Password</label>
-                <input type="password" id="password" v-model="password" placeholder="Password" required
-                    @change="clearErrorMessage" />
-
+    <div class="login-view">
+        <n-card class="login-card" :bordered="false">
+            <div class="login-header">
+                <div class="login-logo">
+                    <div class="i-carbon-bot text-36px" />
+                </div>
+                <h1 class="login-title">ChatGPT Bot</h1>
             </div>
-            <span v-if="errorMessage" class="error-message">{{ errorMessage }}</span>
-
-            <button type="submit" class="submit-btn" :disabled="isLoading">
-                <span v-if="isLoading">Loading...</span>
-                <span v-else>Submit</span>
-            </button>
-        </form>
+            
+            <n-result
+                v-if="isFirstTime"
+                status="info"
+                title="首次访问"
+                description="请设置管理员密码"
+            />
+            <n-result
+                v-else
+                status="success"
+                title="登录"
+                description="请输入管理员密码"
+            />
+            
+            <n-form
+                ref="formRef"
+                :model="formModel"
+                :rules="rules"
+                label-placement="left"
+                label-width="0"
+                require-mark-placement="right-hanging"
+                size="large"
+            >
+                <n-form-item path="password">
+                    <n-input
+                        v-model:value="formModel.password"
+                        type="password"
+                        placeholder="请输入密码"
+                        :maxlength="32"
+                        show-password-on="click"
+                    >
+                        <template #prefix>
+                            <div class="i-carbon-password" />
+                        </template>
+                    </n-input>
+                </n-form-item>
+                
+                <n-form-item v-if="isFirstTime" path="confirmPassword">
+                    <n-input
+                        v-model:value="formModel.confirmPassword"
+                        type="password"
+                        placeholder="请确认密码"
+                        :maxlength="32"
+                        show-password-on="click"
+                    >
+                        <template #prefix>
+                            <div class="i-carbon-password" />
+                        </template>
+                    </n-input>
+                </n-form-item>
+                
+                <n-space vertical :size="24">
+                    <n-button
+                        type="primary"
+                        size="large"
+                        block
+                        :loading="loading"
+                        @click="handleSubmit"
+                    >
+                        {{ isFirstTime ? '设置密码' : '登录' }}
+                    </n-button>
+                </n-space>
+            </n-form>
+        </n-card>
     </div>
 </template>
   
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { NCard, NForm, NFormItem, NInput, NButton, NSpace, NResult } from 'naive-ui'
+import type { FormRules } from 'naive-ui'
 
-const $router = useRouter()
-const password = ref('');
-const isLoading = ref(false);
-const errorMessage = ref('');
+const router = useRouter()
+const isFirstTime = ref(false)
+const loading = ref(false)
+const formModel = ref({
+    password: '',
+    confirmPassword: ''
+})
 
-function clearErrorMessage() {
-    errorMessage.value = ''
+// 表单验证规则
+const rules: FormRules = {
+    password: [
+        { required: true, message: '请输入密码' },
+        { min: 6, message: '密码长度不能小于6位' }
+    ],
+    confirmPassword: [
+        { 
+            required: true, 
+            message: '请确认密码',
+            trigger: ['input', 'blur']
+        },
+        {
+            validator: (rule, value) => {
+                return value === formModel.value.password
+            },
+            message: '两次输入的密码不一致',
+            trigger: ['input', 'blur']
+        }
+    ]
 }
 
-const submitForm = async () => {
-    isLoading.value = true;
-    errorMessage.value = '';
-    const resp = await fetch('/backend-api/v1/login', {
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        method: 'POST',
-        body: JSON.stringify({
-            'password': password.value
+// 检查是否首次访问
+const checkFirstTime = async () => {
+    try {
+        const response = await fetch('/backend-api/api/auth/login', {
+            method: 'GET'
         })
-    })
-    const body = await resp.json()
-    isLoading.value = false;
-    if (resp.status != 200) {
-        errorMessage.value = body['error']
-    } else {
-        localStorage.setItem('token', body['token'])
-        $router.push('/dashboard')
+        const data = await response.json()
+        isFirstTime.value = response.status === 401 && data.error === 'No password set'
+    } catch (error) {
+        console.error('检查首次访问失败:', error)
     }
-};
+}
+
+// 处理登录/设置密码
+const handleSubmit = async () => {
+    if (isFirstTime.value && formModel.value.password !== formModel.value.confirmPassword) {
+        alert('两次输入的密码不一致')
+        return
+    }
+    
+    loading.value = true
+    try {
+        const response = await fetch('/backend-api/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                password: formModel.value.password
+            })
+        })
+        
+        const data = await response.json()
+        if (response.ok) {
+            localStorage.setItem('token', data.access_token)
+            router.push('/')
+        } else {
+            alert(data.error || '登录失败')
+        }
+    } catch (error) {
+        console.error('登录失败:', error)
+        alert('登录失败，请重试')
+    } finally {
+        loading.value = false
+    }
+}
+
+checkFirstTime()
 </script>
   
-<style>
-.login-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+<style scoped>
+.login-view {
     height: 100vh;
-    background-color: white;
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, color-stop(.5, transparent), color-stop(.5, rgba(226, 205, 188, .9)), to(rgba(226, 205, 188, .9))),
-        -webkit-gradient(linear, 0 0, 100% 0, color-stop(.5, transparent), color-stop(.5, rgba(226, 205, 188, .9)), to(rgba(226, 205, 188, .9)));
-    background-image: -moz-linear-gradient(transparent 50%, rgba(226, 205, 188, .9) 50%, rgba(226, 205, 188, .9)),
-        -moz-linear-gradient(0deg, transparent 50%, rgba(226, 205, 188, .9) 50%, rgba(226, 205, 188, .9));
-    background-image: -o-linear-gradient(transparent 50%, rgba(226, 205, 188, .9) 50%, rgba(226, 205, 188, .9)),
-        -o-linear-gradient(0deg, transparent 50%, rgba(226, 205, 188, .9) 50%, rgba(226, 205, 188, .9));
-    background-image: linear-gradient(transparent 50%, rgba(226, 205, 188, .9) 50%, rgba(226, 205, 188, .9)),
-        linear-gradient(0deg, transparent 50%, rgba(226, 205, 188, .9) 50%, rgba(226, 205, 188, .9));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--n-color-1) 0%, var(--n-color-2) 100%);
 }
 
-.login-form {
+.login-card {
+    width: 100%;
+    max-width: 360px;
+    padding: 24px;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.login-logo {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    background-color: #fff;
-    transition: all 0.3s ease-in-out;
-    min-width: 400px;
+    justify-content: center;
+    margin-bottom: 16px;
 }
 
 .login-title {
-    margin-bottom: 1rem;
-    font-size: 2rem;
-    font-weight: bold;
-    color: #333;
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--n-text-color);
 }
 
-.form-group {
-    width: 100%;
-    margin-bottom: 1rem;
+:deep(.n-card-header) {
+    text-align: center;
 }
 
-label {
-    display: none;
+:deep(.n-result) {
+    padding: 0 0 24px 0;
 }
 
-input[type='password'] {
-    width: 100%;
-    padding: 1rem;
-    border: none;
-    border-radius: 5px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    font-size: 1rem;
-    color: #333;
-    background-color: #f9f9f9;
-}
-
-.submit-btn {
-    width: 100%;
-    padding: 1rem;
-    border: none;
-    border-radius: 5px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    font-size: 1rem;
-    font-weight: bold;
-    color: #fff;
-    background-color: #333;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-}
-
-.submit-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.submit-btn:hover {
-    background-color: #555;
-}
-
-.error-message {
-    margin: 1rem;
-    font-size: 1rem;
-    font-weight: bold;
-    color: #ff0000;
-    animation: shake 0.3s ease-in-out;
-}
-
-
-@keyframes shake {
-    0% {
-        transform: translateX(0);
-    }
-
-    25% {
-        transform: translateX(-5px);
-    }
-
-    50% {
-        transform: translateX(5px);
-    }
-
-    75% {
-        transform: translateX(-5px);
-    }
-
-    100% {
-        transform: translateX(0);
-    }
+:deep(.n-input .n-input__prefix) {
+    margin-right: 8px;
 }
 </style>
