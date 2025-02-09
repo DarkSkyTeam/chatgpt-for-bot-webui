@@ -23,6 +23,22 @@ export interface IMAdapter {
   config: Record<string, any>
 }
 
+export interface ConfigSchema {
+  title: string
+  type: string
+  properties: Record<string, {
+    title: string
+    type: string
+    description?: string
+    default?: any
+    minimum?: number
+    maximum?: number
+    enum?: any[]
+    enumNames?: string[]
+  }>
+  required?: string[]
+}
+
 export const imApi = {
   /**
    * 获取适配器类型列表
@@ -78,6 +94,13 @@ export const imApi = {
    */
   stopAdapter(adapterId: string) {
     return http.post<void>(`/im/adapters/${adapterId}/stop`)
+  },
+
+  /**
+   * 获取适配器配置模式
+   */
+  getAdapterConfigSchema(adapterType: string) {
+    return http.get<{ configSchema: ConfigSchema }>(`/im/types/${adapterType}/config-schema`)
   },
 
   /**

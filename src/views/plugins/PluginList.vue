@@ -1,120 +1,23 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { NCard, NSpace, NButton, NDataTable, NTag, NSwitch, NModal, NForm, NFormItem, NInput } from 'naive-ui'
+import { h, onMounted } from 'vue'
+import { NCard, NSpace, NButton, NDataTable, NTag, NSwitch, NModal, NForm, NFormItem, NInput, NSpin } from 'naive-ui'
 import type { DataTableColumns } from 'naive-ui'
 import { useRouter } from 'vue-router'
-
-interface PluginInfo {
-  name: string
-  package_name: string
-  description: string
-  version: string
-  author: string
-  homepage?: string
-  license?: string
-  is_internal: boolean
-  is_enabled: boolean
-  metadata?: {
-    category?: string
-    tags?: string[]
-  }
-}
+import { usePluginViewModel } from './plugin.vm'
+import type { PluginInfo } from './plugin.vm'
 
 const router = useRouter()
-const plugins = ref<PluginInfo[]>([])
-const showInstallModal = ref(false)
-const installForm = ref({
-  package_name: '',
-  version: ''
-})
-
-// 获取所有插件
-const fetchPlugins = async () => {
-  try {
-    const response = await fetch('/backend-api/api/plugin/plugins')
-    const data = await response.json()
-    plugins.value = data.plugins
-  } catch (error) {
-    console.error('获取插件列表失败:', error)
-  }
-}
-
-// 安装插件
-const handleInstall = async () => {
-  try {
-    const response = await fetch('/backend-api/api/plugin/plugins', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(installForm.value)
-    })
-    
-    if (response.ok) {
-      showInstallModal.value = false
-      await fetchPlugins()
-    }
-  } catch (error) {
-    console.error('安装插件失败:', error)
-  }
-}
-
-// 卸载插件
-const handleUninstall = async (plugin: PluginInfo) => {
-  if (plugin.is_internal) {
-    alert('内部插件不能卸载')
-    return
-  }
-  
-  if (confirm(`确定要卸载插件 ${plugin.name} 吗？`)) {
-    try {
-      const response = await fetch(`/api/plugin/plugins/${plugin.package_name}`, {
-        method: 'DELETE'
-      })
-      if (response.ok) {
-        await fetchPlugins()
-      }
-    } catch (error) {
-      console.error('卸载插件失败:', error)
-    }
-  }
-}
-
-// 启用/禁用插件
-const handleToggleEnable = async (plugin: PluginInfo) => {
-  try {
-    const action = plugin.is_enabled ? 'disable' : 'enable'
-    const response = await fetch(`/api/plugin/plugins/${plugin.package_name}/${action}`, {
-      method: 'POST'
-    })
-    
-    if (response.ok) {
-      await fetchPlugins()
-    }
-  } catch (error) {
-    console.error('切换插件状态失败:', error)
-  }
-}
-
-// 更新插件
-const handleUpdate = async (plugin: PluginInfo) => {
-  if (plugin.is_internal) {
-    alert('内部插件不支持更新')
-    return
-  }
-  
-  try {
-    const response = await fetch(`/api/plugin/plugins/${plugin.package_name}`, {
-      method: 'PUT'
-    })
-    
-    if (response.ok) {
-      await fetchPlugins()
-    }
-  } catch (error) {
-    console.error('更新插件失败:', error)
-  }
-}
+const {
+  plugins,
+  loading,
+  showInstallModal,
+  installForm,
+  fetchPlugins,
+  installPlugin,
+  uninstallPlugin,
+  togglePluginStatus,
+  updatePlugin
+} = usePluginViewModel()
 
 const createColumns = (): DataTableColumns<PluginInfo> => {
   return [
@@ -165,7 +68,8 @@ const createColumns = (): DataTableColumns<PluginInfo> => {
           NSwitch,
           {
             value: row.is_enabled,
-            onUpdateValue: () => handleToggleEnable(row)
+            disabled: row.is_internal,
+            onUpdateValue: () => togglePluginStatus(row)
           }
         )
       }
@@ -184,7 +88,7 @@ const createColumns = (): DataTableColumns<PluginInfo> => {
                 {
                   size: 'small',
                   disabled: row.is_internal,
-                  onClick: () => handleUpdate(row)
+                  onClick: () => updatePlugin(row)
                 },
                 { default: () => '更新' }
               ),
@@ -194,7 +98,7 @@ const createColumns = (): DataTableColumns<PluginInfo> => {
                   size: 'small',
                   type: 'error',
                   disabled: row.is_internal,
-                  onClick: () => handleUninstall(row)
+                  onClick: () => uninstallPlugin(row)
                 },
                 { default: () => '卸载' }
               )
@@ -220,26 +124,30 @@ onMounted(() => {
       </n-space>
       
       <n-card title="已安装插件">
-        <n-data-table :columns="createColumns()" :data="plugins" />
+        <n-spin :show="loading">
+          <n-data-table :columns="createColumns()" :data="plugins" />
+        </n-spin>
       </n-card>
     </n-space>
 
     <!-- 安装插件表单 -->
     <n-modal v-model:show="showInstallModal" title="安装插件">
-      <n-form :model="installForm" label-placement="left" label-width="100">
-        <n-form-item label="包名" path="package_name">
-          <n-input v-model:value="installForm.package_name" placeholder="请输入插件包名" />
-        </n-form-item>
-        <n-form-item label="版本" path="version">
-          <n-input v-model:value="installForm.version" placeholder="请输入版本号（可选）" />
-        </n-form-item>
-      </n-form>
-      <template #footer>
-        <n-space justify="end">
-          <n-button @click="showInstallModal = false">取消</n-button>
-          <n-button type="primary" @click="handleInstall">确定</n-button>
-        </n-space>
-      </template>
+      <n-card style="width: 400px;">
+        <n-form :model="installForm" label-placement="left" label-width="100">
+          <n-form-item label="包名" path="package_name">
+            <n-input v-model:value="installForm.package_name" placeholder="请输入插件包名" />
+          </n-form-item>
+          <n-form-item label="版本" path="version">
+            <n-input v-model:value="installForm.version" placeholder="请输入版本号（可选）" />
+          </n-form-item>
+        </n-form>
+        <template #footer>
+          <n-space justify="end">
+            <n-button @click="showInstallModal = false">取消</n-button>
+            <n-button type="primary" :loading="loading" @click="installPlugin">确定</n-button>
+          </n-space>
+        </template>
+      </n-card>
     </n-modal>
   </div>
 </template>

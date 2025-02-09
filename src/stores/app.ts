@@ -10,8 +10,15 @@ export const useAppStore = defineStore('app', () => {
   const systemStatus = ref({
     status: 'normal',
     apiConnected: true,
-    memoryUsage: 0
+    memoryUsage: 0,
+    cpuUsage: 0,
+    uptime: 0,
+    activeAdapters: 0,
+    activeBackends: 0,
+    loadedPlugins: 0,
+    workflowCount: 0
   })
+
 
   // 计算属性
   const isSystemHealthy = computed(() => 
@@ -40,12 +47,19 @@ export const useAppStore = defineStore('app', () => {
     status?: string
     apiConnected?: boolean
     memoryUsage?: number
+    cpuUsage?: number
+    uptime?: number
+    activeAdapters?: number
+    activeBackends?: number
+    loadedPlugins?: number
+    workflowCount?: number
   }) => {
     systemStatus.value = {
       ...systemStatus.value,
       ...status
     }
   }
+
 
   return {
     // 状态

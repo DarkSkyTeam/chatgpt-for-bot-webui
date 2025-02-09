@@ -12,9 +12,8 @@
       @expand="appStore.toggleSider"
       class="main-sider"
     >
-      <!-- <main-sidebar /> -->
+      <main-sidebar />
     </n-layout-sider>
-    <p>123</p>
     <!-- 二级菜单栏 -->
     <n-layout-sider
       bordered
@@ -27,17 +26,17 @@
       @expand="appStore.toggleSecondarySider"
       class="secondary-sider"
     >
-      <!-- <secondary-sidebar /> -->
+      <secondary-sidebar />
     </n-layout-sider>
 
     <!-- 主内容区域 -->
     <n-layout>
       <n-layout-content class="main-content">
-        <!-- <router-view /> -->
+        <router-view />
       </n-layout-content>
       <!-- 底部状态栏 -->
       <n-layout-footer bordered position="absolute" class="status-bar">
-        <!-- <status-bar /> -->
+        <status-bar />
       </n-layout-footer>
     </n-layout>
   </n-layout>

@@ -1,8 +1,10 @@
 <script setup lang="ts">
+// @Deprecated -- legacy workflow editor
 import { ref, onMounted, watch } from 'vue'
 import { NCard, NSpace, NButton, NDrawer, NDrawerContent, NSelect, NInput, NForm, NFormItem } from 'naive-ui'
 import { useVueFlow, VueFlow, Background, Controls, MiniMap, Panel } from '@vue-flow/core'
 import { v4 as uuidv4 } from 'uuid'
+
 import '@vue-flow/core/dist/style.css'
 import '@vue-flow/core/dist/theme-default.css'
 import WorkflowNode from './WorkflowNode.vue'

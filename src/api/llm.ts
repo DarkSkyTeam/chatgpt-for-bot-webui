@@ -8,6 +8,22 @@ export interface LLMBackend {
   models: string[]
 }
 
+export interface ConfigSchema {
+  title: string
+  type: string
+  properties: Record<string, {
+    title: string
+    type: string
+    description?: string
+    default?: any
+    minimum?: number
+    maximum?: number
+    enum?: any[]
+    enumNames?: string[]
+  }>
+  required?: string[]
+}
+
 export const llmApi = {
   /**
    * 获取适配器类型列表
@@ -20,21 +36,21 @@ export const llmApi = {
    * 获取后端列表
    */
   getBackends() {
-    return http.get<{ backends: LLMBackend[] }>('/llm/backends')
+    return http.get<{ data: { backends: LLMBackend[] } }>('/llm/backends')
   },
 
   /**
    * 创建后端
    */
   createBackend(backend: LLMBackend) {
-    return http.post<void>('/llm/backends', backend)
+    return http.post<{ data: LLMBackend }>('/llm/backends', backend)
   },
 
   /**
    * 更新后端
    */
   updateBackend(name: string, backend: LLMBackend) {
-    return http.put<void>(`/llm/backends/${name}`, backend)
+    return http.put<{ data: LLMBackend }>(`/llm/backends/${name}`, backend)
   },
 
   /**
@@ -49,5 +65,12 @@ export const llmApi = {
    */
   toggleBackend(name: string, enable: boolean) {
     return http.post<void>(`/llm/backends/${name}/${enable ? 'enable' : 'disable'}`)
+  },
+
+  /**
+   * 获取适配器配置模式
+   */
+  getAdapterConfigSchema(adapterType: string) {
+    return http.get<{ configSchema: ConfigSchema }>(`/llm/types/${adapterType}/config-schema`)
   }
 } 

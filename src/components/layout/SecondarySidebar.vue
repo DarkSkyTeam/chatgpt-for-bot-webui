@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, h } from 'vue'
 import { NMenu } from 'naive-ui'
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import type { MenuOption } from 'naive-ui'
 import { useAppStore } from '@/stores/app'
 
 const route = useRoute()
 const appStore = useAppStore()
+const router = useRouter()
 
 // 根据当前路由获取二级菜单配置
 const menuOptions = computed<MenuOption[]>(() => {
@@ -16,8 +17,9 @@ const menuOptions = computed<MenuOption[]>(() => {
     case 'im':
       return [
         {
-          label: () => h(RouterLink, { to: '/im' }, { default: () => '平台管理' }),
-          key: 'im-platforms'
+          label: () => '平台管理',
+          key: 'im-platforms',
+          path: '/im'
         },
         // {
         //   label: () => h(RouterLink, { to: '/im/accounts' }, { default: () => '账号管理' }),
@@ -31,49 +33,63 @@ const menuOptions = computed<MenuOption[]>(() => {
     case 'llm':
       return [
         {
-          label: () => h(RouterLink, { to: '/llm' }, { default: () => '后端管理' }),
-          key: 'llm-backends'
+          label: () => '后端管理',
+          key: 'llm-backends',
+          path: '/llm'
         },
         {
-          label: () => h(RouterLink, { to: '/llm/models' }, { default: () => '模型管理' }),
-          key: 'llm-models'
+          label: () => '模型管理',
+          key: 'llm-models',
+          path: '/llm/models'
         },
         {
-          label: () => h(RouterLink, { to: '/llm/chat' }, { default: () => '对话测试' }),
-          key: 'llm-chat'
+          label: () => '对话测试',
+          key: 'llm-chat',
+          path: '/llm/chat'
         }
       ]
     case 'workflow':
       return [
         {
-          label: () => h(RouterLink, { to: '/workflow' }, { default: () => '工作流列表' }),
-          key: 'workflow-list'
+          label: () => '工作流列表',
+          key: 'workflow-list',
+          path: '/workflow'
         },
         {
-          label: () => h(RouterLink, { to: '/workflow/templates' }, { default: () => '模板管理' }),
-          key: 'workflow-templates'
+          label: () => '模板管理',
+          key: 'workflow-templates',
+          path: '/workflow/templates'
+        },
+        {
+          label: () => '调度规则',
+          key: 'workflow-dispatch-rules',
+          path: '/workflow/dispatch-rules'
         }
       ]
     case 'plugins':
       return [
         {
-          label: () => h(RouterLink, { to: '/plugins' }, { default: () => '已安装插件' }),
-          key: 'plugins-installed'
+          label: () => '已安装插件',
+          key: 'plugins-installed',
+          path: '/plugins'
         },
         {
-          label: () => h(RouterLink, { to: '/plugins/market' }, { default: () => '插件市场' }),
-          key: 'plugins-market'
+          label: () => '插件市场',
+          key: 'plugins-market',
+          path: '/plugins/market'
         }
       ]
     case 'memory':
       return [
         {
-          label: () => h(RouterLink, { to: '/memory' }, { default: () => '记忆管理' }),
-          key: 'memory-list'
+          label: () => '记忆管理',
+          key: 'memory-list',
+          path: '/memory'
         },
         {
-          label: () => h(RouterLink, { to: '/memory/search' }, { default: () => '记忆检索' }),
-          key: 'memory-search'
+          label: () => '记忆检索',
+          key: 'memory-search',
+          path: '/memory/search'
         }
       ]
     default:
@@ -107,6 +123,14 @@ const getDefaultSubModule = (module: string) => {
       return ''
   }
 }
+
+// 监听菜单变化，更新当前路由
+const handleUpdateValue = (key: string) => {
+  const selectedMenu = menuOptions.value.find(option => option.key === key);
+  if (selectedMenu && selectedMenu.path) {
+    router.push(selectedMenu.path);
+  }
+}
 </script>
 
 <template>
@@ -115,6 +139,7 @@ const getDefaultSubModule = (module: string) => {
     :value="activeKey"
     :options="menuOptions"
     :collapsed="appStore.secondarySiderCollapsed"
+    @update:value="handleUpdateValue"
   />
 </template>
 

@@ -18,14 +18,49 @@ const router = createRouter({
           component: () => import('@/views/im/IMView.vue')
         },
         {
+          path: '/im/platforms',
+          name: 'im-platforms',
+          component: () => import('@/views/workflow/WorkflowTemplates.vue'),
+        },
+        {
           path: '/llm',
           name: 'llm',
           component: () => import('@/views/llm/LLMView.vue')
         },
         {
+          path: '/llm/backends',
+          name: 'llm-backends',
+          component: () => import('@/views/workflow/WorkflowTemplates.vue')
+        },
+        {
+          path: '/llm/models',
+          name: 'llm-models',
+          component: () => import('@/views/workflow/WorkflowTemplates.vue')
+        },
+        {
+          path: '/llm/chat',
+          name: 'llm-chat',
+          component: () => import('@/views/workflow/WorkflowTemplates.vue')
+        },
+        {
           path: '/workflow',
           name: 'workflow',
-          component: () => import('@/views/workflow/WorkflowView.vue')
+          component: () => import('@/views/workflow/WorkflowList.vue')
+        },
+        {
+          path: '/workflow/templates',
+          name: 'workflow-templates',
+          component: () => import('@/views/workflow/WorkflowTemplates.vue')
+        },
+        {
+          path: '/workflow/dispatch-rules',
+          name: 'workflow-dispatch-rules',
+          component: () => import('@/views/workflow/DispatchRules.vue')
+        },
+        {
+          path: '/workflow/editor/:id?',
+          name: 'workflow-editor',
+          component: () => import('@/views/workflow/WorkflowEditor.vue')
         },
         {
           path: '/plugins',
@@ -35,14 +70,24 @@ const router = createRouter({
         {
           path: '/plugins/market',
           name: 'plugin-market',
-          component: () => import('@/views/plugins/PluginMarket.vue')
+          component: () => import('@/views/workflow/WorkflowTemplates.vue')
+        },
+        {
+          path: '/memory',
+          name: 'memory',
+          component: () => import('@/views/workflow/WorkflowTemplates.vue')
+        },
+        {
+          path: '/memory/search',
+          name: 'memory-search',
+          component: () => import('@/views/workflow/WorkflowTemplates.vue')
         }
       ]
     },
     {
       path: '/login',
       name: 'login',
-      component: () => import('@/views/LoginView.vue')
+      component: () => import('@/views/login/LoginView.vue')
     }
   ]
 })

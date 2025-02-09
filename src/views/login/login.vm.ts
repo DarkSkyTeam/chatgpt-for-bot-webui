@@ -37,13 +37,14 @@ export function useLoginViewModel() {
   // 检查是否首次访问
   const checkFirstTime = async () => {
     try {
-      await authApi.checkFirstTime()
-      isFirstTime.value = false
+      const { is_first_time } = await authApi.checkFirstTime()
+      isFirstTime.value = is_first_time
     } catch (error) {
       if (error instanceof Error && error.message === 'No password set') {
         isFirstTime.value = true
       }
     }
+
   }
 
   // 处理登录/设置密码

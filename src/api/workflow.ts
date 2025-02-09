@@ -1,19 +1,33 @@
 import { http } from '@/utils/http'
 
+export interface Workflow {
+  group_id: string
+  workflow_id: string
+  name: string
+  description: string
+  blocks: any[]
+  wires: any[]
+  metadata?: Record<string, any>
+}
+
 export interface WorkflowInfo {
   group_id: string
   workflow_id: string
   name: string
   description: string
   block_count: number
-  metadata?: {
-    category?: string
-    tags?: string[]
-  }
+  metadata?: Record<string, any>
+}
+
+export interface WorkflowListResponse {
+  workflows: WorkflowInfo[]
+}
+
+export interface WorkflowResponse {
+  workflow: Workflow
 }
 
 export interface BlockInstance {
-  block_id: string
   type_name: string
   name: string
   config: Record<string, any>
@@ -35,39 +49,22 @@ export interface WorkflowDefinition extends WorkflowInfo {
   wires: Wire[]
 }
 
-export const workflowApi = {
-  /**
-   * 获取工作流列表
-   */
-  getWorkflows() {
-    return http.get<{ workflows: WorkflowInfo[] }>('/workflow')
-  },
+export async function listWorkflows() {
+  return http.get<WorkflowListResponse>('/workflow')
+}
 
-  /**
-   * 获取工作流详情
-   */
-  getWorkflow(groupId: string, workflowId: string) {
-    return http.get<{ workflow: WorkflowDefinition }>(`/workflow/${groupId}/${workflowId}`)
-  },
+export async function getWorkflow(groupId: string, workflowId: string) {
+  return http.get<WorkflowResponse>(`/workflow/${groupId}/${workflowId}`)
+}
 
-  /**
-   * 创建工作流
-   */
-  createWorkflow(workflow: WorkflowDefinition) {
-    return http.post<void>(`/workflow/${workflow.group_id}/${workflow.workflow_id}`, workflow)
-  },
+export async function createWorkflow(groupId: string, workflowId: string, data: Workflow) {
+  return http.post<WorkflowResponse>(`/workflow/${groupId}/${workflowId}`, data)
+}
 
-  /**
-   * 更新工作流
-   */
-  updateWorkflow(workflow: WorkflowDefinition) {
-    return http.put<void>(`/workflow/${workflow.group_id}/${workflow.workflow_id}`, workflow)
-  },
+export async function updateWorkflow(groupId: string, workflowId: string, data: Workflow) {
+  return http.put<WorkflowResponse>(`/workflow/${groupId}/${workflowId}`, data)
+}
 
-  /**
-   * 删除工作流
-   */
-  deleteWorkflow(groupId: string, workflowId: string) {
-    return http.delete<void>(`/workflow/${groupId}/${workflowId}`)
-  }
+export async function deleteWorkflow(groupId: string, workflowId: string) {
+  return http.delete(`/workflow/${groupId}/${workflowId}`)
 } 

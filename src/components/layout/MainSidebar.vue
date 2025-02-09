@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, h } from 'vue'
 import { NMenu } from 'naive-ui'
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import type { MenuOption } from 'naive-ui'
 import {
   ChatboxOutline,
@@ -15,6 +15,7 @@ import { useAppStore } from '@/stores/app'
 
 const route = useRoute()
 const appStore = useAppStore()
+const router = useRouter()
 
 function renderIcon(icon: any) {
   return () => h(NIcon, null, { default: () => h(icon) })
@@ -22,50 +23,22 @@ function renderIcon(icon: any) {
 
 const menuOptions: MenuOption[] = [
   {
-    label: () =>
-      h(
-        RouterLink,
-        {
-          to: '/im'
-        },
-        { default: () => 'IM 管理' }
-      ),
+    label: () => 'IM 管理',
     key: 'im',
     icon: renderIcon(ChatboxOutline)
   },
   {
-    label: () =>
-      h(
-        RouterLink,
-        {
-          to: '/llm'
-        },
-        { default: () => 'LLM 管理' }
-      ),
+    label: () => 'LLM 管理',
     key: 'llm',
     icon: renderIcon(ServerOutline)
   },
   {
-    label: () =>
-      h(
-        RouterLink,
-        {
-          to: '/workflow'
-        },
-        { default: () => 'Workflow' }
-      ),
+    label: () => 'Workflow',
     key: 'workflow',
     icon: renderIcon(GitNetworkOutline)
   },
   {
-    label: () =>
-      h(
-        RouterLink,
-        {
-          to: '/plugins'
-        },
-        { default: () => '插件管理' }
-      ),
+    label: () => '插件管理',
     key: 'plugins',
     icon: renderIcon(ExtensionPuzzleOutline)
   }
@@ -76,6 +49,7 @@ const activeKey = computed(() => route.path.split('/')[1])
 
 // 监听路由变化，更新当前模块
 const handleUpdateValue = (key: string) => {
+  router.push(`/${key}`)
   appStore.setCurrentModule(key)
 }
 </script>

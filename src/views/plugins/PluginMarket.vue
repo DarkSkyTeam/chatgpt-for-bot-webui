@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { NCard, NSpace, NButton, NGrid, NGridItem, NTag, NInput } from 'naive-ui'
 
 interface MarketPlugin {
@@ -141,7 +141,6 @@ const filteredPlugins = computed(() => {
                 <n-space justify="end">
                   <n-button
                     v-if="plugin.homepage"
-                    text
                     tag="a"
                     :href="plugin.homepage"
                     target="_blank"

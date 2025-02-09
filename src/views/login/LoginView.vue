@@ -16,7 +16,7 @@
       />
       <n-result
         v-else
-        status="success"
+        status="warning"
         title="登录"
         description="请输入管理员密码"
       />
@@ -37,6 +37,7 @@
             placeholder="请输入密码"
             :maxlength="32"
             show-password-on="click"
+            :status="passwordFeedback"
           >
             <template #prefix>
               <div class="i-carbon-password" />
@@ -57,26 +58,50 @@
             </template>
           </n-input>
         </n-form-item>
-        
         <n-space vertical :size="24">
           <n-button
             type="primary"
             size="large"
             block
             :loading="loading"
-            @click="handleSubmit"
+            @click="handleLogin"
           >
             {{ isFirstTime ? '设置密码' : '登录' }}
           </n-button>
+          <div style="text-align: right;">
+            <n-tooltip trigger="hover" placement="bottom">
+              <template #trigger>
+                <span style="color: var(--n-info-color); cursor: pointer;">
+                  忘记密码？
+                </span>
+              </template>
+              <span>删除项目下的 data\web\password.hash 文件即可重置密码。</span>
+            </n-tooltip>
+          </div>
         </n-space>
       </n-form>
     </n-card>
+    <div class="login-footer">
+    <a href="https://github.com/lss233/chatgpt-mirai-qq-bot" target="_blank" style="color: var(--n-info-color);">
+      Powered by ChatGPT Mirai QQ Bot
+    </a>
+  </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { NCard, NForm, NFormItem, NInput, NButton, NSpace, NResult } from 'naive-ui'
+import { onMounted, ref } from 'vue'
+import {
+  NCard,
+  NForm,
+  NFormItem,
+  NInput,
+  NButton,
+  NSpace,
+  NResult,
+  NTooltip,
+  useMessage,
+} from 'naive-ui'
 import { useLoginViewModel } from './login.vm'
 
 const {
@@ -87,6 +112,19 @@ const {
   handleSubmit,
   checkFirstTime
 } = useLoginViewModel()
+
+const message = useMessage()
+const passwordFeedback = ref<string | undefined>(undefined)
+
+const handleLogin = async () => {
+  try {
+    passwordFeedback.value = undefined
+    await handleSubmit();
+  } catch (error: any) {
+    passwordFeedback.value = 'error'
+    message.error('登录失败，请重试');
+  }
+};
 
 onMounted(() => {
   checkFirstTime()
@@ -100,6 +138,9 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, var(--n-color-1) 0%, var(--n-color-2) 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
 .login-card {
@@ -107,7 +148,8 @@ onMounted(() => {
   max-width: 360px;
   padding: 24px;
   backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .login-header {
@@ -138,5 +180,33 @@ onMounted(() => {
 
 :deep(.n-input .n-input__prefix) {
   margin-right: 8px;
+}
+
+.login-footer {
+  text-align: center;
+  margin-top: 24px;
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+}
+.login-footer a:hover {
+  color: var(--n-info-color);
+  background-color: unset;
+}
+
+:deep(.n-button--primary) {
+  background-color: var(--n-info-color);
+  border-color: var(--n-info-color);
+  color: #fff;
+}
+
+:deep(.n-button--primary:hover) {
+  background-color: var(--n-info-color-hover);
+  border-color: var(--n-info-color-hover);
+}
+
+:deep(.n-button--primary:active) {
+  background-color: var(--n-info-color-pressed);
+  border-color: var(--n-info-color-pressed);
 }
 </style> 
