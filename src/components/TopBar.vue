@@ -1,6 +1,6 @@
 <template>
   <div class="topbar">
-    <p>ChatGPT for Bot</p>
+    <p>Kirara AI</p>
     <!-- <ul>
       <li><a href="#">Home</a></li>
       <li><a href="#">About</a></li>

@@ -5,7 +5,7 @@
         <div class="login-logo">
           <div class="i-carbon-bot text-36px" />
         </div>
-        <h1 class="login-title">ChatGPT Bot</h1>
+        <h1 class="login-title">Kirara AI</h1>
       </div>
       
       <n-result
@@ -83,7 +83,7 @@
     </n-card>
     <div class="login-footer">
     <a href="https://github.com/lss233/chatgpt-mirai-qq-bot" target="_blank" style="color: var(--n-info-color);">
-      Powered by ChatGPT Mirai QQ Bot
+      Powered by Kirara Agent Framework
     </a>
   </div>
   </div>
