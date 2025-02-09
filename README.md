@@ -1,46 +1,50 @@
-# chatgpt-for-bot-webui
+<div align="center">
+  <h1>Kirara Agent Framework WebUI</h1>
+</div>
 
-This template should help get you started developing with Vue 3 in Vite.
+<div align="center">
+  <a href="https://github.com/DarkSkyTeam/chatgpt-for-bot-webui">
+    <img src="https://img.shields.io/github/stars/DarkSkyTeam/chatgpt-for-bot-webui?style=social" alt="Stars">
+  </a>
+  <a href="https://github.com/DarkSkyTeam/chatgpt-for-bot-webui">
+    <img src="https://img.shields.io/github/forks/DarkSkyTeam/chatgpt-for-bot-webui?style=social" alt="Forks">
+  </a>
+  <a href="https://github.com/DarkSkyTeam/chatgpt-for-bot-webui">
+    <img src="https://img.shields.io/github/issues/DarkSkyTeam/chatgpt-for-bot-webui" alt="Issues">
+  </a>
+  <a href="https://github.com/DarkSkyTeam/chatgpt-for-bot-webui">
+    <img src="https://img.shields.io/github/license/DarkSkyTeam/chatgpt-for-bot-webui" alt="License">
+  </a>
+</div>
 
-## Recommended IDE Setup
+## 项目介绍
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+本项目是 [Kirara Agent Framework](https://github.com/lss233/chatgpt-mirai-qq-bot) 的前端管理面板，旨在提供一个用户友好的界面，方便用户管理和配置文件。  
 
-## Type Support for `.vue` Imports in TS
+🚧 **当前正在施工中，欢迎有兴趣的同学与开发！** 🚧
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
 
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
+## 截图展示
 
-1. Disable the built-in TypeScript Extension
-    1) Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-    2) Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
+<!-- 这里可以添加一些项目截图 -->
+<!-- 例如: -->
+![Screenshot 1](docs/screenshots/1.png)
+![Screenshot 2](docs/screenshots/2.png)
 
-## Customize configuration
+## 如何参与开发
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+我们非常欢迎您参与到 Kirara Agent Framework WebUI 的开发中！在参与开发之前，请务必先进行讨论，以确保您的贡献能够更好地融入到项目中。
 
-## Project Setup
+1.  **参与讨论**：在开始开发之前，请先在 issue 或 QQ 群：701933732 中讨论，提出您的想法和建议。
+2.  **发起 Pull Request**：在充分讨论后，您可以 fork 本仓库，进行开发，并在完成后发起 Pull Request。
+3.  **等待合并**：我们会尽快审核您的 Pull Request，并在确认无误后将其合并到主分支中。
 
-```sh
-npm install
-```
+## License
 
-### Compile and Hot-Reload for Development
+本项目采用 [MIT License](LICENSE) 开源协议。
 
-```sh
-npm run dev
-```
+## Credits
 
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+*   感谢 [Vite](https://vitejs.dev/)
+*   感谢 [Vue 3](https://vuejs.org/)
+*   感谢所有为本项目做出贡献的开发者
