@@ -1,0 +1,63 @@
+// import { useMessage } from 'naive-ui'
+
+const BASE_URL = '/backend-api/api'
+
+class Http {
+//   private message = useMessage()
+
+  private async request<T>(path: string, config: RequestInit): Promise<T> {
+    try {
+      const response = await fetch(`${BASE_URL}${path}`, {
+        ...config,
+        headers: {
+          'Content-Type': 'application/json',
+          ...this.getAuthHeader(),
+          ...config.headers,
+        },
+      })
+
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || '请求失败')
+      }
+
+      return data as T
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '请求失败'
+    //   this.message.error(message)
+      throw error
+    }
+  }
+
+  private getAuthHeader(): HeadersInit {
+    const token = localStorage.getItem('token')
+    return token ? { Authorization: `Bearer ${token}` } : {}
+  }
+
+  get<T>(path: string, config: Omit<RequestInit, 'method'> = {}) {
+    return this.request<T>(path, { ...config, method: 'GET' })
+  }
+
+  post<T>(path: string, data?: any, config: Omit<RequestInit, 'method' | 'body'> = {}) {
+    return this.request<T>(path, {
+      ...config,
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+  }
+
+  put<T>(path: string, data?: any, config: Omit<RequestInit, 'method' | 'body'> = {}) {
+    return this.request<T>(path, {
+      ...config,
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  }
+
+  delete<T>(path: string, config: Omit<RequestInit, 'method'> = {}) {
+    return this.request<T>(path, { ...config, method: 'DELETE' })
+  }
+}
+
+export const http = new Http() 
