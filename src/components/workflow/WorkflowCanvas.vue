@@ -26,7 +26,7 @@ import type { BlockInstance, Wire } from '@/api/workflow'
 import { LGraph, LGraphCanvas, LGraphNode, LiteGraph, type IWidget } from '@comfyorg/litegraph'
 import { workflowEditorModel } from '@/store/workflow-editor'
 import type { IBaseWidget } from 'node_modules/@comfyorg/litegraph/dist/types/widgets'
-import type { Dictionary } from 'node_modules/@comfyorg/litegraph/dist/interfaces'
+import type { Dictionary, INodeOutputSlot } from 'node_modules/@comfyorg/litegraph/dist/interfaces'
 import type { Direction, RenderShape } from '@comfyorg/litegraph'
 
 const props = defineProps<{
@@ -60,14 +60,19 @@ const loadingBar = useLoadingBar()
 
 const formRef = ref()
 const formValue = ref({
-  workflowId: viewState.value.workflowId || '',
-  name: viewState.value.name || '',
-  description: viewState.value.description || ''
+  workflowId: '',
+  name: '',
+  description: ''
 })
+
+viewState.value.workflowId = 'user:' + Array.from({ length: 5 }, () => Math.floor(Math.random() * 36).toString(36)).join('')
+viewState.value.name = formValue.value.name
+viewState.value.description = formValue.value.description
 
 const formRules = {
   workflowId: {
     required: true,
+
     trigger: ['blur', 'input'],
     validator: (rule: any, value: string) => {
       if (!value) {
@@ -112,76 +117,17 @@ const initGraph = () => {
   // 创建 LGraphCanvas 实例并关联到 canvas 元素
   canvas = new LGraphCanvas(canvasElement, graph)
 
-  // 自定义节点样式
-  if (canvas._ctx) {
-    const ctx = canvas._ctx
-    const originalStroke = ctx.stroke.bind(ctx)
-    const originalFillRect = ctx.fillRect.bind(ctx)
-    
-    // 重写描边方法，添加阴影效果
-    ctx.stroke = function () {
-        const shadowColor = ctx.shadowColor
-        const shadowBlur = ctx.shadowBlur
-        const shadowOffsetX = ctx.shadowOffsetX
-        const shadowOffsetY = ctx.shadowOffsetY
-
-        ctx.shadowColor = 'rgba(0,0,0,0.1)'
-        ctx.shadowBlur = 8
-        ctx.shadowOffsetX = 0
-        ctx.shadowOffsetY = 2
-
-        originalStroke.call(this)
-
-        ctx.shadowColor = shadowColor
-        ctx.shadowBlur = shadowBlur
-        ctx.shadowOffsetX = shadowOffsetX
-        ctx.shadowOffsetY = shadowOffsetY
-    }
-
-    // 重写填充方法，实现圆角矩形
-    ctx.fillRect = function (x: number, y: number, w: number, h: number) {
-        const radius = 8
-        ctx.beginPath()
-        ctx.moveTo(x + radius, y)
-        ctx.lineTo(x + w - radius, y)
-        ctx.quadraticCurveTo(x + w, y, x + w, y + radius)
-        ctx.lineTo(x + w, y + h - radius)
-        ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h)
-        ctx.lineTo(x + radius, y + h)
-        ctx.quadraticCurveTo(x, y + h, x, y + h - radius)
-        ctx.lineTo(x, y + radius)
-        ctx.quadraticCurveTo(x, y, x + radius, y)
-        ctx.closePath()
-        originalFillRect.call(this, x, y, w, h)
-    }
-  }
-
   // 配置画布
   canvas.allow_dragcanvas = true
   canvas.allow_dragnodes = true
   canvas.allow_interaction = true
   canvas.connections_width = 2
-  canvas.default_link_color = '#1890ff'
   canvas.align_to_grid = true
-  canvas.round_radius = 8
   canvas.highquality_render = true
   canvas.render_connection_arrows = true
-  canvas.default_connection_color_byType = {
-    number: '#1890ff',
-    string: '#52c41a',
-    boolean: '#faad14',
-    object: '#722ed1',
-    array: '#eb2f96'
-  }
 
   // 设置节点默认样式
-  LiteGraph.NODE_DEFAULT_COLOR = '#ffffff'
-  LiteGraph.NODE_DEFAULT_BGCOLOR = '#ffffff'
-  LiteGraph.NODE_DEFAULT_BOXCOLOR = '#1890ff'
-  LiteGraph.NODE_TITLE_COLOR = '#f6f6f6'
-  LiteGraph.NODE_SELECTED_TITLE_COLOR = '#e6f7ff'
   LiteGraph.NODE_TEXT_SIZE = 14
-  LiteGraph.NODE_TEXT_COLOR = '#333333'
   LiteGraph.NODE_SUBTEXT_SIZE = 12
   LiteGraph.NODE_COLLAPSED_RADIUS = 8
   LiteGraph.DEFAULT_GROUP_FONT = 14
@@ -191,13 +137,8 @@ const initGraph = () => {
   LiteGraph.NODE_MIN_WIDTH = 150
   LiteGraph.NODE_COLLAPSED_WIDTH = 100
   LiteGraph.CANVAS_GRID_SIZE = 20
-
-  // 设置连线颜色和样式
-  LiteGraph.LINK_COLOR = '#1890ff'
-  LiteGraph.EVENT_LINK_COLOR = '#ff4d4f'
-  LiteGraph.CONNECTING_LINK_COLOR = '#13c2c2'
-
   LiteGraph.auto_sort_node_types = true
+  LiteGraph.use_uuids = true
 
   // 设置快捷键
   setupShortcuts()
@@ -236,10 +177,7 @@ const updateCanvasSize = () => {
   canvasElement.style.height = height + 'px'
 
   canvas.resize(canvasElement.width, canvasElement.height)
-
   canvasElement.getContext('2d')?.scale(ratio, ratio)
-
-  console.log(`[updateCanvasSize] Canvas resized to ${width}x${height} (ratio: ${ratio}).`)
 }
 
 // 注册自定义节点类型
@@ -253,7 +191,6 @@ const registerNodeTypes = () => {
     class CustomBlock extends LiteGraph.LGraphNode {
       constructor() {
         super(blockType.type_name)
-
         blockType.inputs.forEach(input => {
           this.addInput(input.name, input.type)
         })
@@ -289,16 +226,16 @@ const registerNodeTypes = () => {
         onValueChange()
         this.size = this.computeSize()
       }
-
-      onConnectionsChange(type: number, slot: number, connected: boolean, link_info: any) {
-        updateWires()
+      onEvent(event: string, data: any) {
+        console.log(event, data)
       }
     }
     Object.defineProperty(CustomBlock, 'name', { value: blockType.type_name })
-    LiteGraph.registerNodeType(blockType.type_name, CustomBlock)
+    LiteGraph.registerNodeType(blockType.type_name.replace(':', '/'), CustomBlock)
     console.log(`[registerNodeTypes] Registered node type: ${blockType.type_name}`)
-  })
 
+
+  })
   console.log('[registerNodeTypes] Node types registered.')
 }
 
@@ -368,7 +305,7 @@ const setupEventListeners = () => {
   }
 
   // 节点被添加
-  graph.onNodeAdded = (node: any) => {
+  graph.onNodeAdded = (node: LGraphNode) => {
     updateBlocks()
     intent.saveToHistory()
   }
@@ -388,7 +325,7 @@ const updateBlocks = () => {
   }
 
   const blocks: BlockInstance[] = Array.from(graph._nodes.values()).map(node => ({
-    type_name: node.type!!,
+    type_name: node.type!!.replace('/', ':'),
     name: node.id.toString(),
     config: node.properties.config || {},
     position: {
@@ -416,9 +353,11 @@ const updateWires = () => {
         if (!sourceNode?.id || !targetNode?.id) return null
         return {
           source_block: sourceNode.id.toString(),
-          source_output: conn.origin_slot.toString(),
+          source_output: sourceNode?.outputs[conn.origin_slot].name,
           target_block: targetNode.id.toString(),
-          target_input: conn.target_slot.toString()
+          target_input: targetNode?.inputs[conn.target_slot].name
+
+
         }
       } catch (error) {
         console.warn('[updateWires] Error getting node:', error)
@@ -426,7 +365,7 @@ const updateWires = () => {
       }
     })
     .filter((wire): wire is Wire => wire !== null)
-
+  console.log(wires)
   intent.updateWires(wires)
   emit('update:wires', wires)
 }
@@ -434,11 +373,17 @@ const updateWires = () => {
 // 修改保存处理函数
 const handleSave = async () => {
   try {
+    const errors = await formRef.value?.validate()
+    if (errors?.length > 0 || !formValue.value.name || !formValue.value.workflowId) {
+      message.error('工作流信息需要修改')
+      showSettingsModal.value = true
+      return
+    }
     saving.value = true
     loadingBar.start()
-    await formRef.value?.validate()
+    showSettingsModal.value = false
+    updateWires()
     emit('save', formValue.value.name, formValue.value.description, formValue.value.workflowId)
-    message.success('保存成功')
   } catch (error: any) {
     message.error(error?.message || '保存失败')
   } finally {
@@ -465,7 +410,7 @@ const handleReset = async () => {
 // 创建节点
 const createNode = (block: BlockInstance) => {
   if (!graph) return null
-  const node = LiteGraph.createNode(block.type_name)
+  const node = LiteGraph.createNode(block.type_name.replace(':', '/'))
   if (!node) {
     console.warn(`[createNode] Could not create node of type ${block.type_name}`)
     return null
@@ -633,10 +578,26 @@ const initGraphData = () => {
   }
 }
 
+const initPropertiesData = () => {
+  viewState.value.name = props.initialName || ''
+  viewState.value.description = props.initialDescription || ''
+  viewState.value.workflowId = props.initialWorkflowId || ''
+
+  formValue.value = {
+    workflowId: props.initialWorkflowId || ':',
+    name: props.initialName || '',
+    description: props.initialDescription || ''
+  }
+  if (formValue.value.workflowId == ':') {
+    formValue.value.workflowId = 'user:' + Array.from({ length: 5 }, () => Math.floor(Math.random() * 36).toString(36)).join('')
+  }
+}
 // 监听 props 变化
 watch([() => props.blocks, () => props.wires, () => props.blockTypes], initGraphData, { deep: true })
-
+watch([() => props.initialName, () => props.initialDescription, () => props.initialWorkflowId], initPropertiesData, { deep: true })
 // 初始化
+
+
 onMounted(() => {
   initGraph()
   initGraphData()

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, h, watch } from 'vue'
-import { NCard, NSpace, NButton, NDataTable, NModal, NForm, NFormItem, NInput, NSelect, NSwitch, NSpin } from 'naive-ui'
+import { NCard, NSpace, NButton, NDataTable, NModal, NForm, NFormItem, NInput, NSelect, NSwitch, NSpin, useMessage } from 'naive-ui'
 import type { DataTableColumns, FormInst } from 'naive-ui'
 import DynamicConfigForm from '@/components/form/DynamicConfigForm.vue'
 
@@ -26,7 +26,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-
+const $message = useMessage()
 const formRef = ref<FormInst | null>(null)
 const showModal = ref(false)
 const modalType = ref<'create' | 'edit'>('create')
@@ -41,8 +41,26 @@ const formModel = ref<AdapterBase>({
   config: {}
 })
 
+const formRules = ref<any>({
+  name: [
+    { required: true, message: '请输入适配器名称', trigger: 'blur' },
+    {
+      validator: (rule: any, value: any) => {
+        if (adapters.value.some(adapter => adapter.name === value && modalType.value === 'create')) {
+          return Promise.reject(new Error('适配器名称已存在'))
+        } else {
+          return Promise.resolve()
+        }
+      },
+      trigger: 'blur'
+    }
+  ],
+  adapter: [{ required: true, message: '请选择适配器类型', trigger: 'change' }]
+})
+
 // 获取适配器类型
 const fetchAdapterTypes = async () => {
+
   try {
     const { types } = await props.api.getAdapterTypes()
     adapterTypes.value = types
@@ -99,16 +117,23 @@ watch(showModal, async (show) => {
 // 创建或更新适配器
 const handleSubmit = async () => {
   try {
-    const submitData = props.transformFormModel ? props.transformFormModel(formModel.value) : formModel.value
-    if (modalType.value === 'create') {
-      await props.api.createAdapter(submitData)
-    } else {
-      await props.api.updateAdapter(submitData.name, submitData)
-    }
-    showModal.value = false
-    await fetchAdapters()
+    formRef.value?.validate((errors) => {
+      if (errors) {
+        console.log(errors)
+        $message.error('表单填写有误，请修正。')
+        return
+      }
+      const submitData = props.transformFormModel ? props.transformFormModel(formModel.value) : formModel.value
+      if (modalType.value === 'create') {
+        props.api.createAdapter(submitData)
+      } else {
+        props.api.updateAdapter(submitData.name, submitData)
+      }
+      showModal.value = false
+      fetchAdapters()
+    })
   } catch (error) {
-    console.error('保存适配器失败:', error)
+    $message.error('保存适配器失败: ' + error)
   }
 }
 
@@ -238,12 +263,12 @@ onMounted(() => {
     <n-modal v-model:show="showModal">
       <n-card style="width: 600px" :title="modalType === 'create' ? '添加适配器' : '编辑适配器'" :bordered="false" size="huge"
         role="dialog" aria-modal="true">
-        <n-form ref="formRef" :model="formModel" label-placement="left" label-width="100">
-          <n-form-item label="名称" path="name">
-            <n-input v-model:value="formModel.name" placeholder="请输入适配器名称" />
-          </n-form-item>
+        <n-form ref="formRef" :model="formModel" label-placement="left" label-width="100" :rules="formRules">
           <n-form-item label="适配器" path="adapter">
             <n-select v-model:value="formModel.adapter" :options="adapterTypes.map(type => ({ label: type, value: type }))" />
+          </n-form-item>
+          <n-form-item label="名称" path="name">
+            <n-input v-model:value="formModel.name" placeholder="请输入适配器名称" />
           </n-form-item>
           <n-spin :show="loading">
             <dynamic-config-form :schema="configSchema" v-model="formModel.config" v-if="configSchema"/>

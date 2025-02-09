@@ -1,18 +1,16 @@
 <script setup lang="ts">
 import { ref, onMounted, h } from 'vue'
-import { NDataTable, NButton, NSpace, NCard, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch, useMessage, NModal, NDivider } from 'naive-ui'
+import { NDataTable, NButton, NSpace, NCard, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch, useMessage, NModal, NDivider, type FormInst } from 'naive-ui'
 import { dispatchApi } from '@/api/dispatch'
 import type { DispatchRule } from '@/api/dispatch'
 import DynamicConfigForm from '@/components/form/DynamicConfigForm.vue'
-import type { Schema } from '@/components/form/types'
 
 const message = useMessage()
 const rules = ref<DispatchRule[]>([])
 const ruleTypes = ref<string[]>([])
-const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const currentRule = ref<Partial<DispatchRule>>({})
-const configSchema = ref<Schema | null>(null)
+const configSchema = ref<any>(null)
 
 // 表格列定义
 const columns = [
@@ -64,8 +62,34 @@ const columns = [
         }
     }
 ]
+const formRef = ref<FormInst | null>(null)
+const validationRules = ref<any>({
+    rule_id: [
+        { required: true, message: '请输入规则ID' },
+
+        { pattern: /^[a-zA-Z0-9_-]+$/, message: '请输入有效的规则ID' }
+    ],
+    name: [
+        { required: true, message: '请输入规则名称' },
+        { min: 1, max: 100, message: '规则名称长度应在1-100个字符之间' }
+    ],
+    workflow_id: [
+        { required: true, message: '请输入工作流ID' },
+    ],
+    priority: [
+        { required: true, message: '请输入优先级' },
+        { type: 'number', min: 0, max: 100, message: '优先级应在0-100之间' }
+    ],
+    type: [
+        { required: true, message: '请选择规则类型' }
+    ],
+    enabled: [
+        { required: true, message: '请选择启用状态' }
+    ]
+})
 
 // 加载规则列表
+
 const loadRules = async () => {
     try {
         const { rules: ruleList } = await dispatchApi.getRules()
@@ -100,11 +124,18 @@ const createRule = () => {
     currentRule.value = {
         priority: 5,
         enabled: true,
+        rule_id: '',
+        name: '',
+        description: '',
+        workflow_id: '',
+        type: '',
         config: {},
         metadata: {}
     }
-    showCreateModal.value = true
+    configSchema.value = null
+    showEditModal.value = true
 }
+
 
 // 编辑规则
 const editRule = (rule: DispatchRule) => {
@@ -131,13 +162,18 @@ const deleteRule = async (ruleId: string) => {
 // 保存规则
 const saveRule = async (isCreate: boolean) => {
     try {
+        const errors = await formRef.value?.validate()
+        if (errors) {
+            message.error('请检查输入内容')
+            return
+        }
         if (isCreate) {
             await dispatchApi.createRule(currentRule.value)
         } else {
+
             await dispatchApi.updateRule(currentRule.value.rule_id!, currentRule.value)
         }
         await loadRules()
-        showCreateModal.value = false
         showEditModal.value = false
         message.success('保存成功')
     } catch (error) {
@@ -167,50 +203,13 @@ onMounted(async () => {
 
             <n-data-table :columns="columns" :data="rules" :bordered="false" :single-line="false" />
 
-            <!-- 创建规则对话框 -->
-            <n-modal v-model:show="showCreateModal" preset="dialog" title="创建规则">
-                <n-form>
-                    <n-form-item label="规则ID" required>
-                        <n-input v-model:value="currentRule.rule_id" placeholder="请输入规则ID" />
-                    </n-form-item>
-                    <n-form-item label="名称" required>
-                        <n-input v-model:value="currentRule.name" placeholder="请输入名称" />
-                    </n-form-item>
-                    <n-form-item label="描述">
-                        <n-input v-model:value="currentRule.description" type="textarea" placeholder="请输入描述" />
-                    </n-form-item>
-                    <n-form-item label="类型" required>
-                        <n-select v-model:value="currentRule.type"
-                            :options="ruleTypes.map(type => ({ label: type, value: type }))" placeholder="请选择类型"
-                            @update:value="handleTypeChange" />
-                    </n-form-item>
-                    <n-form-item label="优先级" required>
-                        <n-input-number v-model:value="currentRule.priority" :min="0" :max="100" />
-                    </n-form-item>
-                    <n-form-item label="工作流ID" required>
-                        <n-input v-model:value="currentRule.workflow_id" placeholder="请输入工作流ID" />
-                    </n-form-item>
-                    <n-form-item label="启用状态">
-                        <n-switch v-model:value="currentRule.enabled" />
-                    </n-form-item>
-                    <n-form-item v-if="configSchema" label="配置">
-                        <dynamic-config-form v-model="currentRule.config" :schema="configSchema" />
-                    </n-form-item>
-                </n-form>
-                <template #action>
-                    <n-button type="primary" @click="saveRule(true)">
-                        确定
-                    </n-button>
-                </template>
-            </n-modal>
-
             <!-- 编辑规则对话框 -->
-            <n-modal v-model:show="showEditModal" preset="dialog" title="编辑规则" style="width: 900px">
+            <n-modal v-model:show="showEditModal" preset="dialog" :title="currentRule.rule_id ? '编辑规则' : '创建规则'" style="width: 900px">
                 <div class="rule-edit-container">
                     <div class="rule-basic-form">
-                        <n-form label-placement="left" label-width="80">
+                        <n-form label-placement="left" label-width="80" :rules="validationRules" ref="formRef">
                             <n-form-item label="规则ID" required>
-                                <n-input v-model:value="currentRule.rule_id" :disabled="true" />
+                                <n-input v-model:value="currentRule.rule_id" placeholder="请输入规则ID" />
                             </n-form-item>
                             <n-form-item label="名称" required>
                                 <n-input v-model:value="currentRule.name" placeholder="请输入名称" />
@@ -220,7 +219,7 @@ onMounted(async () => {
                             </n-form-item>
                             <n-form-item label="类型" required>
                                 <n-select v-model:value="currentRule.type"
-                                    :options="ruleTypes.map(type => ({ label: type, value: type }))" 
+                                    :options="ruleTypes.map(type => ({ label: type, value: type }))"
                                     placeholder="请选择类型"
                                     @update:value="handleTypeChange" />
                             </n-form-item>
@@ -244,7 +243,7 @@ onMounted(async () => {
                     </div>
                 </div>
                 <template #action>
-                    <n-button type="primary" @click="saveRule(false)">
+                    <n-button type="primary" @click="saveRule(!currentRule.rule_id)">
                         确定
                     </n-button>
                 </template>
