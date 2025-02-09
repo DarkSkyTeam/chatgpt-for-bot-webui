@@ -34,6 +34,7 @@ const adapterTypes = ref<string[]>([])
 const adapters = ref<any[]>([])
 const configSchema = ref<any>(null)
 const loading = ref(false)
+const processing = ref(false)
 
 const formModel = ref<AdapterBase>({
   name: '',
@@ -65,6 +66,7 @@ const fetchAdapterTypes = async () => {
     const { types } = await props.api.getAdapterTypes()
     adapterTypes.value = types
   } catch (error) {
+    $message.error('获取适配器类型失败: ' + error)
     console.error('获取适配器类型失败:', error)
   }
 }
@@ -75,6 +77,7 @@ const fetchAdapters = async () => {
     const response = await props.api.getAdapters()
     adapters.value = response.adapters || response.data?.backends || []
   } catch (error) {
+    $message.error('获取适配器列表失败: ' + error)
     console.error('获取适配器列表失败:', error)
   }
 }
@@ -87,6 +90,7 @@ const fetchAdapterConfigSchema = async (adapterType: string) => {
     configSchema.value = configSchemaData
 
   } catch (error) {
+    $message.error('获取适配器配置模式失败: ' + error)
     console.error('获取适配器配置模式失败:', error)
   } finally {
     loading.value = false
@@ -117,48 +121,70 @@ watch(showModal, async (show) => {
 // 创建或更新适配器
 const handleSubmit = async () => {
   try {
-    formRef.value?.validate((errors) => {
-      if (errors) {
-        console.log(errors)
-        $message.error('表单填写有误，请修正。')
-        return
-      }
-      const submitData = props.transformFormModel ? props.transformFormModel(formModel.value) : formModel.value
+    const errors = await formRef.value?.validate()
+    if (errors?.warnings?.length) {
+      $message.error('表单填写有误，请修正。')
+      return
+    }
+
+    processing.value = true
+    const submitData = props.transformFormModel ? props.transformFormModel(formModel.value) : formModel.value
+
+    try {
       if (modalType.value === 'create') {
         props.api.createAdapter(submitData)
       } else {
         props.api.updateAdapter(submitData.name, submitData)
       }
-      showModal.value = false
-      fetchAdapters()
-    })
+      $message.success('保存适配器成功')
+    } catch (error) {
+      $message.error('保存适配器失败: ' + error)
+    }
+
+    showModal.value = false
+    fetchAdapters()
   } catch (error) {
     $message.error('保存适配器失败: ' + error)
+  } finally {
+    processing.value = false
   }
 }
+
+
 
 // 删除适配器
 const handleDelete = async (adapter: any) => {
   if (confirm(`确定要删除适配器 ${adapter.name} 吗？`)) {
     try {
+      processing.value = true
       await props.api.deleteAdapter(adapter.name)
       await fetchAdapters()
+      $message.success('删除适配器成功')
     } catch (error) {
-      console.error('删除适配器失败:', error)
+      $message.error('删除适配器失败: ' + error)
+    } finally {
+      processing.value = false
     }
   }
+
+
 }
 
 // 切换适配器状态
 const handleToggleAdapter = async (adapter: any) => {
   if (props.api.toggleAdapter) {
     try {
+      processing.value = true
       await props.api.toggleAdapter(adapter.name, !adapter.is_running)
       await fetchAdapters()
+      $message.success('切换适配器状态成功')
     } catch (error) {
-      console.error('切换适配器状态失败:', error)
+      $message.error('切换适配器状态失败: ' + error)
+    } finally {
+      processing.value = false
     }
   }
+
 }
 
 const createColumns = (): DataTableColumns<any> => {
@@ -241,6 +267,7 @@ onMounted(() => {
 <template>
   <div class="adapter-manager">
     <n-space vertical :size="16">
+      <n-spin :show="processing">
       <n-card :title="title">
         <template #header-extra>
           <n-button type="primary" @click="() => {
@@ -257,6 +284,7 @@ onMounted(() => {
         </template>
         <n-data-table :columns="createColumns()" :data="adapters" />
       </n-card>
+    </n-spin>
     </n-space>
 
     <!-- 创建/编辑适配器表单 -->
