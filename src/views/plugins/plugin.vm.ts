@@ -87,7 +87,7 @@ export function usePluginViewModel() {
 
         loading.value = true
         try {
-            await http.delete(`/plugin/plugins/${plugin.package_name}`)
+            await http.delete(`/plugin/plugins/${plugin.name}`)
             await fetchPlugins()
             message.success('插件卸载成功')
         } catch (error: any) {

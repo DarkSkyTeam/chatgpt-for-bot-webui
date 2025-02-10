@@ -428,7 +428,7 @@ const createNode = (block: BlockInstance) => {
     }
     node.widgets?.forEach((widget: IBaseWidget) => {
       if (widget.name) {
-        widget.value = block.config[widget.name]
+        widget.value = block.config[widget.name] || widget.value
       }
     })
   }

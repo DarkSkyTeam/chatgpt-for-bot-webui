@@ -11,6 +11,7 @@ const ruleTypes = ref<string[]>([])
 const showEditModal = ref(false)
 const currentRule = ref<Partial<DispatchRule>>({})
 const configSchema = ref<any>(null)
+const isCreate = ref(false)
 
 // 表格列定义
 const columns = [
@@ -121,6 +122,7 @@ const loadConfigSchema = async (type: string) => {
 
 // 创建规则
 const createRule = () => {
+    isCreate.value = true
     currentRule.value = {
         priority: 5,
         enabled: true,
@@ -139,6 +141,7 @@ const createRule = () => {
 
 // 编辑规则
 const editRule = (rule: DispatchRule) => {
+    isCreate.value = false
     currentRule.value = {
         ...rule,
         config: rule.config || {},
@@ -163,7 +166,7 @@ const deleteRule = async (ruleId: string) => {
 const saveRule = async (isCreate: boolean) => {
     try {
         const errors = await formRef.value?.validate()
-        if (errors) {
+        if (errors?.warnings?.length) {
             message.error('请检查输入内容')
             return
         }
@@ -204,7 +207,7 @@ onMounted(async () => {
             <n-data-table :columns="columns" :data="rules" :bordered="false" :single-line="false" />
 
             <!-- 编辑规则对话框 -->
-            <n-modal v-model:show="showEditModal" preset="dialog" :title="currentRule.rule_id ? '编辑规则' : '创建规则'" style="width: 900px">
+            <n-modal v-model:show="showEditModal" preset="dialog" :title="isCreate ? '创建规则' : '编辑规则'" style="width: 900px">
                 <div class="rule-edit-container">
                     <div class="rule-basic-form">
                         <n-form label-placement="left" label-width="80" :rules="validationRules" ref="formRef">
@@ -243,7 +246,7 @@ onMounted(async () => {
                     </div>
                 </div>
                 <template #action>
-                    <n-button type="primary" @click="saveRule(!currentRule.rule_id)">
+                    <n-button type="primary" @click="saveRule(isCreate)">
                         确定
                     </n-button>
                 </template>

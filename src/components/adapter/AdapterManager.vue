@@ -8,6 +8,7 @@ interface AdapterBase {
   name: string
   adapter: string
   config: Record<string, any>
+  [key: string]: any  // 允许添加额外的字段
 }
 
 interface Props {
@@ -21,7 +22,7 @@ interface Props {
     deleteAdapter: (name: string) => Promise<any>
     toggleAdapter?: (name: string, running: boolean) => Promise<any>
   }
-  extraFormItems?: any
+  defaultFormModel?: Record<string, any>  // 添加默认表单模型
   transformFormModel?: (model: any) => any
 }
 
@@ -39,7 +40,8 @@ const processing = ref(false)
 const formModel = ref<AdapterBase>({
   name: '',
   adapter: '',
-  config: {}
+  config: {},
+  ...props.defaultFormModel  // 使用默认表单模型
 })
 
 const formRules = ref<any>({
@@ -58,6 +60,34 @@ const formRules = ref<any>({
   ],
   adapter: [{ required: true, message: '请选择适配器类型', trigger: 'change' }]
 })
+
+// 重置表单
+const resetForm = () => {
+  formModel.value = {
+    name: '',
+    adapter: '',
+    config: {},
+    ...props.defaultFormModel
+  }
+}
+
+// 修改添加适配器的点击处理
+const handleAddClick = () => {
+  modalType.value = 'create'
+  resetForm()
+  showModal.value = true
+}
+
+// 修改编辑适配器的处理
+const handleEdit = (row: any) => {
+  modalType.value = 'edit'
+  formModel.value = {
+    ...props.defaultFormModel,
+    ...row,  // 保留所有自定义字段
+    config: { ...row.config }  // 确保 config 是深拷贝
+  }
+  showModal.value = true
+}
 
 // 获取适配器类型
 const fetchAdapterTypes = async () => {
@@ -101,7 +131,15 @@ const fetchAdapterConfigSchema = async (adapterType: string) => {
 watch(() => formModel.value.adapter, async (newAdapter) => {
   if (newAdapter) {
     if (modalType.value != 'edit') {
-      formModel.value = { name: '', adapter: newAdapter, config: {} }
+      const oldConfig = formModel.value.config
+      const oldName = formModel.value.name
+      const oldValues = { ...formModel.value }
+      formModel.value = { 
+        ...props.defaultFormModel,
+        ...oldValues,  // 保留所有自定义字段
+        adapter: newAdapter,  // 确保使用新的适配器
+        config: oldConfig  // 保持原有配置
+      }
     }
     await fetchAdapterConfigSchema(newAdapter)
   }
@@ -228,15 +266,7 @@ const createColumns = (): DataTableColumns<any> => {
               NButton,
               {
                 size: 'small',
-                onClick: () => {
-                  modalType.value = 'edit'
-                  formModel.value = {
-                    name: row.name,
-                    adapter: row.adapter,
-                    config: { ...row.config }
-                  }
-                  showModal.value = true
-                }
+                onClick: () => handleEdit(row)
               },
               { default: () => '编辑' }
             ),
@@ -270,15 +300,7 @@ onMounted(() => {
       <n-spin :show="processing">
       <n-card :title="title">
         <template #header-extra>
-          <n-button type="primary" @click="() => {
-            modalType = 'create'
-            formModel = {
-              name: '',
-              adapter: '',
-              config: {}
-            }
-            showModal = true
-          }">
+          <n-button type="primary" @click="handleAddClick">
             添加适配器
           </n-button>
         </template>
@@ -301,6 +323,7 @@ onMounted(() => {
           <n-spin :show="loading">
             <dynamic-config-form :schema="configSchema" v-model="formModel.config" v-if="configSchema"/>
           </n-spin>
+          <slot name="extra-form-items" :model="formModel"></slot>
         </n-form>
         <template #footer>
           <n-space justify="end">

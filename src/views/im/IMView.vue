@@ -3,6 +3,10 @@ import { imApi } from '@/api/im'
 import type { IMAdapter } from '@/api/im'
 import AdapterManager from '@/components/adapter/AdapterManager.vue'
 
+const defaultFormModel = {
+  is_running: false
+}
+
 const api = {
   getAdapterTypes: imApi.getAdapterTypes,
   getAdapters: imApi.getAdapters,
@@ -24,6 +28,7 @@ const api = {
   <adapter-manager
     title="IM 适配器管理"
     :api="api"
+    :default-form-model="defaultFormModel"
   />
 </template>
 
