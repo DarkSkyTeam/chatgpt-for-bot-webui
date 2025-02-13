@@ -70,7 +70,7 @@ const router = createRouter({
         {
           path: '/plugins/market',
           name: 'plugin-market',
-          component: () => import('@/views/workflow/WorkflowTemplates.vue')
+          component: () => import('@/views/plugins/PluginMarket.vue')
         },
         {
           path: '/memory',

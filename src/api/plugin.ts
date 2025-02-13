@@ -1,5 +1,31 @@
 import { http } from '@/utils/http'
 
+export interface PyPiInfo {
+  version: string
+  description: string
+  author: string
+  homePage?: string
+}
+
+export interface MarketPlugin {
+  name: string
+  description: string
+  author: string
+  pypiPackage: string
+  pypiInfo: PyPiInfo
+  isInstalled?: boolean
+  isUpgradable?: boolean
+  installedVersion?: string
+}
+
+export interface SearchResponse {
+  plugins: MarketPlugin[]
+  totalCount: number
+  totalPages: number
+  page: number
+  pageSize: number
+}
+
 export interface PluginInfo {
   name: string
   package_name: string
@@ -18,9 +44,28 @@ export interface PluginInfo {
 
 export const pluginApi = {
   /**
+   * 搜索插件市场
+   */
+  searchPlugins(query: string = '', page: number = 1, pageSize: number = 10) {
+    const searchParams = new URLSearchParams({
+      query,
+      page: page.toString(),
+      pageSize: pageSize.toString()
+    })
+    return http.get<SearchResponse>(`/plugin/v1/search?${searchParams.toString()}`)
+  },
+
+  /**
+   * 获取插件市场中插件详情
+   */
+  getMarketPluginInfo(pluginName: string) {
+    return http.get<MarketPlugin>(`/plugin/v1/info/${pluginName}`)
+  },
+
+  /**
    * 获取已安装插件列表
    */
-  getPlugins() {
+  getInstalledPlugins() {
     return http.get<{ plugins: PluginInfo[] }>('/plugin/plugins')
   },
 

@@ -111,16 +111,6 @@ html, body {
   transform: scale(0.96);
 }
 
-/* 卡片悬浮效果 */
-.n-card {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.n-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-}
-
 /* 输入框焦点效果 */
 .n-input {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);

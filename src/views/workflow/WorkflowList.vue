@@ -211,11 +211,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.workflow-list {
-  padding: 2rem;
-  min-height: 100vh;
-  background: var(--background-color);
-}
 
 .workflow-card {
   animation: fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
