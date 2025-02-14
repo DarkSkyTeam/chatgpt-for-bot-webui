@@ -234,7 +234,7 @@ onMounted(async () => {
                             </n-form-item>
                             <n-form-item label="类型" required>
                                 <n-select v-model:value="currentRule.type"
-                                    :options="ruleTypes.map(type => ({ label: getRuleTypeLabel(type), value: type }))"
+                                    :options="ruleTypes.map(type => ({ label: getRuleTypeLabel(type) + ' (' + type + ')', value: type }))"
                                     placeholder="请选择类型"
                                     @update:value="handleTypeChange" />
                             </n-form-item>
@@ -242,7 +242,7 @@ onMounted(async () => {
                                 <n-input-number v-model:value="currentRule.priority" :min="0" :max="100" />
                             </n-form-item>
                             <n-form-item label="工作流ID" required>
-                                <n-select v-model:value="currentRule.workflow_id" :options="workflows.map(workflow => ({ label: workflow.name, value: `${workflow.group_id}:${workflow.workflow_id}` }))" placeholder="请选择工作流" />
+                                <n-select v-model:value="currentRule.workflow_id" :options="workflows.map(workflow => ({ label: workflow.name + ' (' + workflow.group_id + ':' + workflow.workflow_id + ')', value: `${workflow.group_id}:${workflow.workflow_id}` }))" placeholder="请选择工作流" />
                             </n-form-item>
                             <n-form-item label="启用状态">
                                 <n-switch v-model:value="currentRule.enabled" />
