@@ -2,6 +2,7 @@ import { http } from '@/utils/http'
 
 export interface BlockInput {
   name: string
+  label: string
   description: string
   type: string
   required: boolean
@@ -10,6 +11,7 @@ export interface BlockInput {
 
 export interface BlockOutput {
   name: string
+  label: string
   description: string
   type: string
 }
@@ -25,6 +27,7 @@ export interface BlockConfig {
 export interface BlockType {
   type_name: string
   name: string
+  label: string
   description: string
   inputs: BlockInput[]
   outputs: BlockOutput[]

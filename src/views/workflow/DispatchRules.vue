@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, h } from 'vue'
 import { NDataTable, NButton, NSpace, NCard, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch, useMessage, NModal, NDivider, type FormInst } from 'naive-ui'
-import { dispatchApi } from '@/api/dispatch'
+import { dispatchApi, getRuleTypeLabel } from '@/api/dispatch'
+import { listWorkflows, type WorkflowInfo } from '@/api/workflow'
 import type { DispatchRule } from '@/api/dispatch'
 import DynamicConfigForm from '@/components/form/DynamicConfigForm.vue'
 
@@ -12,15 +13,18 @@ const showEditModal = ref(false)
 const currentRule = ref<Partial<DispatchRule>>({})
 const configSchema = ref<any>(null)
 const isCreate = ref(false)
-
+const workflows = ref<WorkflowInfo[]>([])
 // 表格列定义
 const columns = [
     { title: '规则ID', key: 'rule_id' },
     { title: '名称', key: 'name' },
     { title: '描述', key: 'description' },
-    { title: '类型', key: 'type' },
+    { title: '类型', key: 'type', render: (row: DispatchRule) => getRuleTypeLabel(row.type) },
     { title: '优先级', key: 'priority' },
-    { title: '工作流', key: 'workflow_id' },
+    { title: '工作流', key: 'workflow_id', render: (row: DispatchRule) => {
+        const workflow = workflows.value.find(workflow => `${workflow.group_id}:${workflow.workflow_id}` === row.workflow_id)
+        return workflow ? `${workflow.name} (${row.workflow_id})  ` : '未指定'
+    } },
     {
         title: '状态',
         key: 'enabled',
@@ -100,6 +104,14 @@ const loadRules = async () => {
     }
 }
 
+const loadWorkflows = async () => {
+    try {
+        const { workflows: workflowList } = await listWorkflows()
+        workflows.value = workflowList
+    } catch (error) {
+        message.error('加载工作流列表失败')
+    }
+}
 // 加载规则类型
 const loadRuleTypes = async () => {
     try {
@@ -180,7 +192,7 @@ const saveRule = async (isCreate: boolean) => {
         showEditModal.value = false
         message.success('保存成功')
     } catch (error) {
-        message.error('保存失败')
+        message.error('保存失败:' + (error as Error).message)
     }
 }
 
@@ -191,7 +203,7 @@ const handleTypeChange = async (type: string) => {
 }
 
 onMounted(async () => {
-    await Promise.all([loadRules(), loadRuleTypes()])
+    await Promise.all([loadRules(), loadRuleTypes(), loadWorkflows()])
 })
 </script>
 
@@ -222,7 +234,7 @@ onMounted(async () => {
                             </n-form-item>
                             <n-form-item label="类型" required>
                                 <n-select v-model:value="currentRule.type"
-                                    :options="ruleTypes.map(type => ({ label: type, value: type }))"
+                                    :options="ruleTypes.map(type => ({ label: getRuleTypeLabel(type), value: type }))"
                                     placeholder="请选择类型"
                                     @update:value="handleTypeChange" />
                             </n-form-item>
@@ -230,7 +242,7 @@ onMounted(async () => {
                                 <n-input-number v-model:value="currentRule.priority" :min="0" :max="100" />
                             </n-form-item>
                             <n-form-item label="工作流ID" required>
-                                <n-input v-model:value="currentRule.workflow_id" placeholder="请输入工作流ID" />
+                                <n-select v-model:value="currentRule.workflow_id" :options="workflows.map(workflow => ({ label: workflow.name, value: `${workflow.group_id}:${workflow.workflow_id}` }))" placeholder="请选择工作流" />
                             </n-form-item>
                             <n-form-item label="启用状态">
                                 <n-switch v-model:value="currentRule.enabled" />

@@ -58,4 +58,15 @@ export const dispatchApi = {
   disableRule: (ruleId: string) => {
     return http.post(`/dispatch/rules/${ruleId}/disable`)
   }
-} 
+}
+
+const _ruleTypeLabels = {
+  'prefix': '前缀',
+  'regex': '正则表达式',
+  'keyword': '关键词',
+  'fallback': '无条件'
+}
+export const getRuleTypeLabel = (type: string) => {
+  return _ruleTypeLabels[type as keyof typeof _ruleTypeLabels] || type
+}
+
