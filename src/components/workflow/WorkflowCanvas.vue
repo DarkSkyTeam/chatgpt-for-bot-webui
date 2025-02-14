@@ -190,13 +190,13 @@ const registerNodeTypes = () => {
   props.blockTypes.forEach(blockType => {
     class CustomBlock extends LiteGraph.LGraphNode {
       constructor() {
-        super(blockType.type_name)
+        super(blockType.label)
         blockType.inputs.forEach(input => {
-          this.addInput(input.name, input.type)
+          this.addInput(input.name, input.type, { label: input.label })
         })
 
         blockType.outputs.forEach(output => {
-          this.addOutput(output.name, output.type)
+          this.addOutput(output.name, output.type, { label: output.label })
         })
 
         const onValueChange = () => {
@@ -230,7 +230,7 @@ const registerNodeTypes = () => {
         console.log(event, data)
       }
     }
-    Object.defineProperty(CustomBlock, 'name', { value: blockType.type_name })
+    Object.defineProperty(CustomBlock, 'name', { value: blockType.label })
     LiteGraph.registerNodeType(blockType.type_name.replace(':', '/'), CustomBlock)
     console.log(`[registerNodeTypes] Registered node type: ${blockType.type_name}`)
 
