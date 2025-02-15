@@ -16,7 +16,8 @@ export const useAppStore = defineStore('app', () => {
     activeAdapters: 0,
     activeBackends: 0,
     loadedPlugins: 0,
-    workflowCount: 0
+    workflowCount: 0,
+    version: 'unknown'
   })
 
 
@@ -53,6 +54,7 @@ export const useAppStore = defineStore('app', () => {
     activeBackends?: number
     loadedPlugins?: number
     workflowCount?: number
+    version?: string
   }) => {
     systemStatus.value = {
       ...systemStatus.value,

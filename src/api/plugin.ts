@@ -16,6 +16,7 @@ export interface MarketPlugin {
   isInstalled?: boolean
   isUpgradable?: boolean
   installedVersion?: string
+  isEnabled?: boolean
 }
 
 export interface SearchResponse {

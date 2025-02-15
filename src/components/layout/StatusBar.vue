@@ -8,6 +8,9 @@ const appStore = useAppStore()
 // 连接状态
 const connecting = ref(false)
 
+// 从环境变量获取版本号
+const webUIVersion = import.meta.env.VITE_APP_VERSION || 'unknown'
+
 // 模拟状态更新
 let timer: number
 onMounted(() => {
@@ -37,7 +40,8 @@ onMounted(() => {
           activeAdapters: data.status.active_adapters,
           activeBackends: data.status.active_backends,
           loadedPlugins: data.status.loaded_plugins,
-          workflowCount: data.status.workflow_count
+          workflowCount: data.status.workflow_count,
+          version: data.status.version
         })
       })
       .catch(error => {
@@ -80,11 +84,16 @@ onUnmounted(() => {
         <n-text>API: {{ appStore.systemStatus.apiConnected ? '已连接' : '未连接' }}</n-text>
       </n-space>
 
+      <n-space align="center">
+        <n-text>WebUI 版本: {{ webUIVersion }}</n-text>
+        <n-text v-if="appStore.systemStatus.status === 'normal'">后端版本: {{ appStore.systemStatus.version }}</n-text>
+      </n-space>
+
       <n-space v-if="appStore.systemStatus.status === 'normal'">
         <n-text>内存使用: {{ (appStore.systemStatus.memoryUsage / 1024).toFixed(2) }} MB</n-text>
         <n-text>CPU: {{ appStore.systemStatus.cpuUsage }}%</n-text>
-        <n-text>适配器: {{ appStore.systemStatus.activeAdapters }}</n-text>
-        <n-text>后端: {{ appStore.systemStatus.activeBackends }}</n-text>
+        <n-text>IM: {{ appStore.systemStatus.activeAdapters }}</n-text>
+        <n-text>LLM: {{ appStore.systemStatus.activeBackends }}</n-text>
         <n-text>插件: {{ appStore.systemStatus.loadedPlugins }}</n-text>
         <n-text>工作流: {{ appStore.systemStatus.workflowCount }}</n-text>
       </n-space>

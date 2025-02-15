@@ -3,6 +3,28 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
+import { execSync } from 'child_process'
+
+// 获取 Git 信息
+function getGitVersion(): string {
+  try {
+    let tag = '';
+    try {
+      tag = execSync('git describe --tags --exact-match').toString().trim();
+    } catch (e) {
+      // 如果没有找到 tag，则忽略错误
+    }
+
+    if (tag) {
+      return tag;
+    }
+
+    const commitHash = execSync('git rev-parse --short HEAD').toString().trim();
+    return `dev-${commitHash}`;
+  } catch (e) {
+    return 'unknown';
+  }
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -34,5 +56,8 @@ export default defineConfig({
       }
       
     }
+  },
+  define: {
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(getGitVersion())
   }
 })

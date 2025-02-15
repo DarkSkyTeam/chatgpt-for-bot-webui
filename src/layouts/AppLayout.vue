@@ -34,11 +34,11 @@
       <n-layout-content class="main-content">
         <router-view />
       </n-layout-content>
-      <!-- 底部状态栏 -->
-      <n-layout-footer bordered position="absolute" class="status-bar">
-        <status-bar />
-      </n-layout-footer>
     </n-layout>
+    <!-- 底部状态栏 -->
+    <n-layout-footer bordered position="absolute" class="status-bar">
+      <status-bar />
+    </n-layout-footer>
   </n-layout>
 </template>
   
@@ -74,5 +74,6 @@ const appStore = useAppStore()
   padding: 4px 12px;
   font-size: 12px;
   line-height: 20px;
+  z-index: 1000;
 }
 </style>
