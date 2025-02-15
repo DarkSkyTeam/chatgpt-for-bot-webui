@@ -1,16 +1,24 @@
 import { http } from '@/utils/http'
 
+export interface SimpleRule {
+  type: string
+  config: Record<string, any>  // 规则类型特定的配置
+}
+
+export interface RuleGroup {
+  operator: 'and' | 'or'
+  rules: SimpleRule[]
+}
+
 export interface DispatchRule {
   rule_id: string
   name: string
   description: string
-  type: string
-  priority: number
   workflow_id: string
+  priority: number
   enabled: boolean
-  config: Record<string, any>  // 规则类型特定的配置
+  rule_groups: RuleGroup[]  // 规则组列表，组之间是 AND 关系
   metadata: Record<string, any>  // 其他元数据
-  is_active: boolean
 }
 
 export interface DispatchRuleConfigSchema {
@@ -61,10 +69,10 @@ export const dispatchApi = {
 }
 
 const _ruleTypeLabels = {
-  'prefix': '前缀',
+  'prefix': '以……开头',
   'regex': '正则表达式',
-  'keyword': '关键词',
-  'fallback': '无条件'
+  'keyword': '包含……词',
+  'fallback': '任意输入'
 }
 export const getRuleTypeLabel = (type: string) => {
   return _ruleTypeLabels[type as keyof typeof _ruleTypeLabels] || type
