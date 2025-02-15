@@ -27,6 +27,7 @@ import { LGraph, LGraphCanvas, LGraphNode, LiteGraph, type IWidget } from '@comf
 import { workflowEditorModel } from '@/store/workflow-editor'
 import type { IBaseWidget } from 'node_modules/@comfyorg/litegraph/dist/types/widgets'
 import type { Dictionary, INodeOutputSlot } from 'node_modules/@comfyorg/litegraph/dist/interfaces'
+import { getTypeColor } from '@/utils/node-colors'
 
 interface IBaseBlockWidget extends IBaseWidget {
   actual_name: string
@@ -183,6 +184,21 @@ const updateCanvasSize = () => {
   canvasElement.getContext('2d')?.scale(ratio, ratio)
 }
 
+// 更新连线颜色
+const updateLinkColors = () => {
+  if (!canvas) return
+  const linkTypeColors = props
+    .blockTypes
+    .flatMap(blockType => [...blockType.inputs.map(input => input.type), ...blockType.outputs.map(output => output.type)])
+    .reduce((acc, type) => {
+      acc[type] = getTypeColor(type).color_on
+      return acc
+    }, {} as Record<string, string>)
+  canvas.default_connection_color_byType = linkTypeColors
+  LGraphCanvas.link_type_colors = linkTypeColors
+  console.log('[updateLinkColors] Link colors updated.')
+}
+
 // 注册自定义节点类型
 const registerNodeTypes = () => {
   if (!props.blockTypes || props.blockTypes.length === 0) {
@@ -195,11 +211,13 @@ const registerNodeTypes = () => {
       constructor() {
         super(blockType.label)
         blockType.inputs.forEach(input => {
-          this.addInput(input.name, input.type, { label: input.label })
+          const colors = getTypeColor(input.type, input.required)
+          this.addInput(input.name, input.type, { label: input.label, color_off: colors.color_off, color_on: colors.color_on })
         })
 
         blockType.outputs.forEach(output => {
-          this.addOutput(output.name, output.type, { label: output.label })
+          const colors = getTypeColor(output.type)
+          this.addOutput(output.name, output.type, { label: output.label, color_off: colors.color_off, color_on: colors.color_on })
         })
 
         const onValueChange = () => {
@@ -373,7 +391,6 @@ const updateWires = () => {
       }
     })
     .filter((wire): wire is Wire => wire !== null)
-  console.log(wires)
   intent.updateWires(wires)
   emit('update:wires', wires)
 }
@@ -426,7 +443,6 @@ const createNode = (block: BlockInstance) => {
   }
   node.id = block.name
   node.pos = [block.position.x, block.position.y]
-  console.log(node.pos, block.position)
   graph.add(node)
 
   // 恢复节点的配置
@@ -559,6 +575,7 @@ const initGraphData = () => {
   if (props.blockTypes.length > 0 && !isNodeTypesRegistered) {
     graph.clear()
     registerNodeTypes()
+    updateLinkColors()
     isNodeTypesRegistered = true
     console.log('[initGraphData] Node types registered.')
   }
