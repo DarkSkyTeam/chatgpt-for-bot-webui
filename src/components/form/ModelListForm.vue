@@ -74,9 +74,6 @@ const addItem = () => {
     <template v-if="value.length > 0">
       <component :is="renderArrayItem(index)" v-for="(_, index) in value" :key="index" />
     </template>
-    <div v-else style="color: var(--n-text-color-3);">
-      暂无数据
-    </div>
     <n-button 
       type="primary"
       size="small"

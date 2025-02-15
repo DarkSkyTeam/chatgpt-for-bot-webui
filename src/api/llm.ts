@@ -72,5 +72,19 @@ export const llmApi = {
    */
   getAdapterConfigSchema(adapterType: string) {
     return http.get<{ configSchema: ConfigSchema }>(`/llm/types/${adapterType}/config-schema`)
+  },
+
+  /**
+   * 获取适配器支持自动检测模型
+   */
+  getAdapterSupportsAutoDetectModels(adapterType: string) {
+    return http.get<{ supportsAutoDetectModels: boolean }>(`/llm/types/${adapterType}/supports-auto-detect-models`)
+  },
+
+  /**
+   * 获取后端支持的模型列表
+   */
+  getBackendModels(backendName: string) {
+    return http.get<{ models: string[] }>(`/llm/backends/${backendName}/auto-detect-models`)
   }
 } 

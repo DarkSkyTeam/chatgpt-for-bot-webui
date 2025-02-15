@@ -22,8 +22,8 @@ interface Props {
     deleteAdapter: (name: string) => Promise<any>
     toggleAdapter?: (name: string, running: boolean) => Promise<any>
   }
-  defaultFormModel?: Record<string, any>  // 添加默认表单模型
-  transformFormModel?: (model: any) => any
+  transformFormModel?: (model: any) => any,
+  modelValue: AdapterBase
 }
 
 const props = defineProps<Props>()
@@ -37,12 +37,7 @@ const configSchema = ref<any>(null)
 const loading = ref(false)
 const processing = ref(false)
 
-const formModel = ref<AdapterBase>({
-  name: '',
-  adapter: '',
-  config: {},
-  ...props.defaultFormModel  // 使用默认表单模型
-})
+const defaultFormModel = props.modelValue
 
 const formRules = ref<any>({
   name: [
@@ -61,14 +56,21 @@ const formRules = ref<any>({
   adapter: [{ required: true, message: '请选择适配器类型', trigger: 'change' }]
 })
 
+const emit = defineEmits(['update:modelValue'])
+const formModel = ref<AdapterBase>({ ...props.modelValue })
+
+// 监听 props.modelValue 的变化
+watch(() => props.modelValue, (newValue) => {
+  // Do not update if all values are same
+  if (JSON.stringify(formModel.value) !== JSON.stringify(newValue)) {
+    formModel.value = { ...newValue }
+  }
+}, { deep: true })
+
 // 重置表单
 const resetForm = () => {
-  formModel.value = {
-    name: '',
-    adapter: '',
-    config: {},
-    ...props.defaultFormModel
-  }
+  formModel.value = { ...defaultFormModel }
+  emit('update:modelValue', formModel.value)
 }
 
 // 修改添加适配器的点击处理
@@ -82,10 +84,11 @@ const handleAddClick = () => {
 const handleEdit = (row: any) => {
   modalType.value = 'edit'
   formModel.value = {
-    ...props.defaultFormModel,
-    ...row,  // 保留所有自定义字段
-    config: { ...row.config }  // 确保 config 是深拷贝
+    ...defaultFormModel,
+    ...row,
+    config: { ...row.config }
   }
+  emit('update:modelValue', formModel.value)
   showModal.value = true
 }
 
@@ -132,18 +135,24 @@ watch(() => formModel.value.adapter, async (newAdapter) => {
   if (newAdapter) {
     if (modalType.value != 'edit') {
       const oldConfig = formModel.value.config
-      const oldName = formModel.value.name
       const oldValues = { ...formModel.value }
       formModel.value = { 
-        ...props.defaultFormModel,
-        ...oldValues,  // 保留所有自定义字段
-        adapter: newAdapter,  // 确保使用新的适配器
-        config: oldConfig  // 保持原有配置
+        ...defaultFormModel,
+        ...oldValues,
+        adapter: newAdapter,
+        config: oldConfig
       }
     }
     await fetchAdapterConfigSchema(newAdapter)
   }
 })
+
+watch(() => formModel.value, (newValue) => {
+  // Do not update if all values are same
+  if (JSON.stringify(props.modelValue) !== JSON.stringify(newValue)) { 
+    emit('update:modelValue', newValue)
+  }
+}, { deep: true })
 
 // 监听模态框显示状态
 watch(showModal, async (show) => {
@@ -156,8 +165,14 @@ watch(showModal, async (show) => {
   }
 })
 
+
 // 创建或更新适配器
 const handleSubmit = async () => {
+  await handleSubmitActual()
+  showModal.value = false
+}
+
+const handleSubmitActual = async () => {
   try {
     const errors = await formRef.value?.validate()
     if (errors?.warnings?.length) {
@@ -166,21 +181,21 @@ const handleSubmit = async () => {
     }
 
     processing.value = true
-    const submitData = props.transformFormModel ? props.transformFormModel(formModel.value) : formModel.value
+    const submitData = props.transformFormModel ? 
+      props.transformFormModel(formModel.value) : 
+      formModel.value
 
     try {
       if (modalType.value === 'create') {
-        props.api.createAdapter(submitData)
+        await props.api.createAdapter(submitData)
       } else {
-        props.api.updateAdapter(submitData.name, submitData)
+        await props.api.updateAdapter(submitData.name, submitData)
       }
       $message.success('保存适配器成功')
+      await fetchAdapters()
     } catch (error) {
       $message.error('保存适配器失败: ' + error)
     }
-
-    showModal.value = false
-    fetchAdapters()
   } catch (error) {
     $message.error('保存适配器失败: ' + error)
   } finally {
@@ -188,7 +203,9 @@ const handleSubmit = async () => {
   }
 }
 
-
+defineExpose({
+  handleSubmitActual
+})
 
 // 删除适配器
 const handleDelete = async (adapter: any) => {
@@ -204,8 +221,6 @@ const handleDelete = async (adapter: any) => {
       processing.value = false
     }
   }
-
-
 }
 
 // 切换适配器状态
@@ -222,7 +237,6 @@ const handleToggleAdapter = async (adapter: any) => {
       processing.value = false
     }
   }
-
 }
 
 const createColumns = (): DataTableColumns<any> => {
@@ -311,20 +325,27 @@ onMounted(() => {
 
     <!-- 创建/编辑适配器表单 -->
     <n-modal v-model:show="showModal">
-      <n-card style="width: 600px" :title="modalType === 'create' ? '添加适配器' : '编辑适配器'" :bordered="false" size="huge"
+      <n-card style="width: 900px;" :title="modalType === 'create' ? '添加适配器' : '编辑适配器'" :bordered="false" size="huge"
         role="dialog" aria-modal="true">
-        <n-form ref="formRef" :model="formModel" label-placement="left" label-width="100" :rules="formRules">
-          <n-form-item label="适配器" path="adapter">
-            <n-select v-model:value="formModel.adapter" :options="adapterTypes.map(type => ({ label: type, value: type }))" />
-          </n-form-item>
-          <n-form-item label="名称" path="name">
-            <n-input v-model:value="formModel.name" placeholder="请输入适配器名称" />
-          </n-form-item>
-          <n-spin :show="loading">
-            <dynamic-config-form :schema="configSchema" v-model="formModel.config" v-if="configSchema"/>
-          </n-spin>
-          <slot name="extra-form-items" :model="formModel"></slot>
-        </n-form>
+        <div class="adapter-edit-container">
+          <div class="adapter-basic-form">
+            <n-form ref="formRef" :model="formModel" label-placement="left" label-width="100" :rules="formRules">
+              <n-form-item label="适配器" path="adapter">
+                <n-select v-model:value="formModel.adapter" :options="adapterTypes.map(type => ({ label: type, value: type }))" />
+              </n-form-item>
+              <n-form-item label="名称" path="name">
+                <n-input v-model:value="formModel.name" placeholder="请输入适配器名称" />
+              </n-form-item>
+
+            </n-form>
+          </div>
+          <div class="adapter-extra-form">
+            <n-spin :show="loading">
+              <dynamic-config-form :schema="configSchema" v-model="formModel.config" v-if="configSchema"/>
+            </n-spin>
+            <slot name="extra-form-items" :model="formModel"></slot>
+          </div>
+        </div>
         <template #footer>
           <n-space justify="end">
             <n-button @click="showModal = false">取消</n-button>
@@ -339,5 +360,23 @@ onMounted(() => {
 <style scoped>
 .adapter-manager {
   height: 100%;
+}
+
+.adapter-edit-container {
+    display: flex;
+    min-height: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.adapter-basic-form {
+    flex: 0 0 400px;
+    padding-right: 16px;
+}
+
+.adapter-extra-form {
+    flex: 1;
+    padding-left: 16px;
+    border-left: 1px solid var(--n-border-color);
 }
 </style>
