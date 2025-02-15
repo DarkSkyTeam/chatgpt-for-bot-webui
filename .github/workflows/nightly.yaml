@@ -1,0 +1,36 @@
+name: Nightly Build
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs every day at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 16
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build
+        run: yarn build
+
+      - name: Create nightly archive
+        run: |
+          zip -r nightly.zip dist
+          ls -l
+
+      - name: Upload nightly archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-build
+          path: nightly.zip
