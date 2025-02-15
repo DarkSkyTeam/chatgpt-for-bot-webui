@@ -27,7 +27,10 @@ import { LGraph, LGraphCanvas, LGraphNode, LiteGraph, type IWidget } from '@comf
 import { workflowEditorModel } from '@/store/workflow-editor'
 import type { IBaseWidget } from 'node_modules/@comfyorg/litegraph/dist/types/widgets'
 import type { Dictionary, INodeOutputSlot } from 'node_modules/@comfyorg/litegraph/dist/interfaces'
-import type { Direction, RenderShape } from '@comfyorg/litegraph'
+
+interface IBaseBlockWidget extends IBaseWidget {
+  actual_name: string
+}
 
 const props = defineProps<{
   blocks: BlockInstance[]
@@ -204,9 +207,9 @@ const registerNodeTypes = () => {
             this.properties.config = {}
           }
           this.widgets?.forEach((widget: IBaseWidget) => {
-            if (widget.name) {
+            if (widget.name && widget.actual_name) {
               // 更新节点的配置
-              (this.properties.config as Dictionary<any>)[widget.name] = widget.value
+              (this.properties.config as Dictionary<any>)[widget.actual_name] = widget.value
               // 触发更新
               updateBlocks()
             }
@@ -214,13 +217,18 @@ const registerNodeTypes = () => {
         }
 
         blockType.configs.forEach(config => {
+          let widget: IBaseBlockWidget | undefined = undefined
           if (config.type === 'int') {
-            this.addWidget('number', config.name, config.default || 0, onValueChange)
+            widget = this.addWidget('number', config.label, config.default || 0, onValueChange) as IBaseBlockWidget
           } else if (config.type === 'str') {
-            this.addWidget('text', config.name, config.default || '', onValueChange, { multiline: true })
+            widget = this.addWidget('text', config.label, config.default || '', onValueChange, { multiline: true }) as IBaseBlockWidget
           } else if (config.type === 'bool') {
-            this.addWidget('toggle', config.name, config.default || false, onValueChange)
+            widget = this.addWidget('toggle', config.label, config.default || false, onValueChange) as IBaseBlockWidget
           } else {
+            console.warn(`[registerNodeTypes] Unsupported config type: ${config.type}`)
+          }
+          if (widget) {
+            widget.actual_name = config.name
           }
         })
         onValueChange()
@@ -373,6 +381,7 @@ const updateWires = () => {
 // 修改保存处理函数
 const handleSave = async () => {
   try {
+    updateBlocks()
     const errors = await formRef.value?.validate()
     if (errors?.length > 0 || !formValue.value.name || !formValue.value.workflowId) {
       message.error('工作流信息需要修改')
@@ -417,6 +426,7 @@ const createNode = (block: BlockInstance) => {
   }
   node.id = block.name
   node.pos = [block.position.x, block.position.y]
+  console.log(node.pos, block.position)
   graph.add(node)
 
   // 恢复节点的配置
@@ -427,8 +437,8 @@ const createNode = (block: BlockInstance) => {
       node.properties[key] = block.config[key]
     }
     node.widgets?.forEach((widget: IBaseWidget) => {
-      if (widget.name) {
-        widget.value = block.config[widget.name] || widget.value
+      if (widget.name && widget.actual_name) {
+        widget.value = block.config[widget.actual_name] || widget.value
       }
     })
   }
@@ -572,7 +582,12 @@ const initGraphData = () => {
     })
     workflowEditorModel.performActionWithoutHistory(() => {
       restoreGraph()
-      graph.arrange()
+      // 判断节点坐标是不是都有值
+      const nodes = Array.from(graph._nodes.values())
+      if (nodes.some(node => node.pos[0] === 0 && node.pos[1] === 0)) {
+        console.log('节点坐标为0，重新排列')
+        graph.arrange()
+      }
       console.log('[initGraphData] Graph initialized.')
     })
   }

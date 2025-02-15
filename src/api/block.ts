@@ -17,6 +17,7 @@ export interface BlockOutput {
 }
 
 export interface BlockConfig {
+  label: string
   name: string
   description: string
   type: string
