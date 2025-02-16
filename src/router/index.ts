@@ -81,6 +81,11 @@ const router = createRouter({
           path: '/memory/search',
           name: 'memory-search',
           component: () => import('@/views/workflow/WorkflowTemplates.vue')
+        },
+        {
+          path: '/guide',
+          name: 'guide',
+          component: () => import('@/views/guide/GuideView.vue')
         }
       ]
     },

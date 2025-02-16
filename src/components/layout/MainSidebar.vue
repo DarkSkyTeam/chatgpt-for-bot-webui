@@ -8,7 +8,8 @@ import {
   ServerOutline,
   ExtensionPuzzleOutline,
   GitNetworkOutline,
-  BookOutline
+  BookOutline,
+  HomeOutline
 } from '@vicons/ionicons5'
 import { NIcon } from 'naive-ui'
 import { useAppStore } from '@/stores/app'
@@ -22,6 +23,11 @@ function renderIcon(icon: any) {
 }
 
 const menuOptions: MenuOption[] = [
+  {
+    label: () => '快速开始',
+    key: 'guide',
+    icon: renderIcon(HomeOutline)
+  },
   {
     label: () => 'IM 管理',
     key: 'im',

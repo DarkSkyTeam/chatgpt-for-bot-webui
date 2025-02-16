@@ -22,6 +22,7 @@
       :collapsed-width="0"
       :width="240"
       show-trigger
+      v-if="route.path !== '/guide'"
       @collapse="appStore.toggleSecondarySider"
       @expand="appStore.toggleSecondarySider"
       class="secondary-sider"
@@ -44,13 +45,14 @@
   
 <script setup lang="ts">
 import { NLayout, NLayoutSider, NLayoutContent, NLayoutFooter } from 'naive-ui'
-import { RouterView } from 'vue-router'
+import { RouterView, useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import MainSidebar from '@/components/layout/MainSidebar.vue'
 import SecondarySidebar from '@/components/layout/SecondarySidebar.vue' 
 import StatusBar from '@/components/layout/StatusBar.vue'
 
 const appStore = useAppStore()
+const route = useRoute()
 </script>
 
 <style scoped>

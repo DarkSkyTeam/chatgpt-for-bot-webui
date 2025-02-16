@@ -11,23 +11,8 @@ const connecting = ref(false)
 // 从环境变量获取版本号
 const webUIVersion = import.meta.env.VITE_APP_VERSION || 'unknown'
 
-// 模拟状态更新
-let timer: number
-onMounted(() => {
-  appStore.updateSystemStatus({
-    status: 'warning',
-    apiConnected: false,
-    memoryUsage: 0,
-    cpuUsage: 0,
-    uptime: 0,
-    activeAdapters: 0,
-    activeBackends: 0,
-    loadedPlugins: 0,
-    workflowCount: 0
-  })
-  connecting.value = true
-  timer = setInterval(() => {
-    fetch('/backend-api/api/system/status')
+const fetchStatus = () => {
+  fetch('/backend-api/api/system/status')
       .then(response => response.json())
       .then(data => {
         connecting.value = false
@@ -50,9 +35,28 @@ onMounted(() => {
         appStore.updateSystemStatus({
           status: 'error',
           apiConnected: false
-        })
-      })
+    })
+  })
+}
+// 模拟状态更新
+let timer: number
+onMounted(() => {
+  appStore.updateSystemStatus({
+    status: 'warning',
+    apiConnected: false,
+    memoryUsage: 0,
+    cpuUsage: 0,
+    uptime: 0,
+    activeAdapters: 0,
+    activeBackends: 0,
+    loadedPlugins: 0,
+    workflowCount: 0
+  })
+  connecting.value = true
+  timer = setInterval(() => {
+    fetchStatus()
   }, 10000)
+  fetchStatus()
 })
 
 onUnmounted(() => {
