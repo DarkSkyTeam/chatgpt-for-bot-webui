@@ -368,7 +368,7 @@ onMounted(async () => {
                                     </div>
                                 </div>
 
-                                <n-button dashed block class="add-group-btn" @click="addRuleGroup">
+                                <n-button dashed block class="add-group-btn" @click="addRuleGroup" :disabled="currentRule.rule_groups[currentRule.rule_groups.length - 1].rules.length === 0">
                                     <template #icon>
                                         <n-icon><Add /></n-icon>
                                     </template>

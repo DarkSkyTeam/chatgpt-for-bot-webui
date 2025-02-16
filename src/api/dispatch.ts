@@ -72,6 +72,9 @@ const _ruleTypeLabels = {
   'prefix': '以……开头',
   'regex': '正则表达式',
   'keyword': '包含……词',
+  'random': '以……概率',
+  'sender': '发送者为……',
+  'sender_mismatch': '发送者不为……',
   'fallback': '任意输入'
 }
 export const getRuleTypeLabel = (type: string) => {
