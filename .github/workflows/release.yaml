@@ -25,7 +25,9 @@ jobs:
 
       - name: Create release archive
         run: |
-          zip -r dist.zip dist
+          pushd dist
+          zip -r ../dist.zip .
+          popd
           ls -l
 
       - name: Upload release archive
