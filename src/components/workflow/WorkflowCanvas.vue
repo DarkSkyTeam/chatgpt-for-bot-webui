@@ -21,12 +21,12 @@ import {
   ArrowBackOutline,
   SettingsOutline
 } from '@vicons/ionicons5'
-import type { BlockType } from '@/api/block'
+import { getTypeCompatibility, type BlockType } from '@/api/block'
 import type { BlockInstance, Wire } from '@/api/workflow'
 import { LGraph, LGraphCanvas, LGraphNode, LiteGraph, type IWidget } from '@comfyorg/litegraph'
 import { workflowEditorModel } from '@/store/workflow-editor'
 import type { IBaseWidget } from 'node_modules/@comfyorg/litegraph/dist/types/widgets'
-import type { Dictionary, INodeOutputSlot } from 'node_modules/@comfyorg/litegraph/dist/interfaces'
+import type { Dictionary, INodeOutputSlot, ISlotType } from 'node_modules/@comfyorg/litegraph/dist/interfaces'
 import { getTypeColor } from '@/utils/node-colors'
 
 interface IBaseBlockWidget extends IBaseWidget {
@@ -48,6 +48,7 @@ const emit = defineEmits<{
   'update:wires': [wires: Wire[]]
   'save': [name: string, description: string, workflowId: string]
 }>()
+const typeCompatibility = ref<Record<string, Record<string, boolean>>>({})
 
 const container = ref<HTMLCanvasElement>()
 let graph: LGraph = new LGraph()
@@ -143,6 +144,16 @@ const initGraph = () => {
   LiteGraph.CANVAS_GRID_SIZE = 20
   LiteGraph.auto_sort_node_types = true
   LiteGraph.use_uuids = true
+  LiteGraph.isValidConnection = (a: ISlotType, b: ISlotType) => {
+    console.log('[isValidConnection] Checking connection between', a, 'and', b)
+    if (a == b) {
+      return true
+    }
+    if (typeCompatibility.value[a as string] && typeCompatibility.value[a as string][b as string]) {
+      return true
+    }
+    return false
+  }
 
   // 设置快捷键
   setupShortcuts()
@@ -225,9 +236,9 @@ const registerNodeTypes = () => {
             this.properties.config = {}
           }
           this.widgets?.forEach((widget: IBaseWidget) => {
-            if (widget.name && widget.actual_name) {
+            if (widget.name && (widget as IBaseBlockWidget).actual_name) {
               // 更新节点的配置
-              (this.properties.config as Dictionary<any>)[widget.actual_name] = widget.value
+              (this.properties.config as Dictionary<any>)[(widget as IBaseBlockWidget).actual_name] = widget.value
               // 触发更新
               updateBlocks()
             }
@@ -453,8 +464,8 @@ const createNode = (block: BlockInstance) => {
       node.properties[key] = block.config[key]
     }
     node.widgets?.forEach((widget: IBaseWidget) => {
-      if (widget.name && widget.actual_name) {
-        widget.value = block.config[widget.actual_name] || widget.value
+      if (widget.name && (widget as IBaseBlockWidget).actual_name) {
+        widget.value = block.config[(widget as IBaseBlockWidget).actual_name] || widget.value
       }
     })
   }
@@ -566,11 +577,16 @@ let isNodeTypesRegistered = false
 let isGraphInitialized = false
 
 // 初始化图形数据 (在合适的时机只执行一次)
-const initGraphData = () => {
+const initGraphData = async () => {
   if (!graph) {
     console.warn('[initGraphData] Graph is not initialized.')
     return
   }
+
+  // 加载区块类型和类型兼容性映射
+  const compatibility = await getTypeCompatibility()
+  typeCompatibility.value = compatibility
+  console.log('[initGraphData] Type compatibility:', typeCompatibility.value)
   // 注册节点类型
   if (props.blockTypes.length > 0 && !isNodeTypesRegistered) {
     graph.clear()

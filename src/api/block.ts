@@ -1,4 +1,5 @@
 import { http } from '@/utils/http'
+import { ref, computed } from 'vue'
 
 export interface BlockInput {
   name: string
@@ -49,4 +50,8 @@ export async function listBlockTypes() {
 
 export async function getBlockType(typeName: string) {
   return http.get<BlockTypeResponse>(`/block/types/${typeName}`)
-} 
+}
+
+export async function getTypeCompatibility() {
+  return http.get<Record<string, Record<string, boolean>>>('/block/types/compatibility')
+}
