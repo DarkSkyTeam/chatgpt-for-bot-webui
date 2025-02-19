@@ -225,6 +225,7 @@ const renderField = (key: string, property: SchemaProperty) => {
         <template v-for="(property, key) in schema.properties" :key="key">
             <component :is="renderField(key, property)" />
         </template>
+        <p v-if="Object.keys(schema.properties).length === 0">暂无配置</p>
     </div>
 </template>
 
