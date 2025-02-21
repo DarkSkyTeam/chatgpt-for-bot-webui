@@ -41,6 +41,12 @@ const handleSave = async (workflowName: string, workflowDesc: string, newWorkflo
         workflowId.value = workflow
         router.replace(`/workflow/editor/${data.group_id}:${data.workflow_id}`)
       }
+      name.value = data.name
+      description.value = data.description
+      blocks.value = data.blocks
+      wires.value = data.wires
+      // 更新页面标题
+      document.title = `工作流 - ${data.name}`
       message.success('保存成功')
     } else {
       await createWorkflow(data.group_id, data.workflow_id, data)
@@ -70,6 +76,8 @@ const fetchWorkflow = async () => {
     description.value = data.description
     blocks.value = data.blocks
     wires.value = data.wires
+    // 更新页面标题
+    document.title = `工作流 - ${data.name}`
   } catch (error: any) {
     message.error('获取工作流失败')
     error.value = error.message || '获取工作流失败'
