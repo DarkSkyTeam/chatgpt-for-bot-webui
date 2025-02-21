@@ -76,6 +76,11 @@ const api = {
     v-model="adapter"
     ref="adapterManagerRef"
   >
+    <template #desc>
+      <div class="llm-view-description">
+        在这里配置 Kirara AI 的模型，更多介绍请阅读<a href="https://kirara-docs.app.lss233.com/guide/configuration/llm.html" target="_blank">官方文档</a>。
+      </div>
+    </template>
     <template #extra-form-items="{ model }">
       <n-form-item label="开启" path="enable">
         <n-switch v-model:value="model.enable" />
@@ -117,7 +122,7 @@ const api = {
 </template>
 
 <style scoped>
-.llm-view {
-  height: 100%;
+.llm-view-description {
+  margin-bottom: 16px;
 }
 </style>

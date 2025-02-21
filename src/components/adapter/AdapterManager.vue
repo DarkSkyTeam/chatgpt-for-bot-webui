@@ -3,7 +3,7 @@ import { ref, onMounted, h, watch } from 'vue'
 import { NCard, NSpace, NButton, NDataTable, NModal, NForm, NFormItem, NInput, NSelect, NSwitch, NSpin, useMessage, NTooltip, NIcon } from 'naive-ui'
 import type { DataTableColumns, FormInst } from 'naive-ui'
 import DynamicConfigForm from '@/components/form/DynamicConfigForm.vue'
-
+import { AddOutline } from '@vicons/ionicons5'
 interface AdapterBase {
   name: string
   adapter: string
@@ -314,10 +314,18 @@ onMounted(() => {
       <n-spin :show="processing">
       <n-card :title="title">
         <template #header-extra>
-          <n-button type="primary" @click="handleAddClick">
+          <NButton
+            type="primary"
+            @click="handleAddClick"
+            class="create-button"
+        >
+          <template #icon>
+            <NIcon><AddOutline /></NIcon>
+          </template>
             添加适配器
-          </n-button>
+          </NButton>
         </template>
+        <slot name="desc"></slot>
         <n-data-table :columns="createColumns()" :data="adapters" />
       </n-card>
     </n-spin>

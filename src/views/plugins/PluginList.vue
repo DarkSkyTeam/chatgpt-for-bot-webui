@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { h, onMounted } from 'vue'
-import { NCard, NSpace, NButton, NDataTable, NTag, NSwitch, NModal, NForm, NFormItem, NInput, NSpin } from 'naive-ui'
+import { NCard, NSpace, NButton, NDataTable, NTag, NSwitch, NModal, NForm, NFormItem, NInput, NSpin, NIcon } from 'naive-ui'
 import type { DataTableColumns } from 'naive-ui'
 import { useRouter } from 'vue-router'
 import { usePluginViewModel } from './plugin.vm'
 import type { PluginInfo } from './plugin.vm'
+import { AddOutline } from '@vicons/ionicons5'
 
 const router = useRouter()
 const {
@@ -117,10 +118,17 @@ onMounted(() => {
 
 <template>
   <div class="plugin-list">
-    <n-space vertical :size="16">      
+    <n-space vertical :size="16">
       <n-card title="已安装插件">
         <template #header-extra>
-          <n-button type="primary" @click="showInstallModal = true">安装插件</n-button>
+          <NButton type="primary" @click="showInstallModal = true" class="create-button">
+            <template #icon>
+              <NIcon>
+                <AddOutline />
+              </NIcon>
+            </template>
+            安装插件
+          </NButton>
         </template>
         <n-spin :show="loading">
           <n-data-table :columns="createColumns()" :data="plugins" />
@@ -154,4 +162,4 @@ onMounted(() => {
 .plugin-list {
   height: 100%;
 }
-</style> 
+</style>

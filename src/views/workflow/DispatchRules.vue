@@ -282,14 +282,17 @@ onMounted(async () => {
 <template>
     <div class="dispatch-rules">
         <n-space vertical>
-            <n-space>
-                <n-button type="primary" @click="createRule">
-                    创建规则
-                </n-button>
-            </n-space>
-
-            <n-data-table :columns="columns" :data="rules" :bordered="false" :single-line="false" />
-
+            <n-card title="规则列表">
+                <template #header-extra>
+                    <n-button type="primary" @click="createRule">
+                        创建规则
+                    </n-button>
+                </template>
+                <div class="dispatch-rules-description">
+                    在这里配置 Kirara AI 的触发规则，更多介绍请阅读<a href="https://kirara-docs.app.lss233.com/guide/configuration/dispatch.html" target="_blank">官方文档</a>。
+                </div>
+                <n-data-table :columns="columns" :data="rules" :bordered="false" :single-line="false" />
+            </n-card>
             <!-- 编辑规则对话框 -->
             <n-modal v-model:show="showEditModal" preset="dialog" :title="isCreate ? '创建规则' : '编辑规则'" style="width: 1200px">
                 <div class="rule-edit-container">
@@ -405,8 +408,8 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.dispatch-rules {
-    padding: 16px;
+.dispatch-rules-description {
+    margin-bottom: 16px;
 }
 
 .rule-edit-container {
