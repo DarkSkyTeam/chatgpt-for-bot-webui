@@ -15,6 +15,7 @@ const loading = ref(false)
 const skeletonVisible = ref(true)
 const isFirstLoad = ref(true)
 const operationStates = ref<Record<string, { loading: boolean, operation: 'install' | 'uninstall' | 'update' | 'toggle' | null }>>({})
+const expandedDescriptions = ref<Record<string, boolean>>({})
 
 const isOperating = (plugin: MarketPlugin) => {
   return operationStates.value[plugin.pypiPackage]?.loading || false
@@ -29,12 +30,12 @@ const setOperationState = (plugin: MarketPlugin, operation: 'install' | 'uninsta
 }
 
 const skeletonPlugins = Array(pageSize.value).fill({
-  name: 'Plugin Name',
-  description: 'This is a plugin description that shows how the content will look like when loaded.',
-  author: 'Author Name',
+  name: '加载中...',
+  description: '插件描述加载中，请稍候...',
+  author: '作者加载中',
   pypiPackage: 'package-name',
   pypiInfo: {
-    version: '1.0.0',
+    version: '0.0.0',
     homePage: '#'
   }
 })
@@ -155,6 +156,10 @@ const handleToggleStatus = async (plugin: MarketPlugin) => {
   }
 }
 
+const toggleDescription = (plugin: MarketPlugin) => {
+  expandedDescriptions.value[plugin.pypiPackage] = !expandedDescriptions.value[plugin.pypiPackage]
+}
+
 onMounted(() => {
   fetchPlugins()
 })
@@ -181,79 +186,86 @@ onMounted(() => {
         <div class="market-content">
           <div class="plugins-grid">
             <template v-if="skeletonVisible">
-              <n-card v-for="plugin in skeletonPlugins" :key="plugin.pypiPackage" size="small" class="plugin-card"
-                :bordered="true">
-                <n-skeleton text style="width: 60%" :sharp="false">
-                  <template #default>
-                    <div class="plugin-header">
-                      <div class="plugin-title">
-                        <h3>{{ plugin.name }}</h3>
-                        <div class="plugin-tags">
-                          <n-tag size="small" type="success" class="version-tag">
-                            v{{ plugin.pypiInfo.version }}
-                          </n-tag>
-                        </div>
-                      </div>
-                    </div>
-                  </template>
-                </n-skeleton>
-
+              <n-card v-for="(plugin, index) in skeletonPlugins" :key="index" size="small" class="plugin-card" :bordered="true">
+                <div class="plugin-header">
+                  <n-skeleton text style="width: 60%" :sharp="false">
+                    <h3>{{ plugin.name }}</h3>
+                  </n-skeleton>
+                  <div class="plugin-tags">
+                    <n-skeleton text style="width: 80px" :sharp="false">
+                      <n-tag size="small" type="success" class="version-tag">
+                        v{{ plugin.pypiInfo.version }}
+                      </n-tag>
+                    </n-skeleton>
+                  </div>
+                </div>
+                
                 <n-skeleton text :repeat="2" :sharp="false" style="margin: 16px 0">
-                  <template #default>
-                    <div class="plugin-description">{{ plugin.description }}</div>
-                  </template>
+                  <div class="plugin-description">{{ plugin.description }}</div>
                 </n-skeleton>
 
-                <n-skeleton text style="width: 80%" :sharp="false">
-                  <template #default>
-                    <div class="plugin-meta">
-                      <n-space align="center" :size="12">
-                        <span>作者: {{ plugin.author }}</span>
-                        <span class="separator">·</span>
-                        <span>PyPI: {{ plugin.pypiPackage }}</span>
-                      </n-space>
-                    </div>
-                  </template>
-                </n-skeleton>
+                <div class="plugin-meta">
+                  <n-skeleton text style="width: 60%" :sharp="false">
+                    <n-space align="center" :size="12">
+                      <span>作者: {{ plugin.author }}</span>
+                      <span class="separator">·</span>
+                      <span>PyPI: {{ plugin.pypiPackage }}</span>
+                    </n-space>
+                  </n-skeleton>
+                </div>
 
-                <n-skeleton text style="width: 30%; margin-left: auto" :sharp="false">
-                  <template #default>
-                    <div class="plugin-actions">
-                      <n-button type="primary">安装</n-button>
-                    </div>
-                  </template>
-                </n-skeleton>
+                <div class="plugin-actions">
+                  <n-skeleton text style="width: 30%" :sharp="false">
+                    <n-space align="center" :size="12">
+                      <n-button text>主页</n-button>
+                      <n-button text>问题反馈</n-button>
+                      <n-button text>插件文档</n-button>
+                    </n-space>
+                  </n-skeleton>
+                  <n-skeleton text style="width: 80px" :sharp="false">
+                    <n-button type="primary">安装</n-button>
+                  </n-skeleton>
+                </div>
               </n-card>
             </template>
 
             <template v-else-if="plugins.length > 0">
               <n-card v-for="plugin in plugins" :key="plugin.pypiPackage" size="small" class="plugin-card"
                 :bordered="true">
-                <div class="plugin-header">
-                  <div class="plugin-title">
+                <template #header>
+                  <div class="plugin-header">
                     <h3>{{ plugin.name }}</h3>
-                    <div class="plugin-tags">
-                      <template v-if="plugin.isInstalled">
-                        <n-tag v-if="plugin.isInstalled" size="small" type="info" class="status-tag">
-                          已安装 v{{ plugin.installedVersion }}
-                        </n-tag>
-
-                        <n-tag v-if="plugin.isUpgradable" size="small" type="warning" class="status-tag">
-                          可更新
-                        </n-tag>
-
-                        <n-tag v-if="plugin.isEnabled" size="small" type="success" class="status-tag">
-                          已启用
-                        </n-tag>
-                        <n-tag v-else size="small" type="error" class="status-tag">
-                          已禁用
-                        </n-tag>
-                      </template>
-                    </div>
                   </div>
-                </div>
+                </template>
+                <template #header-extra>
+                  <div class="plugin-tags">
+                    <template v-if="plugin.isInstalled">
+                      <n-tag v-if="plugin.isInstalled" size="small" type="info" class="status-tag">
+                        已安装 v{{ plugin.installedVersion }}
+                      </n-tag>
 
-                <div class="plugin-description">{{ plugin.description }}</div>
+                      <n-tag v-if="plugin.isUpgradable" size="small" type="warning" class="status-tag">
+                        可更新
+                      </n-tag>
+
+                      <n-tag v-if="plugin.isEnabled" size="small" type="success" class="status-tag">
+                        已启用
+                      </n-tag>
+                      <n-tag v-else size="small" type="error" class="status-tag">
+                        已禁用
+                      </n-tag>
+
+                      <n-tag v-if="plugin.requiresRestart" size="small" type="error" class="status-tag">
+                        需重启生效
+                      </n-tag>
+                    </template>
+                  </div>
+                </template>
+
+                <div class="plugin-description" :class="{ expanded: expandedDescriptions[plugin.pypiPackage] }"
+                  @click="toggleDescription(plugin)">
+                  {{ plugin.description }}
+                </div>
 
                 <div class="plugin-meta">
                   <n-space :size="12" vertical>
@@ -268,14 +280,24 @@ onMounted(() => {
                   </n-space>
                 </div>
 
-                <div class="plugin-actions">
-                  <n-space align="center" :size="12">
-                    <n-button v-if="plugin.pypiInfo.homePage" tag="a" :href="plugin.pypiInfo.homePage" target="_blank"
-                      text class="homepage-link">
-                      主页
-                    </n-button>
-                    <template v-if="plugin.isInstalled">
-                      <n-space :size="12">
+                <template #action>
+                  <div class="plugin-actions">
+                    <n-space align="center" :size="12">
+                      <n-button v-if="plugin.pypiInfo.homePage" tag="a" :href="plugin.pypiInfo.homePage" target="_blank"
+                        text class="homepage-link">
+                        主页
+                      </n-button>
+                      <n-button v-if="plugin.pypiInfo.bug_tracker_url" tag="a" :href="plugin.pypiInfo.bug_tracker_url"
+                        target="_blank" text class="homepage-link">
+                        问题反馈
+                      </n-button>
+                      <n-button v-if="plugin.pypiInfo.document_url" tag="a" :href="plugin.pypiInfo.document_url"
+                        target="_blank" text class="homepage-link">
+                        插件文档
+                      </n-button>
+                    </n-space>
+                    <n-space align="center" :size="12">
+                      <template v-if="plugin.isInstalled">
                         <n-button :type="plugin.isEnabled ? 'error' : 'primary'" size="small"
                           :loading="getCurrentOperation(plugin) === 'toggle'" :disabled="isOperating(plugin)"
                           @click="handleToggleStatus(plugin)" class="action-button">
@@ -290,15 +312,15 @@ onMounted(() => {
                           :disabled="isOperating(plugin)" @click="handleUninstall(plugin)" class="action-button">
                           卸载
                         </n-button>
-                      </n-space>
-                    </template>
-                    <n-button v-else type="primary" size="small" :loading="getCurrentOperation(plugin) === 'install'"
-                      :disabled="isOperating(plugin)" @click="handleInstall(plugin)"
-                      class="action-button install-button">
-                      {{ getCurrentOperation(plugin) === 'install' ? '安装中' : '安装' }}
-                    </n-button>
-                  </n-space>
-                </div>
+                      </template>
+                      <n-button v-else type="primary" size="small" :loading="getCurrentOperation(plugin) === 'install'"
+                        :disabled="isOperating(plugin)" @click="handleInstall(plugin)"
+                        class="action-button install-button">
+                        {{ getCurrentOperation(plugin) === 'install' ? '安装中' : '安装' }}
+                      </n-button>
+                    </n-space>
+                  </div>
+                </template>
               </n-card>
             </template>
 
@@ -364,32 +386,12 @@ onMounted(() => {
 
 .plugin-card {
   background: #ffffff;
-  border-radius: 12px;
-  padding: 20px;
-  transition: background-color 0.2s ease;
+  border-radius: 8px;
+  transition: all 0.2s ease;
   height: 100%;
-}
-
-.plugin-card-wrapper {
-  height: 100%;
-}
-
-.plugin-header {
-  margin-bottom: 12px;
-}
-
-.plugin-title {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.plugin-title h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 500;
-  color: #1d1d1f;
+  flex-direction: column;
 }
 
 .plugin-tags {
@@ -402,21 +404,37 @@ onMounted(() => {
   font-weight: 500;
 }
 
+.plugin-header {
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .plugin-description {
+  padding: 0 24px;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
   color: #424245;
   margin-bottom: 16px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  cursor: pointer;
+}
+
+.plugin-description.expanded {
+  max-height: none;
+  overflow: visible;
+}
+
+.plugin-description:hover {
+  color: #1d1d1f;
 }
 
 .plugin-meta {
-  font-size: 12px;
-  color: #86868b;
-  margin-bottom: 16px;
+  font-size: 13px;
+  color: #6e6e73;
+  padding: 8px 24px;
+  border-top: 1px solid #f0f0f0;
+  margin-top: auto;
 }
 
 .separator {
@@ -425,21 +443,21 @@ onMounted(() => {
 
 .plugin-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  padding: 16px 24px;
   align-items: center;
-  margin-top: 16px;
   gap: 12px;
 }
 
 .plugin-actions .n-button {
   font-size: 13px;
-  padding: 4px 12px;
-  height: 28px;
+  padding: 6px 16px;
+  height: 32px;
   line-height: 20px;
   position: relative;
-  min-width: 72px;
+  min-width: 80px;
   font-weight: 500;
-  border-radius: 6px;
+  border-radius: 8px;
   transition: all 0.2s ease;
 }
 
@@ -481,15 +499,16 @@ onMounted(() => {
 .homepage-link {
   font-size: 13px;
   color: #0066cc;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
   transition: all 0.2s ease;
   font-weight: 500;
+  border: 1px solid rgba(0, 102, 204, 0.2);
 }
 
 .homepage-link:hover {
-  text-decoration: none;
   background-color: rgba(0, 102, 204, 0.1);
+  text-decoration: none;
 }
 
 .homepage-link:active {
@@ -515,27 +534,7 @@ onMounted(() => {
   display: flex;
   gap: 8px;
   margin-top: 4px;
-}
-
-.plugin-meta {
-  font-size: 12px;
-  color: #86868b;
-  margin: 12px 0;
-}
-
-.separator {
-  color: #d2d2d7;
-}
-
-.plugin-description {
-  font-size: 14px;
-  line-height: 1.5;
-  color: #424245;
-  margin: 12px 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  flex-wrap: wrap;
 }
 
 .pagination-container {

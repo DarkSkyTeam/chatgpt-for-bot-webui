@@ -29,17 +29,17 @@ const menuOptions: MenuOption[] = [
     icon: renderIcon(HomeOutline)
   },
   {
-    label: () => 'IM 管理',
+    label: () => '聊天平台管理',
     key: 'im',
     icon: renderIcon(ChatboxOutline)
   },
   {
-    label: () => 'LLM 管理',
+    label: () => '模型管理',
     key: 'llm',
     icon: renderIcon(ServerOutline)
   },
   {
-    label: () => 'Workflow',
+    label: () => '工作流',
     key: 'workflow',
     icon: renderIcon(GitNetworkOutline)
   },

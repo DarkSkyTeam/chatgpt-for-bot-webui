@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { 
-  NCard, 
-  NSpace, 
-  NSteps, 
-  NStep, 
-  NGrid, 
-  NGi, 
-  NStatistic, 
+import {
+  NCard,
+  NSpace,
+  NSteps,
+  NStep,
+  NGrid,
+  NGi,
+  NStatistic,
   NButton,
   useMessage
 } from 'naive-ui'
@@ -38,17 +38,17 @@ const stepsStatus = computed(() => [
     path: '/llm'
   },
   {
-    completed: appStore.systemStatus.activeAdapters > 0 && 
-               appStore.systemStatus.activeBackends > 0 && 
-               appStore.systemStatus.loadedPlugins > 0,
+    completed: appStore.systemStatus.activeAdapters > 0 &&
+      appStore.systemStatus.activeBackends > 0 &&
+      appStore.systemStatus.loadedPlugins > 0,
     title: '了解调度规则',
     description: '学习如何召唤和使用 Bot',
     path: '/workflow/dispatch-rules'
   },
   {
-    completed: appStore.systemStatus.activeAdapters > 0 && 
-               appStore.systemStatus.activeBackends > 0 && 
-               appStore.systemStatus.loadedPlugins > 0,
+    completed: appStore.systemStatus.activeAdapters > 0 &&
+      appStore.systemStatus.activeBackends > 0 &&
+      appStore.systemStatus.loadedPlugins > 0,
     title: '自定义工作流',
     description: '打造专属于您的 AI 助手',
     path: '/workflow'
@@ -81,6 +81,21 @@ const getStatusColor = (status: string) => {
 <template>
   <div class="guide-container">
     <n-space vertical size="large">
+        <!-- 引导步骤 -->
+        <n-card title="快速开始" :bordered="false" class="steps-card" v-if="appStore.systemStatus.status === 'normal'">
+        <n-steps :current="currentStep" class="guide-steps">
+          <n-step v-for="(step, index) in stepsStatus" :key="index" :title="step.title" :description="step.description"
+            :status="step.completed ? 'finish' : index === currentStep ? 'process' : 'wait'">
+            <template #default>
+              {{ step.description }}
+              <n-button text type="primary" @click="handleStepClick(index, step.path)"
+                :disabled="index !== currentStep && !step.completed" v-if="index === currentStep">
+                立刻前往
+              </n-button>
+            </template>
+          </n-step>
+        </n-steps>
+      </n-card>
       <!-- 系统状态卡片 -->
       <n-card title="系统概览" :bordered="false" class="status-card">
         <n-grid :cols="5" :x-gap="12">
@@ -97,39 +112,10 @@ const getStatusColor = (status: string) => {
             <n-statistic label="工作流数量" :value="appStore.systemStatus.workflowCount" />
           </n-gi>
           <n-gi>
-            <n-statistic 
-              label="系统状态" 
-              :value="appStore.systemStatus.status === 'normal' ? '正常' : '异常'"
-              :value-style="{ color: getStatusColor(appStore.systemStatus.status) }"
-            />
+            <n-statistic label="系统状态" :value="appStore.systemStatus.status === 'normal' ? '正常' : '异常'"
+              :value-style="{ color: getStatusColor(appStore.systemStatus.status) }" />
           </n-gi>
         </n-grid>
-      </n-card>
-
-      <!-- 引导步骤 -->
-      <n-card title="快速开始" :bordered="false" class="steps-card" v-if="appStore.systemStatus.status === 'normal'">
-        <n-steps :current="currentStep" class="guide-steps">
-          <n-step
-            v-for="(step, index) in stepsStatus"
-            :key="index"
-            :title="step.title"
-            :description="step.description"
-            :status="step.completed ? 'finish' : index === currentStep ? 'process' : 'wait'"
-          >
-            <template #default>
-            {{ step.description }}
-              <n-button
-                text
-                type="primary"
-                @click="handleStepClick(index, step.path)"
-                :disabled="index !== currentStep && !step.completed"
-                v-if="index === currentStep"
-              >
-                立刻前往
-              </n-button>
-            </template>
-          </n-step>
-        </n-steps>
       </n-card>
     </n-space>
   </div>
@@ -158,15 +144,6 @@ const getStatusColor = (status: string) => {
   margin: 20px 0;
 }
 
-:deep(.n-card) {
-  transition: all 0.3s ease;
-}
-
-:deep(.n-card:hover) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
 :deep(.n-step) {
   padding: 20px 0;
 }
@@ -188,4 +165,4 @@ const getStatusColor = (status: string) => {
 :deep(.n-step.n-step--wait) {
   opacity: 0.6;
 }
-</style> 
+</style>

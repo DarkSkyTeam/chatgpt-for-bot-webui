@@ -5,6 +5,8 @@ export interface PyPiInfo {
   description: string
   author: string
   homePage?: string
+  bugTrackerUrl?: string
+  documentUrl?: string
 }
 
 export interface MarketPlugin {
@@ -17,6 +19,7 @@ export interface MarketPlugin {
   isUpgradable?: boolean
   installedVersion?: string
   isEnabled?: boolean
+  requiresRestart?: boolean
 }
 
 export interface SearchResponse {

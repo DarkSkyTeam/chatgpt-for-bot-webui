@@ -117,13 +117,11 @@ onMounted(() => {
 
 <template>
   <div class="plugin-list">
-    <n-space vertical :size="16">
-      <n-space>
-        <n-button type="primary" @click="showInstallModal = true">安装插件</n-button>
-        <n-button @click="router.push('/plugins/market')">插件市场</n-button>
-      </n-space>
-      
+    <n-space vertical :size="16">      
       <n-card title="已安装插件">
+        <template #header-extra>
+          <n-button type="primary" @click="showInstallModal = true">安装插件</n-button>
+        </template>
         <n-spin :show="loading">
           <n-data-table :columns="createColumns()" :data="plugins" />
         </n-spin>
@@ -131,11 +129,11 @@ onMounted(() => {
     </n-space>
 
     <!-- 安装插件表单 -->
-    <n-modal v-model:show="showInstallModal" title="安装插件">
-      <n-card style="width: 400px;">
+    <n-modal v-model:show="showInstallModal">
+      <n-card style="width: 400px;" title="安装插件">
         <n-form :model="installForm" label-placement="left" label-width="100">
-          <n-form-item label="包名" path="package_name">
-            <n-input v-model:value="installForm.package_name" placeholder="请输入插件包名" />
+          <n-form-item label="Pypi 包名" path="package_name">
+            <n-input v-model:value="installForm.package_name" placeholder="请输入插件的 Pypi 包名" />
           </n-form-item>
           <n-form-item label="版本" path="version">
             <n-input v-model:value="installForm.version" placeholder="请输入版本号（可选）" />

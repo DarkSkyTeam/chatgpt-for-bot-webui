@@ -22,6 +22,7 @@ interface SchemaProperty {
         maximum?: number
         default?: any
     }
+    $ref?: string
 }
 
 interface Schema {
@@ -29,6 +30,7 @@ interface Schema {
     type: string
     properties: Record<string, SchemaProperty>
     required?: string[]
+    $defs?: Record<string, SchemaProperty>
 }
 
 const props = defineProps({
@@ -82,6 +84,36 @@ const renderInputComponent = (itemType: string, property: SchemaProperty, itemVa
 const renderField = (key: string, property: SchemaProperty) => {
     const value = props.modelValue[key]
     const required = props.schema.required?.includes(key)
+
+    // 处理$ref引用
+    if (property.$ref && !property.type) {
+        const refPath = property.$ref.split('/')
+        if (refPath[0] === '#' && refPath[1] === '$defs') {
+            const defName = refPath[2]
+            const refProperty = props.schema.$defs?.[defName]
+            if (refProperty) {
+                // 如果引用属性有enum，则使用引用属性的配置
+                if (refProperty.enum) {
+                    return h(NFormItem, { label: property.title, required: required }, {
+                        default: () => h(NSelect, {
+                            value: value,
+                            options: refProperty.enum?.map((value, index) => ({
+                                label: refProperty.enumNames?.[index] || value,
+                                value
+                            })),
+                            placeholder: '',
+                            onUpdateValue: (val) => updateValue(key, val)
+                        })
+                    })
+                }
+                // 否则合并属性
+                property = {
+                    ...property,
+                    ...refProperty
+                }
+            }
+        }
+    }
 
     const hint = property.description ? h(NTooltip, { content: property.description }, { default: () => property.title }) : property.title;
 

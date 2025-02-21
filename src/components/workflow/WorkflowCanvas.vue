@@ -295,10 +295,6 @@ const setupMenu = () => {
         callback: () => handleImport()
       },
       {
-        content: '返回上一页',
-        callback: () => handleBack()
-      },
-      {
         content: '编辑工作流信息',
         callback: () => handleEditInfo()
       }
@@ -430,18 +426,11 @@ const handleSave = async () => {
 }
 
 // 修改重置处理函数
-const handleReset = async () => {
-  try {
-    resetting.value = true
-    loadingBar.start()
-    graph.clear()
-    emit('update:blocks', [])
-    emit('update:wires', [])
-    message.success('重置成功')
-  } finally {
-    resetting.value = false
-    loadingBar.finish()
-  }
+const handleReset = () => {
+  resetting.value = true
+  loadingBar.start()
+  // 刷新页面
+  window.location.reload()
 }
 
 // 创建节点
@@ -722,21 +711,6 @@ onBeforeUnmount(() => {
             <NButton
               quaternary
               circle
-              @click="handleBack"
-              class="toolbar-button"
-            >
-              <template #icon>
-                <NIcon><ArrowBackOutline /></NIcon>
-              </template>
-            </NButton>
-          </template>
-          <span>返回上一页</span>
-        </NTooltip>
-        <NTooltip placement="bottom" trigger="hover">
-          <template #trigger>
-            <NButton
-              quaternary
-              circle
               @click="handleEditInfo"
               class="toolbar-button"
             >
@@ -813,11 +787,14 @@ onBeforeUnmount(() => {
 @import '@comfyorg/litegraph/dist/css/litegraph.css';
 
 .workflow-canvas {
-  width: 100%;
-  height: calc(100vh - 64px);
-  position: relative;
+  width: 100vw;
+  height: calc(100vh - 28px);
+  position: fixed;
+  top: 0;
+  left: 0;
   background: var(--background-color);
   overflow: hidden;
+  z-index: 50;
 }
 
 .toolbar {
@@ -858,12 +835,6 @@ onBeforeUnmount(() => {
   height: 100%;
   position: relative;
   overflow: hidden;
-}
-
-.workflow-canvas {
-  width: 100%;
-  height: 100%;
-  transition: filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .settings-modal {

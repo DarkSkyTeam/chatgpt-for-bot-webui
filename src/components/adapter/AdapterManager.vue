@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, h, watch } from 'vue'
-import { NCard, NSpace, NButton, NDataTable, NModal, NForm, NFormItem, NInput, NSelect, NSwitch, NSpin, useMessage } from 'naive-ui'
+import { NCard, NSpace, NButton, NDataTable, NModal, NForm, NFormItem, NInput, NSelect, NSwitch, NSpin, useMessage, NTooltip, NIcon } from 'naive-ui'
 import type { DataTableColumns, FormInst } from 'naive-ui'
 import DynamicConfigForm from '@/components/form/DynamicConfigForm.vue'
 
@@ -331,10 +331,17 @@ onMounted(() => {
           <div class="adapter-basic-form">
             <n-form ref="formRef" :model="formModel" label-placement="left" label-width="100" :rules="formRules">
               <n-form-item label="适配器" path="adapter">
-                <n-select v-model:value="formModel.adapter" :options="adapterTypes.map(type => ({ label: type, value: type }))" />
+                <n-tooltip>
+                  <template #trigger>
+                    <n-select v-model:value="formModel.adapter" :options="adapterTypes.map(type => ({ label: type, value: type }))" />
+                  </template>
+                  <div>
+                    如果没有找到合适的适配器，可以去 <router-link to="/plugins/market">插件市场</router-link> 逛逛。
+                  </div>
+                </n-tooltip>
               </n-form-item>
               <n-form-item label="名称" path="name">
-                <n-input v-model:value="formModel.name" placeholder="请输入适配器名称" />
+                <n-input v-model:value="formModel.name" placeholder="适配器名称用来区分不同的适配器" />
               </n-form-item>
 
             </n-form>
@@ -377,6 +384,7 @@ onMounted(() => {
 .adapter-extra-form {
     flex: 1;
     padding-left: 16px;
+    padding-right: 16px;
     border-left: 1px solid var(--n-border-color);
 }
 </style>

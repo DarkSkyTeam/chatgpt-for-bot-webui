@@ -68,18 +68,26 @@ const api = {
 }
 
 </script>
-
 <template>
-  <adapter-manager title="LLM 后端管理" :api="api" :transform-form-model="transformFormModel" v-model="adapter"
-    ref="adapterManagerRef">
+  <adapter-manager
+    title="模型管理"
+    :api="api"
+    :transform-form-model="transformFormModel"
+    v-model="adapter"
+    ref="adapterManagerRef"
+  >
     <template #extra-form-items="{ model }">
       <n-form-item label="开启" path="enable">
         <n-switch v-model:value="model.enable" />
       </n-form-item>
       <n-form-item label="支持模型" path="models">
         <n-space vertical>
-          <n-button type="primary" @click="handleAutoDetectModels" v-if="isAutoDetectModelsSupported"
-            :loading="autoDetectLoading">
+          <n-button
+            type="primary"
+            @click="handleAutoDetectModels"
+            v-if="isAutoDetectModelsSupported"
+            :loading="autoDetectLoading"
+          >
             自动检测模型
           </n-button>
           <model-list-form v-model:value="model.models" />
@@ -89,7 +97,14 @@ const api = {
   </adapter-manager>
 
   <n-modal v-model:show="showConfirmModal">
-    <n-card style="width: 400px" title="确认" :bordered="false" size="huge" role="dialog" aria-modal="true">
+    <n-card
+      style="width: 400px"
+      title="确认"
+      :bordered="false"
+      size="huge"
+      role="dialog"
+      aria-modal="true"
+    >
       <div>自动检测前会自动保存当前配置，请确保 API 信息正确填写，然后点击继续。</div>
       <n-space justify="end" style="margin-top: 24px;">
         <n-button @click="cancelAutoDetect">取消</n-button>

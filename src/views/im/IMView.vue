@@ -30,7 +30,7 @@ const api = {
 
 <template>
   <adapter-manager
-    title="IM 适配器管理"
+    title="聊天平台管理"
     :api="api"
     v-model="adapter"
   />

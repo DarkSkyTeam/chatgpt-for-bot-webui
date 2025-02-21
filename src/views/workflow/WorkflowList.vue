@@ -124,11 +124,13 @@ const fetchWorkflows = async () => {
 }
 
 const handleCreate = () => {
-  router.push('/workflow/editor')
+  // 打开新页面
+  window.open('/workflow/editor', '_blank')
 }
 
 const handleEdit = (row: Workflow) => {
-  router.push(`/workflow/editor/${row.group_id}:${row.workflow_id}`)
+  // 打开新页面
+  window.open(`/workflow/editor/${row.group_id}:${row.workflow_id}`, '_blank')
 }
 
 const handleDelete = async (row: Workflow) => {

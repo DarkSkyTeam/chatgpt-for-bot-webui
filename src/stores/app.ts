@@ -3,8 +3,8 @@ import { ref, computed } from 'vue'
 
 export const useAppStore = defineStore('app', () => {
   // 状态
-  const siderCollapsed = ref(false)
-  const secondarySiderCollapsed = ref(false)
+  const siderCollapsed = ref(localStorage.getItem('siderCollapsed') === 'true' || false)
+  const secondarySiderCollapsed = ref(localStorage.getItem('secondarySiderCollapsed') === 'true' || false)
   const currentModule = ref('')
   const currentSubModule = ref('')
   const systemStatus = ref({
@@ -30,10 +30,12 @@ export const useAppStore = defineStore('app', () => {
   // 动作
   const toggleSider = () => {
     siderCollapsed.value = !siderCollapsed.value
+    localStorage.setItem('siderCollapsed', siderCollapsed.value.toString())
   }
 
   const toggleSecondarySider = () => {
     secondarySiderCollapsed.value = !secondarySiderCollapsed.value
+    localStorage.setItem('secondarySiderCollapsed', secondarySiderCollapsed.value.toString())
   }
 
   const setCurrentModule = (module: string) => {
