@@ -18,7 +18,6 @@ import {
   SaveOutline,
   RefreshOutline,
   DownloadOutline,
-  ArrowBackOutline,
   SettingsOutline
 } from '@vicons/ionicons5'
 import { getTypeCompatibility, type BlockType } from '@/api/block'
@@ -129,7 +128,6 @@ const initGraph = () => {
   canvas.connections_width = 2
   canvas.align_to_grid = true
   canvas.highquality_render = true
-  canvas.render_connection_arrows = true
 
   // 设置节点默认样式
   LiteGraph.NODE_TEXT_SIZE = 14
@@ -250,7 +248,12 @@ const registerNodeTypes = () => {
           if (config.type === 'int') {
             widget = this.addWidget('number', config.label, config.default || 0, onValueChange) as IBaseBlockWidget
           } else if (config.type === 'str') {
-            widget = this.addWidget('text', config.label, config.default || '', onValueChange, { multiline: true }) as IBaseBlockWidget
+            if (config.has_options) {
+              console.log(config.options)
+              widget = this.addWidget('combo', config.label, config.default || '', onValueChange, { values: config.options }) as IBaseBlockWidget
+            } else {
+              widget = this.addWidget('text', config.label, config.default || '', onValueChange, { multiline: true }) as IBaseBlockWidget
+            }
           } else if (config.type === 'bool') {
             widget = this.addWidget('toggle', config.label, config.default || false, onValueChange) as IBaseBlockWidget
           } else {
@@ -793,8 +796,7 @@ onBeforeUnmount(() => {
   top: 0;
   left: 0;
   background: var(--background-color);
-  overflow: hidden;
-  z-index: 50;
+  z-index: 2;
 }
 
 .toolbar {

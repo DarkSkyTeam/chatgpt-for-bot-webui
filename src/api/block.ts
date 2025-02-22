@@ -24,6 +24,8 @@ export interface BlockConfig {
   type: string
   required: boolean
   default?: any
+  has_options?: boolean
+  options?: string[]
 }
 
 export interface BlockType {
