@@ -5,8 +5,7 @@ export const version = {
    * 获取当前前端版本
    */
   getCurrentVersion(): string {
-    return '0.0.0'
-    // return import.meta.env.VITE_APP_VERSION || '0.0.0'
+    return import.meta.env.VITE_APP_VERSION.replace(/^v/, '') || '0.0.0'
   },
 
   /**

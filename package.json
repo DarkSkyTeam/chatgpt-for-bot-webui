@@ -1,7 +1,14 @@
 {
   "name": "kirara-ai-webui",
-  "version": "0.0.3",
-  "private": true,
+  "version": "0.0.4",
+  "author": "lss233",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check build-only",
