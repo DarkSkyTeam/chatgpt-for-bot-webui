@@ -287,13 +287,13 @@ onMounted(() => {
                         text class="homepage-link">
                         主页
                       </n-button>
-                      <n-button v-if="plugin.pypiInfo.bug_tracker_url" tag="a" :href="plugin.pypiInfo.bug_tracker_url"
+                      <n-button v-if="plugin.pypiInfo.bugTrackerUrl" tag="a" :href="plugin.pypiInfo.bugTrackerUrl"
                         target="_blank" text class="homepage-link">
                         问题反馈
                       </n-button>
-                      <n-button v-if="plugin.pypiInfo.document_url" tag="a" :href="plugin.pypiInfo.document_url"
+                      <n-button v-if="plugin.pypiInfo.documentUrl" tag="a" :href="plugin.pypiInfo.documentUrl"
                         target="_blank" text class="homepage-link">
-                        插件文档
+                        使用文档
                       </n-button>
                     </n-space>
                     <n-space align="center" :size="12">
@@ -339,6 +339,10 @@ onMounted(() => {
 </template>
 
 <style scoped>
+* {
+  --var-plugin-card-padding: 12px;
+}
+
 .plugin-market {
   height: 100%;
   padding: 24px;
@@ -379,7 +383,7 @@ onMounted(() => {
 .plugins-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  gap: 48px;
   padding: 0 48px;
   margin-bottom: 24px;
 }
@@ -405,19 +409,18 @@ onMounted(() => {
 }
 
 .plugin-header {
-  padding: 12px 24px;
+  padding: 12px var(--var-plugin-card-padding);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .plugin-description {
-  padding: 0 24px;
+  padding: 0 var(--var-plugin-card-padding);
   font-size: 14px;
   line-height: 1.6;
   color: #424245;
   margin-bottom: 16px;
-  cursor: pointer;
 }
 
 .plugin-description.expanded {
@@ -432,7 +435,7 @@ onMounted(() => {
 .plugin-meta {
   font-size: 13px;
   color: #6e6e73;
-  padding: 8px 24px;
+  padding: 8px var(--var-plugin-card-padding);
   border-top: 1px solid #f0f0f0;
   margin-top: auto;
 }
@@ -444,7 +447,7 @@ onMounted(() => {
 .plugin-actions {
   display: flex;
   justify-content: space-between;
-  padding: 16px 24px;
+  padding: 16px var(--var-plugin-card-padding);
   align-items: center;
   gap: 12px;
 }
@@ -538,7 +541,7 @@ onMounted(() => {
 }
 
 .pagination-container {
-  padding: 24px 0;
+  padding: var(--var-plugin-card-padding) 0;
   display: flex;
   justify-content: center;
   position: sticky;
