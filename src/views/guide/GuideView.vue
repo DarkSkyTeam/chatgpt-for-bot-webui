@@ -81,8 +81,8 @@ const getStatusColor = (status: string) => {
 <template>
   <div class="guide-container">
     <n-space vertical size="large">
-        <!-- 引导步骤 -->
-        <n-card title="快速开始" :bordered="false" class="steps-card" v-if="appStore.systemStatus.status === 'normal'">
+      <!-- 引导步骤 -->
+      <n-card title="快速开始" :bordered="false" class="steps-card" v-if="appStore.systemStatus.status === 'normal'">
         <n-steps :current="currentStep" class="guide-steps">
           <n-step v-for="(step, index) in stepsStatus" :key="index" :title="step.title" :description="step.description"
             :status="step.completed ? 'finish' : index === currentStep ? 'process' : 'wait'">
@@ -96,6 +96,7 @@ const getStatusColor = (status: string) => {
           </n-step>
         </n-steps>
       </n-card>
+      
       <!-- 系统状态卡片 -->
       <n-card title="系统概览" :bordered="false" class="status-card">
         <n-grid :cols="5" :x-gap="12">

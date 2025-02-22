@@ -2,9 +2,10 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { NSpace, NText, NBadge, NTooltip } from 'naive-ui'
 import { useAppStore } from '@/stores/app'
-
+import { useUpdateViewModel } from '@/views/system/update.vm'
+import UpdateChecker from '@/components/UpdateChecker.vue'
+const updateCheckerRef = ref<InstanceType<typeof UpdateChecker> | null>(null)
 const appStore = useAppStore()
-
 // 连接状态
 const connecting = ref(false)
 
@@ -40,7 +41,10 @@ const fetchStatus = () => {
 }
 // 模拟状态更新
 let timer: number
+
+
 onMounted(() => {
+  updateCheckerRef.value?.checkUpdate()
   appStore.updateSystemStatus({
     status: 'warning',
     apiConnected: false,
@@ -50,7 +54,8 @@ onMounted(() => {
     activeAdapters: 0,
     activeBackends: 0,
     loadedPlugins: 0,
-    workflowCount: 0
+    workflowCount: 0,
+    version: 'unknown'
   })
   connecting.value = true
   timer = setInterval(() => {
@@ -66,6 +71,9 @@ onUnmounted(() => {
 
 <template>
   <div class="status-bar-content">
+    <!-- 更新检查组件 -->
+    <update-checker ref="updateCheckerRef" />
+
     <n-space align="center" :size="20">
       <n-space align="center" :size="4">
         <n-badge dot :type="connecting

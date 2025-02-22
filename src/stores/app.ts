@@ -1,13 +1,42 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
+interface SystemStatus {
+  status: string
+  apiConnected: boolean
+  memoryUsage: number
+  cpuUsage: number
+  uptime: number
+  activeAdapters: number
+  activeBackends: number
+  loadedPlugins: number
+  workflowCount: number
+  version: string
+}
+
+interface UpdateInfo {
+  current_backend_version: string
+  latest_backend_version: string
+  current_webui_version: string
+  latest_webui_version: string
+  backend_update_available: boolean
+  webui_update_available: boolean
+  backend_download_url: string | null
+  webui_download_url: string | null
+}
+
+interface SkipVersions {
+  backend: string;
+  webui: string;
+}
+
 export const useAppStore = defineStore('app', () => {
   // 状态
   const siderCollapsed = ref(localStorage.getItem('siderCollapsed') === 'true' || false)
   const secondarySiderCollapsed = ref(localStorage.getItem('secondarySiderCollapsed') === 'true' || false)
-  const currentModule = ref('')
+  const currentModule = ref('home')
   const currentSubModule = ref('')
-  const systemStatus = ref({
+  const systemStatus = ref<SystemStatus>({
     status: 'normal',
     apiConnected: true,
     memoryUsage: 0,
@@ -19,13 +48,16 @@ export const useAppStore = defineStore('app', () => {
     workflowCount: 0,
     version: 'unknown'
   })
-
+  
+  const updateInfo = ref<UpdateInfo | null>(null)
+  // 持久化
+  const skipVersions = ref<SkipVersions>(JSON.parse(localStorage.getItem('skipVersions') || '{}') as SkipVersions)
+  const lastRemindTime = ref<number>(0)
 
   // 计算属性
-  const isSystemHealthy = computed(() => 
-    systemStatus.value.status === 'normal' && 
-    systemStatus.value.apiConnected
-  )
+  const isSystemHealthy = computed(() => {
+    return systemStatus.value.status === 'normal' && systemStatus.value.apiConnected
+  })
 
   // 动作
   const toggleSider = () => {
@@ -46,24 +78,42 @@ export const useAppStore = defineStore('app', () => {
     currentSubModule.value = subModule
   }
 
-  const updateSystemStatus = (status: {
-    status?: string
-    apiConnected?: boolean
-    memoryUsage?: number
-    cpuUsage?: number
-    uptime?: number
-    activeAdapters?: number
-    activeBackends?: number
-    loadedPlugins?: number
-    workflowCount?: number
-    version?: string
-  }) => {
-    systemStatus.value = {
-      ...systemStatus.value,
-      ...status
-    }
+  const updateSystemStatus = (status: SystemStatus) => {
+    systemStatus.value = status
   }
 
+  const setUpdateInfo = (info: UpdateInfo) => {
+    // 如果版本已被跳过，不显示更新
+    if (skipVersions.value.backend === info.latest_backend_version || 
+        skipVersions.value.webui === info.latest_webui_version) {
+      return false
+    }
+    
+    // 如果在提醒冷却时间内，不显示更新
+    const now = Date.now()
+    if (now - lastRemindTime.value < 24 * 60 * 60 * 1000) { // 24小时
+      return false
+    }
+    
+    updateInfo.value = info
+    return true
+  }
+  
+  const setUpdateRemindLater = () => {
+    lastRemindTime.value = Date.now()
+  }
+  
+  const setSkipVersion = () => {
+    if (updateInfo.value) {
+      if (updateInfo.value.latest_backend_version) {
+        skipVersions.value.backend = updateInfo.value.latest_backend_version;
+      }
+      if (updateInfo.value.latest_webui_version) {
+        skipVersions.value.webui = updateInfo.value.latest_webui_version;
+      }
+      localStorage.setItem('skipVersions', JSON.stringify(skipVersions.value));
+    }
+  }
 
   return {
     // 状态
@@ -72,6 +122,7 @@ export const useAppStore = defineStore('app', () => {
     currentModule,
     currentSubModule,
     systemStatus,
+    updateInfo,
     // 计算属性
     isSystemHealthy,
     // 动作
@@ -79,6 +130,9 @@ export const useAppStore = defineStore('app', () => {
     toggleSecondarySider,
     setCurrentModule,
     setCurrentSubModule,
-    updateSystemStatus
+    updateSystemStatus,
+    setUpdateInfo,
+    setUpdateRemindLater,
+    setSkipVersion
   }
 }) 
