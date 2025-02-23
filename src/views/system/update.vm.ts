@@ -107,7 +107,8 @@ export function useUpdateViewModel() {
 
                 // 5秒后刷新页面
                 setTimeout(() => {
-                    window.location.reload()
+                    // 重新加载页面， 设置一个 query t=来重置缓存
+                    window.location.href = window.location.href.split('?')[0] + '?t=' + Date.now()
                 }, 5000)
             }
 
