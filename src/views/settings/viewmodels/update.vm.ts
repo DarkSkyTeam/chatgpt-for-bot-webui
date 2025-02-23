@@ -17,7 +17,7 @@ export function useUpdateViewModel() {
   const message = useMessage()
 
   const formData = ref<UpdateForm>({
-    pypi_registry: 'https://pypi.org/pypi',
+    pypi_registry: 'https://pypi.org/simple',
     npm_registry: 'https://registry.npmjs.org'
   })
 
@@ -38,8 +38,8 @@ export function useUpdateViewModel() {
   const pypiRegistryOptions: SelectOption[] = [
     { 
       label: 'PyPI 官方',
-      value: 'https://pypi.org/pypi',
-      description: 'https://pypi.org/pypi'
+      value: 'https://pypi.org/simple',
+      description: 'https://pypi.org/simple'
     },
     { 
       label: '阿里云镜像',

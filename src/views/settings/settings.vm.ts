@@ -29,7 +29,7 @@ export function useSettingsViewModel() {
       market_base_url: 'https://kirara-plugin.app.lss233.com/api/v1'
     },
     update: {
-      pypi_registry: 'https://pypi.org/pypi',
+      pypi_registry: 'https://pypi.org/simple',
       npm_registry: 'https://registry.npmjs.org'
     }
   })
@@ -40,7 +40,7 @@ export function useSettingsViewModel() {
 
   // 预设的镜像源选项
   const pypiRegistryOptions: SelectOption[] = [
-    { label: 'PyPI 官方', value: 'https://pypi.org/pypi' },
+    { label: 'PyPI 官方', value: 'https://pypi.org/simple' },
     { label: '阿里云镜像', value: 'https://mirrors.aliyun.com/pypi/simple' },
     { label: '清华镜像', value: 'https://pypi.tuna.tsinghua.edu.cn/simple' }
   ]
