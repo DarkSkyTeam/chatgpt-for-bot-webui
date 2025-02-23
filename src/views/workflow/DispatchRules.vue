@@ -256,7 +256,7 @@ const removeRule = (groupIndex: number, ruleIndex: number) => {
 // 规则类型选项
 const ruleTypeOptions = computed(() => 
     ruleTypes.value.map(type => ({
-        label: getRuleTypeLabel(type) + ' (' + type + ')',
+        label: getRuleTypeLabel(type),
         value: type
     }))
 )

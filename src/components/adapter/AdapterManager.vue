@@ -188,6 +188,7 @@ const handleSubmitActual = async () => {
     try {
       if (modalType.value === 'create') {
         await props.api.createAdapter(submitData)
+        modalType.value = 'edit'
       } else {
         await props.api.updateAdapter(submitData.name, submitData)
       }
