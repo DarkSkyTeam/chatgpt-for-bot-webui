@@ -18,42 +18,50 @@ const router = useRouter()
 const appStore = useAppStore()
 
 // 计算每个步骤的完成状态
-const stepsStatus = computed(() => [
-  {
-    completed: appStore.systemStatus.loadedPlugins > 0,
-    title: '浏览插件市场',
-    description: '发现并安装适合您需求的插件',
-    path: '/plugins/market'
-  },
-  {
-    completed: appStore.systemStatus.activeAdapters > 0,
-    title: '添加 IM',
-    description: '连接您常用的聊天平台',
-    path: '/im'
-  },
-  {
-    completed: appStore.systemStatus.activeBackends > 0,
-    title: '添加 LLM',
-    description: '连接 AI 模型服务',
-    path: '/llm'
-  },
-  {
-    completed: appStore.systemStatus.activeAdapters > 0 &&
-      appStore.systemStatus.activeBackends > 0 &&
-      appStore.systemStatus.loadedPlugins > 0,
-    title: '了解调度规则',
-    description: '学习如何召唤和使用 Bot',
-    path: '/workflow/dispatch-rules'
-  },
-  {
-    completed: appStore.systemStatus.activeAdapters > 0 &&
-      appStore.systemStatus.activeBackends > 0 &&
-      appStore.systemStatus.loadedPlugins > 0,
-    title: '自定义工作流',
-    description: '打造专属于您的 AI 助手',
-    path: '/workflow'
-  }
-])
+const stepsStatus = computed(() => {
+  // 从 localStorage 获取已完成的步骤
+  const completedSteps = JSON.parse(localStorage.getItem('completedSteps') || '{}')
+  
+  const steps = [
+    {
+      key: 'plugins',
+      completed: completedSteps.plugins,
+      title: '浏览插件市场',
+      description: '发现并安装适合您需求的插件',
+      path: '/plugins/market'
+    },
+    {
+      key: 'im',
+      completed: completedSteps.im,
+      title: '添加 IM',
+      description: '连接您常用的聊天平台',
+      path: '/im'
+    },
+    {
+      key: 'llm',
+      completed: completedSteps.llm,
+      title: '添加 LLM',
+      description: '连接 AI 模型服务',
+      path: '/llm'
+    },
+    {
+      key: 'dispatch',
+      completed: completedSteps.dispatch,
+      title: '了解调度规则',
+      description: '学习如何召唤和使用 Bot',
+      path: '/workflow/dispatch-rules'
+    },
+    {
+      key: 'workflow',
+      completed: completedSteps.workflow,
+      title: '自定义工作流',
+      description: '打造专属于您的 AI 助手',
+      path: '/workflow'
+    }
+  ]
+  
+  return steps
+})
 
 // 计算当前应该进行的步骤
 const currentStep = computed(() => {
@@ -61,6 +69,12 @@ const currentStep = computed(() => {
 })
 
 const handleStepClick = (step: number, path: string) => {
+  // 标记当前步骤为已完成
+  const completedSteps = JSON.parse(localStorage.getItem('completedSteps') || '{}')
+  completedSteps[stepsStatus.value[step].key] = true
+  localStorage.setItem('completedSteps', JSON.stringify(completedSteps))
+  
+  // 跳转到目标页面
   router.push(path)
 }
 

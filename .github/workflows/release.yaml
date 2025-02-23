@@ -1,8 +1,9 @@
 name: Build and Release
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -25,10 +26,7 @@ jobs:
 
       - name: Create release archive
         run: |
-          pushd dist
-          zip -r ../dist.zip .
-          popd
-          ls -l
+          zip -r dist.zip dist
 
       - name: Upload release archive
         uses: actions/upload-release-asset@v1

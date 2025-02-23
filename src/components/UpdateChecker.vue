@@ -25,7 +25,8 @@ const {
 
 // 导出检查更新方法供其他组件使用
 defineExpose({
-  checkUpdate
+  checkUpdate,
+  showUpdateModal
 })
 </script>
 
@@ -47,7 +48,7 @@ defineExpose({
       
       <n-space vertical size="large">
         <div v-if="!updateInProgress">
-          <div v-if="appStore.updateInfo?.backend_update_available" class="version-info">
+          <div class="version-info">
             <div class="version-title">后端版本</div>
             <div class="version-row">
               <span class="version-label">当前版本：</span>
@@ -55,11 +56,13 @@ defineExpose({
             </div>
             <div class="version-row">
               <span class="version-label">最新版本：</span>
-              <n-text type="success">{{ appStore.updateInfo?.latest_backend_version }}</n-text>
+              <n-text :type="appStore.updateInfo?.backend_update_available ? 'success' : ''">
+                {{ appStore.updateInfo?.latest_backend_version }}
+              </n-text>
             </div>
           </div>
           
-          <div v-if="appStore.updateInfo?.webui_update_available" class="version-info">
+          <div class="version-info">
             <div class="version-title">WebUI 版本</div>
             <div class="version-row">
               <span class="version-label">当前版本：</span>
@@ -67,7 +70,9 @@ defineExpose({
             </div>
             <div class="version-row">
               <span class="version-label">最新版本：</span>
-              <n-text type="success">{{ appStore.updateInfo?.latest_webui_version }}</n-text>
+              <n-text :type="appStore.updateInfo?.webui_update_available ? 'success' : ''">
+                {{ appStore.updateInfo?.latest_webui_version }}
+              </n-text>
             </div>
           </div>
         </div>

@@ -9,7 +9,8 @@ import {
   ExtensionPuzzleOutline,
   GitNetworkOutline,
   BookOutline,
-  HomeOutline
+  HomeOutline,
+  SettingsOutline
 } from '@vicons/ionicons5'
 import { NIcon } from 'naive-ui'
 import { useAppStore } from '@/stores/app'
@@ -47,6 +48,11 @@ const menuOptions: MenuOption[] = [
     label: () => '插件管理',
     key: 'plugins',
     icon: renderIcon(ExtensionPuzzleOutline)
+  },
+  {
+    label: () => '系统设置',
+    key: 'settings',
+    icon: renderIcon(SettingsOutline)
   }
 ]
 

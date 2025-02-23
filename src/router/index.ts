@@ -10,7 +10,7 @@ const router = createRouter({
       children: [
         {
           path: '',
-          redirect: '/im'
+          redirect: '/guide'
         },
         {
           path: '/im',
@@ -86,6 +86,11 @@ const router = createRouter({
           path: '/guide',
           name: 'guide',
           component: () => import('@/views/guide/GuideView.vue')
+        },
+        {
+          path: '/settings',
+          name: 'settings',
+          component: () => import('@/views/settings/BasicSettings.vue')
         }
       ]
     },

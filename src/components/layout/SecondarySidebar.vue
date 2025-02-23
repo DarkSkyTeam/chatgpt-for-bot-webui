@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, h } from 'vue'
+import { computed, h, watch } from 'vue'
 import { NMenu } from 'naive-ui'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import type { MenuOption } from 'naive-ui'
@@ -8,6 +8,9 @@ import { useAppStore } from '@/stores/app'
 const route = useRoute()
 const appStore = useAppStore()
 const router = useRouter()
+const emit = defineEmits<{
+  (e: 'hasContent', hasContent: boolean): void
+}>()
 
 // 根据当前路由获取二级菜单配置
 const menuOptions = computed<MenuOption[]>(() => {
@@ -56,14 +59,14 @@ const menuOptions = computed<MenuOption[]>(() => {
           path: '/workflow'
         },
         {
-          label: () => '模板管理',
-          key: 'workflow-templates',
-          path: '/workflow/templates'
-        },
-        {
           label: () => '调度规则',
           key: 'workflow-dispatch-rules',
           path: '/workflow/dispatch-rules'
+        },
+        {
+          label: () => '模板管理',
+          key: 'workflow-templates',
+          path: '/workflow/templates'
         }
       ]
     case 'plugins':
@@ -131,6 +134,14 @@ const handleUpdateValue = (key: string) => {
     router.push(selectedMenu.path);
   }
 }
+
+watch(() => menuOptions.value, () => {
+  if (menuOptions.value.length === 0) {
+    emit('hasContent', false)
+  } else {
+    emit('hasContent', true)
+  }
+}, { immediate: true })
 </script>
 
 <template>

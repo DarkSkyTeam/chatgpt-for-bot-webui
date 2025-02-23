@@ -24,15 +24,8 @@ jobs:
       - name: Build
         run: yarn build
 
-      - name: Create nightly archive
-        run: |
-          pushd dist
-          zip -r ../nightly.zip .
-          popd
-          ls -l
-
       - name: Upload nightly archive
         uses: actions/upload-artifact@v4
         with:
           name: nightly-build
-          path: nightly.zip
+          path: dist

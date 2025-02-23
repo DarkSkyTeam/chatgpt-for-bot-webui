@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, h, computed } from 'vue'
-import { NDataTable, NButton, NSpace, NCard, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch, useMessage, NModal, NDivider, type FormInst, NCollapse, NCollapseItem, NIcon, NPopconfirm } from 'naive-ui'
+import { NDataTable, NButton, NSpace, NCard, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch, useMessage, NModal, NDivider, type FormInst, NIcon, NTooltip } from 'naive-ui'
 import { dispatchApi, getRuleTypeLabel, type DispatchRule, type RuleGroup, type SimpleRule } from '@/api/dispatch'
 import { listWorkflows, type WorkflowInfo } from '@/api/workflow'
 import DynamicConfigForm from '@/components/form/DynamicConfigForm.vue'
-import { Add, Remove, PencilOutline } from '@vicons/ionicons5'
+import { Add, Remove, PencilOutline, HelpCircleOutline } from '@vicons/ionicons5'
 import { v4 as uuidv4 } from 'uuid'
 
 const message = useMessage()
@@ -42,6 +42,23 @@ const columns = [
         const workflow = workflows.value.find(workflow => `${workflow.group_id}:${workflow.workflow_id}` === row.workflow_id)
         return workflow ? `${workflow.name} (${row.workflow_id})  ` : '未指定'
     } },
+    { 
+        title: () => h(NTooltip, {
+            trigger: 'hover',
+            placement: 'top'
+        }, {
+            trigger: () => h('div', { style: { display: 'flex', alignItems: 'center' } }, {
+                default: () => [
+                    '优先级',
+                    h(NIcon, {}, {
+                        default: () => h(HelpCircleOutline)
+                    })
+                ]
+            }),
+            default: () => '优先级定义了规则判定的顺序，数值越大优先级越高，会优先被判断。建议根据业务需求合理设置优先级。'
+        }),
+        key: 'priority' 
+    },
     {
         title: '状态',
         key: 'enabled',

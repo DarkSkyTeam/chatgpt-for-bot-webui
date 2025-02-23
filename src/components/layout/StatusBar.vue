@@ -14,30 +14,38 @@ const webUIVersion = import.meta.env.VITE_APP_VERSION || 'unknown'
 
 const fetchStatus = () => {
   fetch('/backend-api/api/system/status')
-      .then(response => response.json())
-      .then(data => {
-        connecting.value = false
-        appStore.updateSystemStatus({
-          status: 'normal',
-          apiConnected: true,
-          memoryUsage: data.status.memory_usage.rss,
-          cpuUsage: data.status.cpu_usage,
-          uptime: data.status.uptime,
-          activeAdapters: data.status.active_adapters,
-          activeBackends: data.status.active_backends,
-          loadedPlugins: data.status.loaded_plugins,
-          workflowCount: data.status.workflow_count,
-          version: data.status.version
-        })
+    .then(response => response.json())
+    .then(data => {
+      connecting.value = false
+      appStore.updateSystemStatus({
+        status: 'normal',
+        apiConnected: true,
+        memoryUsage: data.status.memory_usage.rss,
+        cpuUsage: data.status.cpu_usage,
+        uptime: data.status.uptime,
+        activeAdapters: data.status.active_adapters,
+        activeBackends: data.status.active_backends,
+        loadedPlugins: data.status.loaded_plugins,
+        workflowCount: data.status.workflow_count,
+        version: data.status.version
       })
-      .catch(error => {
-        console.error('获取系统状态失败:', error)
-        connecting.value = false
-        appStore.updateSystemStatus({
-          status: 'error',
-          apiConnected: false
     })
-  })
+    .catch(error => {
+      console.error('获取系统状态失败:', error)
+      connecting.value = false
+      appStore.updateSystemStatus({
+        status: 'error',
+        apiConnected: false,
+        memoryUsage: 0,
+        cpuUsage: 0,
+        uptime: 0,
+        activeAdapters: 0,
+        activeBackends: 0,
+        loadedPlugins: 0,
+        workflowCount: 0,
+        version: 'unknown'
+      })
+    })
 }
 // 模拟状态更新
 let timer: number
@@ -77,10 +85,10 @@ onUnmounted(() => {
     <n-space align="center" :size="20">
       <n-space align="center" :size="4">
         <n-badge dot :type="connecting
-            ? 'warning'
-            : appStore.systemStatus.status === 'normal'
-              ? 'success'
-              : 'error'
+          ? 'warning'
+          : appStore.systemStatus.status === 'normal'
+            ? 'success'
+            : 'error'
           " />
         <n-text>
           系统状态:
@@ -97,8 +105,17 @@ onUnmounted(() => {
       </n-space>
 
       <n-space align="center">
-        <n-text>WebUI 版本: {{ webUIVersion }}</n-text>
-        <n-text v-if="appStore.systemStatus.status === 'normal'">后端版本: {{ appStore.systemStatus.version }}</n-text>
+        <n-text>
+          WebUI 版本: {{ webUIVersion }}
+        </n-text>
+        <n-text v-if="appStore.systemStatus.status === 'normal'">
+          后端版本: {{ appStore.systemStatus.version }}
+        </n-text>
+        <n-text @click="updateCheckerRef!!.showUpdateModal = true"
+          v-if="appStore.updateInfo?.backend_update_available || appStore.updateInfo?.webui_update_available"
+          type="success" class="version-text" style="margin-left: 4px;">
+          有更新
+        </n-text>
       </n-space>
 
       <n-space v-if="appStore.systemStatus.status === 'normal'">
@@ -118,5 +135,24 @@ onUnmounted(() => {
   height: 100%;
   display: flex;
   align-items: center;
+}
+
+.version-text {
+  cursor: pointer;
+  animation: blink 3s infinite;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+
+  55% {
+    opacity: 0;
+  }
+
+  75% {
+    opacity: 1;
+  }
 }
 </style>

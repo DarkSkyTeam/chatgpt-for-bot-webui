@@ -22,12 +22,12 @@
       :collapsed-width="0"
       :width="240"
       show-trigger
-      v-if="route.path !== '/guide'"
+      v-show="hasSecondarySiderContent"
       @collapse="appStore.toggleSecondarySider"
       @expand="appStore.toggleSecondarySider"
       class="secondary-sider"
     >
-      <secondary-sidebar />
+      <secondary-sidebar @hasContent="handleHasSecondarySiderContentUpdate" />
     </n-layout-sider>
 
     <!-- 主内容区域 -->
@@ -46,13 +46,19 @@
 <script setup lang="ts">
 import { NLayout, NLayoutSider, NLayoutContent, NLayoutFooter } from 'naive-ui'
 import { RouterView, useRoute } from 'vue-router'
+import { ref } from 'vue'
 import { useAppStore } from '@/stores/app'
 import MainSidebar from '@/components/layout/MainSidebar.vue'
 import SecondarySidebar from '@/components/layout/SecondarySidebar.vue' 
 import StatusBar from '@/components/layout/StatusBar.vue'
 
 const appStore = useAppStore()
-const route = useRoute()
+
+const hasSecondarySiderContent = ref(true)
+
+const handleHasSecondarySiderContentUpdate = (hasContent: boolean) => {
+  hasSecondarySiderContent.value = hasContent
+}
 </script>
 
 <style scoped>
