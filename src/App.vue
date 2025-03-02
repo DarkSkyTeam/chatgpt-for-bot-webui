@@ -101,22 +101,4 @@ html, body {
   opacity: 0;
   transform: translateX(-20px);
 }
-
-/* 按钮点击效果 */
-.n-button {
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.n-button:active {
-  transform: scale(0.96);
-}
-
-/* 输入框焦点效果 */
-.n-input {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.n-input:focus-within {
-  transform: scale(1.01);
-}
 </style>

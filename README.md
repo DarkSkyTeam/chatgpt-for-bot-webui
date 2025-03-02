@@ -45,6 +45,9 @@
 
 ## Credits
 
-*   感谢 [Vite](https://vitejs.dev/)
-*   感谢 [Vue 3](https://vuejs.org/)
+*   感谢 [Vite](https://vitejs.dev/) 提供前端构建工具
+*   感谢 [Vue 3](https://vuejs.org/) 提供前端框架
+*   感谢 [Naive UI](https://www.naiveui.com/) 提供 UI 组件
+*   感谢 [LiteGraph](https://github.com/comfyorg/litegraph.js) 提供流程图编辑器
+*   感谢 [LobeHub Icons](https://github.com/LobeHub/lobe-hub-icons) 提供 LLM 图标
 *   感谢所有为本项目做出贡献的开发者

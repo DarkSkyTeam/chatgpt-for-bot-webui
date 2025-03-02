@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { NCard, NSpace, NButton, NGrid, NGridItem, NTag, NInput, NPagination, NEmpty, NLoadingBarProvider, useLoadingBar, NMessageProvider, useMessage, NSkeleton, NSwitch } from 'naive-ui'
+import { NCard, NSpace, NButton, NGrid, NGridItem, NTag, NInput, NPagination, NEmpty, NLoadingBarProvider, useLoadingBar, NMessageProvider, useMessage, NSkeleton, NSwitch, NModal, NIcon } from 'naive-ui'
 import { pluginApi } from '@/api/plugin'
 import type { MarketPlugin } from '@/api/plugin'
+import { SearchOutline, HomeOutline, HelpCircleOutline, DocumentTextOutline } from '@vicons/ionicons5'
 
 const loadingBar = useLoadingBar()
 const message = useMessage()
@@ -16,6 +17,9 @@ const skeletonVisible = ref(true)
 const isFirstLoad = ref(true)
 const operationStates = ref<Record<string, { loading: boolean, operation: 'install' | 'uninstall' | 'update' | 'toggle' | null }>>({})
 const expandedDescriptions = ref<Record<string, boolean>>({})
+
+const errorModal = ref(false)
+const errorMessage = ref('')
 
 const isOperating = (plugin: MarketPlugin) => {
   return operationStates.value[plugin.pypiPackage]?.loading || false
@@ -87,9 +91,10 @@ const handleInstall = async (plugin: MarketPlugin) => {
     await pluginApi.installPlugin(plugin.pypiPackage)
     message.success('插件安装成功')
     await fetchPlugins()
-  } catch (error) {
+  } catch (error: any) {
     console.error('安装插件失败:', error)
-    message.error('插件安装失败')
+    errorMessage.value = error.message || '未知错误'
+    errorModal.value = true
   } finally {
     setOperationState(plugin, null, false)
     loadingBar.finish()
@@ -107,9 +112,10 @@ const handleUpdate = async (plugin: MarketPlugin) => {
     await pluginApi.updatePlugin(plugin.name)
     message.success('插件更新成功')
     await fetchPlugins()
-  } catch (error) {
+  } catch (error: any) {
     console.error('更新插件失败:', error)
-    message.error('插件更新失败')
+    errorMessage.value = error.message || '未知错误'
+    errorModal.value = true
   } finally {
     setOperationState(plugin, null, false)
     loadingBar.finish()
@@ -127,9 +133,10 @@ const handleUninstall = async (plugin: MarketPlugin) => {
     await pluginApi.uninstallPlugin(plugin.name)
     message.success('插件卸载成功')
     await fetchPlugins()
-  } catch (error) {
+  } catch (error: any) {
     console.error('卸载插件失败:', error)
-    message.error('插件卸载失败')
+    errorMessage.value = error.message || '未知错误'
+    errorModal.value = true
   } finally {
     setOperationState(plugin, null, false)
     loadingBar.finish()
@@ -169,21 +176,24 @@ onMounted(() => {
   <n-message-provider>
     <n-loading-bar-provider>
       <div class="plugin-market">
-        <div class="market-header">
-          <h1 class="market-title">插件市场</h1>
-          <div class="search-container">
-            <n-input v-model:value="searchQuery" placeholder="搜索插件..." class="search-input" @keyup.enter="handleSearch">
-              <template #prefix>
-                <div class="i-carbon-search" />
-              </template>
-            </n-input>
-            <n-button type="primary" ghost @click="handleSearch" :disabled="loading">
-              搜索
-            </n-button>
-          </div>
-        </div>
+        <n-card title="插件市场" class="market-card">
+          <template #header-extra>
+            <div class="search-container">
+              <n-input v-model:value="searchQuery" placeholder="搜索插件..." class="search-input" @keyup.enter="handleSearch">
+                <template #prefix>
+                  <n-icon><SearchOutline /></n-icon>
+                </template>
+              </n-input>
+              <n-button type="primary" @click="handleSearch" :disabled="loading">
+                搜索
+              </n-button>
+            </div>
+          </template>
 
-        <div class="market-content">
+          <div class="market-description">
+            在这里浏览和安装可用的插件，扩展 Kirara AI 的功能。
+          </div>
+
           <div class="plugins-grid">
             <template v-if="skeletonVisible">
               <n-card v-for="(plugin, index) in skeletonPlugins" :key="index" size="small" class="plugin-card" :bordered="true">
@@ -217,9 +227,9 @@ onMounted(() => {
                 <div class="plugin-actions">
                   <n-skeleton text style="width: 30%" :sharp="false">
                     <n-space align="center" :size="12">
-                      <n-button text>主页</n-button>
-                      <n-button text>问题反馈</n-button>
-                      <n-button text>插件文档</n-button>
+                      <n-button secondary text>主页</n-button>
+                      <n-button secondary text>问题反馈</n-button>
+                      <n-button secondary text>插件文档</n-button>
                     </n-space>
                   </n-skeleton>
                   <n-skeleton text style="width: 80px" :sharp="false">
@@ -243,159 +253,159 @@ onMounted(() => {
                       <n-tag v-if="plugin.isInstalled" size="small" type="info" class="status-tag">
                         已安装 v{{ plugin.installedVersion }}
                       </n-tag>
-
-                      <n-tag v-if="plugin.isUpgradable" size="small" type="warning" class="status-tag">
-                        可更新
+                      <n-tag v-if="plugin.isUpgradable" size="small" type="warning" class="update-tag">
+                        可更新至 v{{ plugin.pypiInfo.version }}
                       </n-tag>
-
-                      <n-tag v-if="plugin.isEnabled" size="small" type="success" class="status-tag">
-                        已启用
-                      </n-tag>
-                      <n-tag v-else size="small" type="error" class="status-tag">
-                        已禁用
-                      </n-tag>
-
-                      <n-tag v-if="plugin.requiresRestart" size="small" type="error" class="status-tag">
-                        需重启生效
+                      <n-tag v-if="plugin.isEnabled !== undefined" size="small" :type="plugin.isEnabled ? 'success' : 'error'" class="status-tag">
+                        {{ plugin.isEnabled ? '已启用' : '已禁用' }}
                       </n-tag>
                     </template>
+                    <n-tag v-else size="small" type="success" class="version-tag">
+                      v{{ plugin.pypiInfo.version }}
+                    </n-tag>
                   </div>
                 </template>
 
-                <div class="plugin-description" :class="{ expanded: expandedDescriptions[plugin.pypiPackage] }"
-                  @click="toggleDescription(plugin)">
+                <div class="plugin-description" :class="{ 'expanded': expandedDescriptions[plugin.pypiPackage] }">
                   {{ plugin.description }}
                 </div>
+                <n-button v-if="plugin.description && plugin.description.length > 100" text size="small"
+                  @click="toggleDescription(plugin)" class="toggle-description">
+                  {{ expandedDescriptions[plugin.pypiPackage] ? '收起' : '展开' }}
+                </n-button>
 
                 <div class="plugin-meta">
-                  <n-space :size="12" vertical>
-                    <n-space align="center" :size="12">
-                      <span>作者: {{ plugin.author }}</span>
-                      <span class="separator">·</span>
-                      <span>PyPI: {{ plugin.pypiPackage }}</span>
-                    </n-space>
-                    <n-space align="center" :size="12">
-                      <span>最新版本：v{{ plugin.pypiInfo.version }}</span>
-                    </n-space>
+                  <n-space align="center" :size="12">
+                    <span>作者: {{ plugin.author }}</span>
+                    <span class="separator">·</span>
+                    <span>PyPI: {{ plugin.pypiPackage }}</span>
                   </n-space>
                 </div>
 
-                <template #action>
-                  <div class="plugin-actions">
-                    <n-space align="center" :size="12">
-                      <n-button v-if="plugin.pypiInfo.homePage" tag="a" :href="plugin.pypiInfo.homePage" target="_blank"
-                        text class="homepage-link">
-                        主页
-                      </n-button>
-                      <n-button v-if="plugin.pypiInfo.bugTrackerUrl" tag="a" :href="plugin.pypiInfo.bugTrackerUrl"
-                        target="_blank" text class="homepage-link">
-                        问题反馈
-                      </n-button>
-                      <n-button v-if="plugin.pypiInfo.documentUrl" tag="a" :href="plugin.pypiInfo.documentUrl"
-                        target="_blank" text class="homepage-link">
-                        使用文档
-                      </n-button>
-                    </n-space>
-                    <n-space align="center" :size="12">
-                      <template v-if="plugin.isInstalled">
-                        <n-button :type="plugin.isEnabled ? 'error' : 'primary'" size="small"
-                          :loading="getCurrentOperation(plugin) === 'toggle'" :disabled="isOperating(plugin)"
-                          @click="handleToggleStatus(plugin)" class="action-button">
-                          {{ plugin.isEnabled ? '禁用' : '启用' }}
-                        </n-button>
-                        <n-button v-if="plugin.isUpgradable" type="info" ghost size="small"
-                          :loading="getCurrentOperation(plugin) === 'update'" :disabled="isOperating(plugin)"
-                          @click="handleUpdate(plugin)" class="action-button">
-                          {{ getCurrentOperation(plugin) === 'update' ? '更新中' : '更新' }}
-                        </n-button>
-                        <n-button type="error" ghost size="small" :loading="getCurrentOperation(plugin) === 'uninstall'"
-                          :disabled="isOperating(plugin)" @click="handleUninstall(plugin)" class="action-button">
-                          卸载
-                        </n-button>
+                <div class="plugin-actions">
+                  <n-space align="center" :size="12">
+                    <n-button quaternary size="small" tag="a" :href="plugin.pypiInfo.homePage" target="_blank">
+                      <template #icon>
+                        <n-icon><HomeOutline /></n-icon>
                       </template>
-                      <n-button v-else type="primary" size="small" :loading="getCurrentOperation(plugin) === 'install'"
-                        :disabled="isOperating(plugin)" @click="handleInstall(plugin)"
-                        class="action-button install-button">
-                        {{ getCurrentOperation(plugin) === 'install' ? '安装中' : '安装' }}
+                      主页
+                    </n-button>
+                    <n-button quaternary size="small" tag="a" :href="`https://github.com/lss233/chatgpt-mirai-qq-bot-plugin-${plugin.pypiPackage}/issues`" target="_blank">
+                      <template #icon>
+                        <n-icon><HelpCircleOutline /></n-icon>
+                      </template>
+                      问题反馈
+                    </n-button>
+                    <n-button quaternary size="small" tag="a" :href="`https://github.com/lss233/chatgpt-mirai-qq-bot-plugin-${plugin.pypiPackage}#readme`" target="_blank">
+                      <template #icon>
+                        <n-icon><DocumentTextOutline /></n-icon>
+                      </template>
+                      插件文档
+                    </n-button>
+                  </n-space>
+                  <div class="action-buttons">
+                    <template v-if="plugin.isInstalled">
+                      <n-button v-if="plugin.isUpgradable" type="warning" size="small" :loading="isOperating(plugin) && getCurrentOperation(plugin) === 'update'"
+                        @click="handleUpdate(plugin)" class="action-button">
+                        更新
                       </n-button>
-                    </n-space>
+                      <n-button v-if="plugin.isEnabled !== undefined" :type="plugin.isEnabled ? 'error' : 'success'" size="small"
+                        :loading="isOperating(plugin) && getCurrentOperation(plugin) === 'toggle'"
+                        @click="handleToggleStatus(plugin)" class="action-button">
+                        {{ plugin.isEnabled ? '禁用' : '启用' }}
+                      </n-button>
+                      <n-button type="error" size="small" :loading="isOperating(plugin) && getCurrentOperation(plugin) === 'uninstall'"
+                        @click="handleUninstall(plugin)" class="action-button">
+                        卸载
+                      </n-button>
+                    </template>
+                    <n-button v-else type="primary" size="small" :loading="isOperating(plugin) && getCurrentOperation(plugin) === 'install'"
+                      @click="handleInstall(plugin)" class="action-button">
+                      安装
+                    </n-button>
                   </div>
-                </template>
+                </div>
               </n-card>
             </template>
 
+            <n-empty v-else description="没有找到插件" />
           </div>
-          <n-empty v-if="plugins.length === 0 && !skeletonVisible" description="暂无插件" style="margin: auto;" />
 
-        </div>
+          <div class="pagination-container" v-if="totalCount > 0">
+            <n-pagination v-model:page="currentPage" :page-count="Math.ceil(totalCount / pageSize)" @update:page="handlePageChange" />
+          </div>
+        </n-card>
 
-        <div class="pagination-container">
-          <n-pagination v-if="totalCount > 0" v-model:page="currentPage" :page-size="pageSize" :item-count="totalCount"
-            @update:page="handlePageChange" />
-        </div>
+        <n-modal v-model:show="errorModal" title="操作失败" preset="dialog">
+          <div class="error-message">{{ errorMessage }}</div>
+          <template #action>
+            <n-button @click="errorModal = false">关闭</n-button>
+          </template>
+        </n-modal>
       </div>
     </n-loading-bar-provider>
   </n-message-provider>
 </template>
 
 <style scoped>
-* {
-  --var-plugin-card-padding: 12px;
-}
-
 .plugin-market {
   height: 100%;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
 }
 
-.market-header {
-  margin-bottom: 32px;
+.market-card {
+  animation: fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 24px;
+}
+
+.market-description {
+  margin-bottom: 24px;
+  color: var(--text-color-secondary);
+  line-height: 1.6;
+}
+
+.search-container {
+  display: flex;
+  gap: 8px;
+  width: 300px;
+}
+
+.search-input {
+  flex: 1;
+}
+
+.plugins-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.plugin-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s;
+  border-radius: var(--border-radius);
+  background-color: var(--card-bg-color);
+  border: 1px solid var(--border-color);
+}
+
+.plugin-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--box-shadow-hover);
+}
+
+.plugin-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.market-title {
-  font-size: 18px;
-  font-weight: 500;
-  color: #1d1d1f;
+.plugin-header h3 {
   margin: 0;
-}
-
-.search-container {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.search-input {
-  width: 240px;
-}
-
-.market-content {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-
-.plugins-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 48px;
-  padding: 0 48px;
-  margin-bottom: 24px;
-}
-
-.plugin-card {
-  background: #ffffff;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  height: 100%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-color);
 }
 
 .plugin-tags {
@@ -403,150 +413,91 @@ onMounted(() => {
   gap: 8px;
 }
 
-.version-tag,
-.status-tag {
-  font-weight: 500;
-}
-
-.plugin-header {
-  padding: 12px var(--var-plugin-card-padding);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 .plugin-description {
-  padding: 0 var(--var-plugin-card-padding);
-  font-size: 14px;
+  margin: 16px 0;
+  color: var(--text-color-secondary);
   line-height: 1.6;
-  color: #424245;
-  margin-bottom: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  height: 50px;
+  -webkit-box-orient: vertical;
 }
 
 .plugin-description.expanded {
-  max-height: none;
-  overflow: visible;
+  -webkit-line-clamp: unset;
 }
 
-.plugin-description:hover {
-  color: #1d1d1f;
+.toggle-description {
+  margin-top: -8px;
+  margin-bottom: 16px;
+  color: var(--primary-color);
 }
 
 .plugin-meta {
-  font-size: 13px;
-  color: #6e6e73;
-  padding: 8px var(--var-plugin-card-padding);
-  border-top: 1px solid #f0f0f0;
   margin-top: auto;
+  padding-top: 16px;
+  color: var(--text-color-tertiary);
+  font-size: 12px;
 }
 
 .separator {
-  color: #d2d2d7;
+  color: var(--text-color-tertiary);
 }
 
 .plugin-actions {
   display: flex;
   justify-content: space-between;
-  padding: 16px var(--var-plugin-card-padding);
   align-items: center;
-  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
 }
 
-.plugin-actions .n-button {
-  font-size: 13px;
-  padding: 6px 16px;
-  height: 32px;
-  line-height: 20px;
-  position: relative;
-  min-width: 80px;
-  font-weight: 500;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-
-.plugin-actions .n-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.plugin-actions .n-button--loading::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(1px);
-  border-radius: inherit;
-}
-
-.plugin-actions .install-button {
-  background: linear-gradient(to right, #0066cc, #0052a3);
-  border: none;
-  color: #ffffff;
-  font-weight: 600;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-}
-
-.plugin-actions .install-button:not(:disabled):hover {
-  background: linear-gradient(to right, #0052a3, #003d7a);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.plugin-actions .install-button:not(:disabled):active {
-  background: linear-gradient(to right, #003d7a, #002952);
-  box-shadow: none;
-}
-
-.homepage-link {
-  font-size: 13px;
-  color: #0066cc;
-  padding: 6px 12px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  font-weight: 500;
-  border: 1px solid rgba(0, 102, 204, 0.2);
-}
-
-.homepage-link:hover {
-  background-color: rgba(0, 102, 204, 0.1);
-  text-decoration: none;
-}
-
-.homepage-link:active {
-  background-color: rgba(0, 102, 204, 0.2);
-}
-
-.plugin-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.plugin-status .n-switch {
-  margin-right: 8px;
-}
-
-.version-tag,
-.status-tag {
-  font-weight: 500;
-}
-
-.plugin-tags {
+.action-buttons {
   display: flex;
   gap: 8px;
-  margin-top: 4px;
-  flex-wrap: wrap;
+}
+
+.action-button {
+  min-width: 60px;
 }
 
 .pagination-container {
-  padding: var(--var-plugin-card-padding) 0;
   display: flex;
   justify-content: center;
-  position: sticky;
-  bottom: 0;
-  background: #ffffff;
-  border-top: 1px solid #f0f0f0;
+  margin-top: 24px;
+}
+
+.error-message {
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 16px;
+  background-color: var(--bg-color);
+  border-radius: var(--border-radius-small);
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .plugins-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .plugin-actions {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .action-buttons {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .search-container {
+    width: 100%;
+  }
 }
 </style>

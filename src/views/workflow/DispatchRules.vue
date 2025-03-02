@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, h, computed } from 'vue'
-import { NDataTable, NButton, NSpace, NCard, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch, useMessage, NModal, NDivider, type FormInst, NIcon, NTooltip } from 'naive-ui'
+import { NDataTable, NButton, NSpace, NCard, NForm, NFormItem, NInput, NInputNumber, NSelect, NSwitch, useMessage, NModal, NDivider, NScrollbar, type FormInst, NIcon, NTooltip } from 'naive-ui'
 import { dispatchApi, getRuleTypeLabel, type DispatchRule, type RuleGroup, type SimpleRule } from '@/api/dispatch'
 import { listWorkflows, type WorkflowInfo } from '@/api/workflow'
 import DynamicConfigForm from '@/components/form/DynamicConfigForm.vue'
@@ -38,11 +38,13 @@ const showRuleConfigModal = ref(false)
 const columns = [
     { title: '名称', key: 'name' },
     { title: '描述', key: 'description' },
-    { title: '工作流', key: 'workflow_id', render: (row: DispatchRule) => {
-        const workflow = workflows.value.find(workflow => `${workflow.group_id}:${workflow.workflow_id}` === row.workflow_id)
-        return workflow ? `${workflow.name} (${row.workflow_id})  ` : '未指定'
-    } },
-    { 
+    {
+        title: '工作流', key: 'workflow_id', render: (row: DispatchRule) => {
+            const workflow = workflows.value.find(workflow => `${workflow.group_id}:${workflow.workflow_id}` === row.workflow_id)
+            return workflow ? `${workflow.name} (${row.workflow_id})  ` : '未指定'
+        }
+    },
+    {
         title: () => h(NTooltip, {
             trigger: 'hover',
             placement: 'top'
@@ -57,7 +59,7 @@ const columns = [
             }),
             default: () => '优先级定义了规则判定的顺序，数值越大优先级越高，会优先被判断。建议根据业务需求合理设置优先级。'
         }),
-        key: 'priority' 
+        key: 'priority'
     },
     {
         title: '状态',
@@ -239,7 +241,7 @@ const removeRuleGroup = (index: number) => {
 const addRule = (groupIndex: number) => {
     selectedRuleGroupIndex.value = groupIndex
     selectedRuleIndex.value = currentRule.value.rule_groups[groupIndex].rules.length
-    
+
     // 创建新规则，但不设置类型
     const newRule: SimpleRule = {
         type: '',
@@ -254,7 +256,7 @@ const removeRule = (groupIndex: number, ruleIndex: number) => {
 }
 
 // 规则类型选项
-const ruleTypeOptions = computed(() => 
+const ruleTypeOptions = computed(() =>
     ruleTypes.value.map(type => ({
         label: getRuleTypeLabel(type),
         value: type
@@ -264,15 +266,15 @@ const ruleTypeOptions = computed(() =>
 // 规则类型变化时更新配置表单
 const handleRuleTypeChange = async (type: string, groupIndex: number, ruleIndex: number) => {
     if (!type) return // 如果用户清空了选择，直接返回
-    
+
     selectedRuleType.value = type
     selectedRuleGroupIndex.value = groupIndex
     selectedRuleIndex.value = ruleIndex
-    
+
     // 更新规则类型
     currentRule.value.rule_groups[groupIndex].rules[ruleIndex].type = type
     currentRule.value.rule_groups[groupIndex].rules[ruleIndex].config = {}
-    
+
     // 加载配置模式并打开配置对话框
     await loadConfigSchema(type)
     showRuleConfigModal.value = true
@@ -281,7 +283,7 @@ const handleRuleTypeChange = async (type: string, groupIndex: number, ruleIndex:
 // 确认规则配置
 const confirmRuleConfig = (config: any) => {
     if (selectedRuleGroupIndex.value === -1 || !currentRule.value.rule_groups) return
-    
+
     // 更新规则配置
     currentRule.value.rule_groups[selectedRuleGroupIndex.value].rules[selectedRuleIndex.value].config = config
 }
@@ -299,19 +301,22 @@ onMounted(async () => {
 <template>
     <div class="dispatch-rules">
         <n-space vertical>
-            <n-card title="规则列表">
+            <n-card title="规则列表" class="dispatch-rules-card">
                 <template #header-extra>
                     <n-button type="primary" @click="createRule">
                         创建规则
                     </n-button>
                 </template>
                 <div class="dispatch-rules-description">
-                    在这里配置 Kirara AI 的触发规则，更多介绍请阅读<a href="https://kirara-docs.app.lss233.com/guide/configuration/dispatch.html" target="_blank">官方文档</a>。
+                    在这里配置 Kirara AI 的触发规则，更多介绍请阅读<a
+                        href="https://kirara-docs.app.lss233.com/guide/configuration/dispatch.html"
+                        target="_blank">官方文档</a>。
                 </div>
                 <n-data-table :columns="columns" :data="rules" :bordered="false" :single-line="false" />
             </n-card>
             <!-- 编辑规则对话框 -->
-            <n-modal v-model:show="showEditModal" preset="dialog" :title="isCreate ? '创建规则' : '编辑规则'" style="width: 1200px">
+            <n-modal v-model:show="showEditModal" preset="dialog" :title="isCreate ? '创建规则' : '编辑规则'"
+                style="width: 1200px">
                 <div class="rule-edit-container">
                     <!-- 基本信息 -->
                     <div class="rule-basic-form">
@@ -323,7 +328,9 @@ onMounted(async () => {
                                 <n-input v-model:value="currentRule.description" type="textarea" placeholder="请输入描述" />
                             </n-form-item>
                             <n-form-item label="工作流" required>
-                                <n-select v-model:value="currentRule.workflow_id" :options="workflows.map(workflow => ({ label: workflow.name + ' (' + workflow.group_id + ':' + workflow.workflow_id + ')', value: `${workflow.group_id}:${workflow.workflow_id}` }))" placeholder="请选择工作流" />
+                                <n-select v-model:value="currentRule.workflow_id"
+                                    :options="workflows.map(workflow => ({ label: workflow.name + ' (' + workflow.group_id + ':' + workflow.workflow_id + ')', value: `${workflow.group_id}:${workflow.workflow_id}` }))"
+                                    placeholder="请选择工作流" />
                             </n-form-item>
                             <n-form-item label="优先级" required>
                                 <n-input-number v-model:value="currentRule.priority" :min="0" :max="100" />
@@ -339,74 +346,80 @@ onMounted(async () => {
                         <n-divider vertical />
                         <div class="config-form-container">
                             <h3 class="config-title">触发条件</h3>
-                            
-                            <div class="rule-groups">
-                                <div class="rule-group-header">
-                                    <span class="rule-group-label">当</span>
-                                </div>
+                            <n-scrollbar style="max-height: 400px;">
+                                <div class="rule-groups">
+                                    <div class="rule-group-header">
+                                        <span class="rule-group-label">当</span>
+                                    </div>
 
-                                <div v-for="(group, groupIndex) in currentRule.rule_groups" :key="groupIndex" class="rule-group">
-                                    <div class="rule-list">
-                                        <template v-for="(rule, ruleIndex) in group.rules" :key="ruleIndex">
-                                            <div class="rule-item">
-                                                <n-select
-                                                    v-model:value="rule.type"
-                                                    :options="ruleTypeOptions"
-                                                    @update:value="(type) => handleRuleTypeChange(type, groupIndex, ruleIndex)"
-                                                    class="rule-type-select"
-                                                    placeholder="请选择规则类型"
-                                                />
-                                                <n-button circle tertiary type="info" @click="() => {
-                                                    selectedRuleGroupIndex = groupIndex;
-                                                    selectedRuleIndex = ruleIndex;
-                                                    selectedRuleType = rule.type;
-                                                    loadConfigSchema(rule.type);
-                                                    showRuleConfigModal = true;
-                                                }" :disabled="!rule.type">
-                                                    <template #icon>
-                                                        <n-icon><PencilOutline /></n-icon>
-                                                    </template>
-                                                </n-button>
-                                                <n-button circle tertiary type="error" @click="removeRule(groupIndex, ruleIndex)">
-                                                    <template #icon>
-                                                        <n-icon><Remove /></n-icon>
-                                                    </template>
-                                                </n-button>
-                                            </div>
-                                            <span class="operator">或</span>
-                                        </template>
-                                        <n-button dashed class="add-rule-btn" @click="addRule(groupIndex)">
-                                            <template #icon>
-                                                <n-icon><Add /></n-icon>
+                                    <div v-for="(group, groupIndex) in currentRule.rule_groups" :key="groupIndex"
+                                        class="rule-group">
+                                        <div class="rule-list">
+                                            <template v-for="(rule, ruleIndex) in group.rules" :key="ruleIndex">
+                                                <div class="rule-item">
+                                                    <n-select v-model:value="rule.type" :options="ruleTypeOptions"
+                                                        @update:value="(type) => handleRuleTypeChange(type, groupIndex, ruleIndex)"
+                                                        class="rule-type-select" placeholder="请选择规则类型" />
+                                                    <n-button circle tertiary type="info" @click="() => {
+                                                        selectedRuleGroupIndex = groupIndex;
+                                                        selectedRuleIndex = ruleIndex;
+                                                        selectedRuleType = rule.type;
+                                                        loadConfigSchema(rule.type);
+                                                        showRuleConfigModal = true;
+                                                    }" :disabled="!rule.type">
+                                                        <template #icon>
+                                                            <n-icon>
+                                                                <PencilOutline />
+                                                            </n-icon>
+                                                        </template>
+                                                    </n-button>
+                                                    <n-button circle tertiary type="error"
+                                                        @click="removeRule(groupIndex, ruleIndex)">
+                                                        <template #icon>
+                                                            <n-icon>
+                                                                <Remove />
+                                                            </n-icon>
+                                                        </template>
+                                                    </n-button>
+                                                </div>
+                                                <span class="operator">或</span>
                                             </template>
-                                            添加条件
-                                        </n-button>
+                                            <n-button dashed class="add-rule-btn" @click="addRule(groupIndex)">
+                                                <template #icon>
+                                                    <n-icon>
+                                                        <Add />
+                                                    </n-icon>
+                                                </template>
+                                                添加条件
+                                            </n-button>
+                                        </div>
+
+                                        <div class="group-operator">
+                                            且
+                                        </div>
                                     </div>
 
-                                    <div class="group-operator">
-                                        且
-                                    </div>
+                                    <n-button dashed block class="add-group-btn" @click="addRuleGroup"
+                                        :disabled="currentRule.rule_groups[currentRule.rule_groups.length - 1].rules.length === 0">
+                                        <template #icon>
+                                            <n-icon>
+                                                <Add />
+                                            </n-icon>
+                                        </template>
+                                        添加条件组
+                                    </n-button>
                                 </div>
-
-                                <n-button dashed block class="add-group-btn" @click="addRuleGroup" :disabled="currentRule.rule_groups[currentRule.rule_groups.length - 1].rules.length === 0">
-                                    <template #icon>
-                                        <n-icon><Add /></n-icon>
-                                    </template>
-                                    添加条件组
-                                </n-button>
-                            </div>
+                            </n-scrollbar>
                         </div>
                     </div>
                 </div>
 
                 <!-- 规则配置对话框 -->
-                <n-modal v-model:show="showRuleConfigModal" preset="dialog" :title="'配置' + getRuleTypeLabel(selectedRuleType) + '规则'" style="width: 600px">
-                    <dynamic-config-form
-                        v-if="configSchema && selectedRuleGroupIndex >= 0"
+                <n-modal v-model:show="showRuleConfigModal" preset="dialog"
+                    :title="'配置' + getRuleTypeLabel(selectedRuleType) + '规则'" style="width: 600px">
+                    <dynamic-config-form v-if="configSchema && selectedRuleGroupIndex >= 0"
                         :model-value="currentRule.rule_groups[selectedRuleGroupIndex].rules[selectedRuleIndex]?.config || {}"
-                        :schema="configSchema"
-                        @update:model-value="confirmRuleConfig"
-                    />
+                        :schema="configSchema" @update:model-value="confirmRuleConfig" />
                     <template #action>
                         <n-button type="primary" @click="closeRuleConfigModal">
                             确定
@@ -425,6 +438,14 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.dispatch-rules {
+    padding: 16px;
+}
+
+.dispatch-rules-card {
+    animation: fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .dispatch-rules-description {
     margin-bottom: 16px;
 }
@@ -448,7 +469,6 @@ onMounted(async () => {
 .config-form-container {
     flex: 1;
     padding-left: 16px;
-    overflow: auto;
 }
 
 .config-title {

@@ -12,16 +12,18 @@
       @expand="appStore.toggleSider"
       class="main-sider"
     >
+      <div class="logo-container">
+        <!-- <img v-if="appStore.siderCollapsed" src="/logo-small.png" alt="Logo" class="logo-small" />
+        <img v-else src="/logo.png" alt="Logo" class="logo" /> -->
+        <n-avatar v-if="appStore.siderCollapsed" :size="32" round>K</n-avatar>
+        <div v-else>Kirara AI</div>
+      </div>
       <main-sidebar />
     </n-layout-sider>
     <!-- 二级菜单栏 -->
     <n-layout-sider
       bordered
-      collapse-mode="width"
-      :collapsed="appStore.secondarySiderCollapsed"
-      :collapsed-width="0"
       :width="240"
-      show-trigger
       v-show="hasSecondarySiderContent"
       @collapse="appStore.toggleSecondarySider"
       @expand="appStore.toggleSecondarySider"
@@ -32,7 +34,7 @@
 
     <!-- 主内容区域 -->
     <n-layout>
-      <n-layout-content class="main-content">
+      <n-layout-content class="main-content" :native-scrollbar="false">
         <router-view />
       </n-layout-content>
     </n-layout>
@@ -44,7 +46,7 @@
 </template>
   
 <script setup lang="ts">
-import { NLayout, NLayoutSider, NLayoutContent, NLayoutFooter } from 'naive-ui'
+import { NLayout, NLayoutSider, NLayoutContent, NLayoutFooter, NAvatar } from 'naive-ui'
 import { RouterView, useRoute } from 'vue-router'
 import { ref } from 'vue'
 import { useAppStore } from '@/stores/app'
@@ -64,17 +66,20 @@ const handleHasSecondarySiderContentUpdate = (hasContent: boolean) => {
 <style scoped>
 .main-sider {
   height: 100vh;
-  background: var(--n-color);
+  background: var(--sidebar-bg-color);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
 .secondary-sider {
   height: 100vh;
-  background: var(--n-color);
+  background: var(--sidebar-bg-color);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
 .main-content {
-  padding: 16px;
   height: calc(100vh - 28px); /* 减去状态栏高度 */
+  background-color: var(--bg-color);
+  overflow-y: auto;
 }
 
 .status-bar {
@@ -83,5 +88,25 @@ const handleHasSecondarySiderContentUpdate = (hasContent: boolean) => {
   font-size: 12px;
   line-height: 20px;
   z-index: 1000;
+  background-color: var(--sidebar-bg-color);
+  color: var(--text-color-secondary);
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.logo {
+  height: 32px;
+}
+
+.logo-small {
+  height: 32px;
+  width: 32px;
 }
 </style>

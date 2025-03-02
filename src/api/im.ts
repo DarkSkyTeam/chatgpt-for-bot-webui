@@ -16,11 +16,58 @@ export interface IMAccount {
   config: Record<string, any>
 }
 
+export interface IMAdapterInfo {
+  name: string
+  localized_name: string | null
+  localized_description: string | null
+}
+
+export interface UserProfile {
+  user_id: string
+  username: string
+  display_name: string
+  description: string
+  avatar_url: string
+}
+
 export interface IMAdapter {
   name: string
   adapter: string
   is_running: boolean
+  enable: boolean
   config: Record<string, any>
+  bot_profile: UserProfile | null
+}
+
+// 适配器类型枚举
+export enum AdapterType {
+  // 主动类 - 一个配置项对应一个bot实例
+  ACTIVE = 'active',
+  // 被动类 - 1对多，一个配置项对应多个bot实例
+  PASSIVE_MANY = 'passive_many',
+  // 被动类 - 1对1，一个配置项对应一个bot实例
+  PASSIVE_ONE = 'passive_one'
+}
+
+// 适配器实例接口
+export interface IMAdapterInstance {
+  id: string
+  adapter_name: string
+  name: string
+  status: 'online' | 'offline'
+  config: Record<string, any>
+  created_at: string
+  updated_at: string
+}
+
+// 适配器详情接口
+export interface IMAdapterDetail {
+  name: string
+  adapter: string
+  type: AdapterType
+  is_running: boolean
+  config: Record<string, any>
+  bot_profile: UserProfile | null
 }
 
 export interface ConfigSchema {
@@ -35,6 +82,7 @@ export interface ConfigSchema {
     maximum?: number
     enum?: any[]
     enumNames?: string[]
+    readonly?: boolean
   }>
   required?: string[]
 }
@@ -44,7 +92,7 @@ export const imApi = {
    * 获取适配器类型列表
    */
   getAdapterTypes() {
-    return http.get<{ types: string[] }>('/im/types')
+    return http.get<{ types: string[], adapters: Record<string, IMAdapterInfo> }>('/im/types')
   },
 
   /**
@@ -59,6 +107,13 @@ export const imApi = {
    */
   getAdapter(adapterId: string) {
     return http.get<{ adapter: IMAdapter }>(`/im/adapters/${adapterId}`)
+  },
+
+  /**
+   * 获取适配器详细信息（包含类型和实例）
+   */
+  getAdapterDetail(adapterId: string) {
+    return http.get<{ adapter: IMAdapterDetail }>(`/im/adapters/${adapterId}`)
   },
 
   /**
@@ -102,53 +157,4 @@ export const imApi = {
   getAdapterConfigSchema(adapterType: string) {
     return http.get<{ configSchema: ConfigSchema }>(`/im/types/${adapterType}/config-schema`)
   },
-
-  /**
-   * 获取平台列表
-   */
-  getPlatforms() {
-    return http.get<{ platforms: IMPlatform[] }>('/im/platforms')
-  },
-
-  /**
-   * 创建平台
-   */
-  createPlatform(platform: IMPlatform) {
-    return http.post<void>('/im/platforms', platform)
-  },
-
-  /**
-   * 更新平台
-   */
-  updatePlatform(name: string, platform: IMPlatform) {
-    return http.put<void>(`/im/platforms/${name}`, platform)
-  },
-
-  /**
-   * 删除平台
-   */
-  deletePlatform(name: string) {
-    return http.delete<void>(`/im/platforms/${name}`)
-  },
-
-  /**
-   * 启用/禁用平台
-   */
-  togglePlatform(name: string, enable: boolean) {
-    return http.post<void>(`/im/platforms/${name}/${enable ? 'enable' : 'disable'}`)
-  },
-
-  /**
-   * 获取账号列表
-   */
-  getAccounts() {
-    return http.get<{ accounts: IMAccount[] }>('/im/accounts')
-  },
-
-  /**
-   * 删除账号
-   */
-  deleteAccount(id: string) {
-    return http.delete<void>(`/im/accounts/${id}`)
-  }
 } 

@@ -99,7 +99,7 @@ export function useUpdateViewModel() {
   }
 
   const renderLabel = (option: SelectOption) => {
-    return h('div', {}, `${option.label} (${option.description})`)
+    return h('div', {}, `${option.label} (${option.description || '自定义'})`)
   }
 
   return {

@@ -18,6 +18,11 @@ const router = createRouter({
           component: () => import('@/views/im/IMView.vue')
         },
         {
+          path: '/im/adapters/:adapterType',
+          name: 'im-adapter-detail',
+          component: () => import('@/views/im/IMAdapterDetail.vue')
+        },
+        {
           path: '/im/platforms',
           name: 'im-platforms',
           component: () => import('@/views/workflow/WorkflowTemplates.vue'),
@@ -65,7 +70,7 @@ const router = createRouter({
         {
           path: '/plugins',
           name: 'plugins',
-          component: () => import('@/views/plugins/PluginList.vue')
+          component: () => import('@/views/plugins/PluginMarket.vue')
         },
         {
           path: '/plugins/market',

@@ -32,7 +32,7 @@ onMounted(() => {
             placeholder="请输入插件市场基础URL"
           />
           <template #feedback>
-            <n-text depth="3">插件市场的API地址，用于获取插件列表和下载插件，修改后可能影响插件的安装和更新</n-text>
+            <n-text depth="3">插件市场的API地址，用于获取插件列表，修改后可能影响插件的安装和更新</n-text>
           </template>
         </n-form-item>
       </n-form>

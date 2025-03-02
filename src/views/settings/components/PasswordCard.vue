@@ -12,6 +12,11 @@ const {
 
 <template>
   <n-card title="修改密码" class="settings-card">
+    <div style="margin-bottom: 16px;">
+      <n-text>
+        配置 WebUI 的登录密码，如果你的 WebUI 可被外部访问，请务必设置一个复杂的密码，以免被破解。
+      </n-text>
+    </div>
     <n-spin :show="loading">
       <n-form
         :model="formData"

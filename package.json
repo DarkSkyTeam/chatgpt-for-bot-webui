@@ -31,6 +31,7 @@
     "vue3-markdown-it": "^1.0.10"
   },
   "devDependencies": {
+    "@lobehub/icons-static-webp": "^1.24.0",
     "@rushstack/eslint-patch": "^1.2.0",
     "@tsconfig/node18": "^2.0.0",
     "@types/node": "^18.16.3",

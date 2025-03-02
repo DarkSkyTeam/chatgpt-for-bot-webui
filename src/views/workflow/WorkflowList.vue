@@ -1,22 +1,30 @@
 <script setup lang="ts">
 import { ref, onMounted, h, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { 
-  NSpace, 
-  NCard, 
-  NButton, 
-  NDataTable, 
-  NPopconfirm, 
-  useMessage, 
-  NEmpty, 
+import {
+  NSpace,
+  NCard,
+  NButton,
+  NDataTable,
+  NPopconfirm,
+  useMessage,
+  NEmpty,
   NSkeleton,
   NTag,
   NTooltip,
-  NIcon
+  NIcon,
+  NModal,
+  NForm,
+  NFormItem,
+  NInput,
+  NBadge
 } from 'naive-ui'
 import type { DataTableColumns } from 'naive-ui'
-import { listWorkflows, deleteWorkflow } from '@/api/workflow'
-import { CreateOutline, TrashOutline, AddOutline } from '@vicons/ionicons5'
+import { listWorkflows, deleteWorkflow, getWorkflow, createWorkflow } from '@/api/workflow'
+import { CreateOutline, TrashOutline, AddOutline, CopyOutline, DownloadOutline } from '@vicons/ionicons5'
+import WorkflowForm from '@/components/workflow/WorkflowForm.vue'
+import type { ComponentPublicInstance } from 'vue'
+import type { FormValidate } from 'naive-ui/es/form/src/interface'
 
 const router = useRouter()
 const message = useMessage()
@@ -33,6 +41,19 @@ interface Workflow {
 const workflows = ref<Workflow[]>([])
 const loading = ref(false)
 const deleting = ref<string>('')
+const showCopyModal = ref(false)
+const copyLoading = ref(false)
+const currentWorkflow = ref<Workflow | null>(null)
+const copyFormRef = ref<WorkflowFormInstance | null>(null)
+
+interface WorkflowFormInstance extends ComponentPublicInstance {
+  validate: FormValidate,
+  getFormData: () => {
+    workflowId: string
+    name: string
+    description: string
+  }
+}
 
 const columns: DataTableColumns<Workflow> = [
   {
@@ -78,35 +99,46 @@ const columns: DataTableColumns<Workflow> = [
   {
     title: '操作',
     key: 'actions',
-    width: 160,
+    width: 220,
     render(row) {
       const id = `${row.group_id}:${row.workflow_id}`
-      return h(NSpace, { align: 'center' }, [
-        h(NButton, {
-          quaternary: true,
-          size: 'small',
-          onClick: () => handleEdit(row),
-          class: 'action-button'
-        }, {
-          icon: () => h(NIcon, null, { default: () => h(CreateOutline) }),
-          default: () => '编辑'
-        }),
-        h(NPopconfirm, {
-          onPositiveClick: () => handleDelete(row),
-          class: deleting.value === id ? 'deleting' : ''
-        }, {
-          trigger: () => h(NButton, {
+      return h(NSpace, null, {
+        default: () => [
+          h(NButton, {
             quaternary: true,
             size: 'small',
-            type: 'error',
+            onClick: () => handleEdit(row),
             class: 'action-button'
           }, {
-            icon: () => h(NIcon, null, { default: () => h(TrashOutline) }),
-            default: () => '删除'
+            icon: () => h(NIcon, null, { default: () => h(CreateOutline) }),
+            default: () => '编辑'
           }),
-          default: () => '确认删除该工作流？'
-        })
-      ])
+          h(NButton, {
+            quaternary: true,
+            size: 'small',
+            onClick: () => handleCopy(row),
+            class: 'action-button'
+          }, {
+            icon: () => h(NIcon, null, { default: () => h(CopyOutline) }),
+            default: () => '复制'
+          }),
+          h(NPopconfirm, {
+            onPositiveClick: () => handleDelete(row),
+            class: deleting.value === id ? 'deleting' : ''
+          }, {
+            trigger: () => h(NButton, {
+              quaternary: true,
+              size: 'small',
+              type: 'error',
+              class: 'action-button'
+            }, {
+              icon: () => h(NIcon, null, { default: () => h(TrashOutline) }),
+              default: () => '删除'
+            }),
+            default: () => '确认删除该工作流？'
+          })
+        ]
+      })
     }
   }
 ]
@@ -147,6 +179,52 @@ const handleDelete = async (row: Workflow) => {
   }
 }
 
+const handleCopy = (row: Workflow) => {
+  currentWorkflow.value = row
+  showCopyModal.value = true
+}
+
+const confirmCopy = async () => {
+  if (!copyFormRef.value) return
+
+  const valid = await copyFormRef.value.validate()
+  if (valid.warnings?.length || !currentWorkflow.value) return
+
+  const formData = copyFormRef.value.getFormData()
+  const [newGroupId, newWorkflowId] = formData.workflowId.split(':')
+
+  copyLoading.value = true
+  try {
+    // 1. 获取原工作流详情
+    const { workflow: originalWorkflow } = await getWorkflow(
+      currentWorkflow.value.group_id,
+      currentWorkflow.value.workflow_id
+    )
+
+    // 2. 创建新工作流
+    await createWorkflow(newGroupId, newWorkflowId, {
+      group_id: newGroupId,
+      workflow_id: newWorkflowId,
+      name: formData.name,
+      description: formData.description,
+      blocks: originalWorkflow.blocks,
+      wires: originalWorkflow.wires
+    })
+
+    message.success('复制成功')
+    showCopyModal.value = false
+    fetchWorkflows()
+  } catch (error: any) {
+    message.error(`复制失败: ${error.message || '未知错误'}`)
+  } finally {
+    copyLoading.value = false
+  }
+}
+
+const cancelCopy = () => {
+  showCopyModal.value = false
+}
+
 const displayWorkflows = computed(() => {
   return workflows.value.map(workflow => {
     return {
@@ -164,70 +242,72 @@ onMounted(() => {
 
 <template>
   <div class="workflow-list">
-    <NCard title="工作流管理" class="workflow-card">
+    <n-card title="工作流管理" class="workflow-card">
       <template #header-extra>
-        <NButton
-          type="primary"
-          @click="handleCreate"
-          class="create-button"
-        >
+        <n-button type="primary" @click="handleCreate" class="create-button">
           <template #icon>
-            <NIcon><AddOutline /></NIcon>
+            <n-icon>
+              <AddOutline />
+            </n-icon>
           </template>
           创建工作流
-        </NButton>
+        </n-button>
       </template>
 
       <div v-if="loading" class="loading-skeleton">
-        <NSkeleton text :repeat="3" />
+        <n-skeleton text :repeat="3" />
       </div>
-      
-      <NEmpty
-        v-else-if="displayWorkflows.length === 0"
-        description="暂无工作流"
-      >
-        <template #extra>
-          <NButton
-            type="primary"
-            @click="handleCreate"
-            class="create-button"
-          >
-            创建工作流
-          </NButton>
-        </template>
-      </NEmpty>
 
-      <NDataTable
-        v-else
-        :columns="columns"
-        :data="displayWorkflows"
-        :loading="loading"
-        class="workflow-table"
-        :row-class-name="() => 'workflow-row'"
-        :pagination="{
+      <n-empty v-else-if="displayWorkflows.length === 0" description="暂无工作流">
+        <template #extra>
+          <n-button type="primary" @click="handleCreate" class="create-button">
+            创建工作流
+          </n-button>
+        </template>
+      </n-empty>
+
+      <n-data-table v-else :columns="columns" :data="displayWorkflows" :loading="loading" class="workflow-table"
+        :row-class-name="() => 'workflow-row'" :pagination="{
           pageSize: 10
-        }"
-      />
-    </NCard>
+        }" />
+    </n-card>
+
+    <!-- 复制工作流对话框 -->
+    <n-modal v-model:show="showCopyModal" preset="dialog" title="复制工作流">
+      <WorkflowForm ref="copyFormRef" :initial-data="{
+        workflowId: currentWorkflow ? `${currentWorkflow.group_id}:${currentWorkflow.workflow_id}_copy` : '',
+        name: currentWorkflow ? `${currentWorkflow.name} (复制)` : '',
+        description: currentWorkflow?.description || ''
+      }" />
+
+      <template #action>
+        <n-button @click="cancelCopy">取消</n-button>
+        <n-button type="primary" :loading="copyLoading" @click="confirmCopy">
+          确认复制
+        </n-button>
+      </template>
+    </n-modal>
   </div>
 </template>
 
 <style scoped>
+.workflow-list {
+  height: 100%;
+  padding: 16px;
+}
 
 .workflow-card {
   animation: fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.create-button {
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.create-button:hover {
-  transform: translateY(-1px);
+  margin-bottom: 24px;
 }
 
 .loading-skeleton {
-  padding: 1rem 0;
+  padding: 24px 0;
+}
+
+.workflow-table {
+  border-radius: var(--border-radius);
+  overflow: hidden;
 }
 
 .workflow-table :deep(.workflow-row) {
@@ -236,7 +316,7 @@ onMounted(() => {
 }
 
 .workflow-table :deep(.workflow-row:hover) {
-  background-color: rgba(0, 122, 255, 0.05);
+  background-color: rgba(64, 128, 255, 0.05);
 }
 
 .workflow-name {
@@ -245,16 +325,13 @@ onMounted(() => {
 }
 
 .action-button {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .action-button:hover {
-  transform: translateY(-1px);
-  background-color: rgba(0, 122, 255, 0.1);
-}
-
-.action-button:active {
-  transform: translateY(0);
+  background-color: rgba(64, 128, 255, 0.1);
 }
 
 .deleting {
@@ -262,14 +339,19 @@ onMounted(() => {
   pointer-events: none;
 }
 
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+.create-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@media (max-width: 768px) {
+  .workflow-list {
+    padding: 0;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  
+  .workflow-card {
+    margin-bottom: 16px;
   }
 }
-</style> 
+</style>

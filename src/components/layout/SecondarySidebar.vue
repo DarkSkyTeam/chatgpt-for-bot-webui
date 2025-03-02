@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, h, watch } from 'vue'
-import { NMenu } from 'naive-ui'
+import { NMenu, NDivider } from 'naive-ui'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import type { MenuOption } from 'naive-ui'
 import { useAppStore } from '@/stores/app'
@@ -19,38 +19,9 @@ const menuOptions = computed<MenuOption[]>(() => {
   switch (currentPath) {
     case 'im':
       return [
-        {
-          label: () => '平台管理',
-          key: 'im-platforms',
-          path: '/im'
-        },
-        // {
-        //   label: () => h(RouterLink, { to: '/im/accounts' }, { default: () => '账号管理' }),
-        //   key: 'im-accounts'
-        // },
-        // {
-        //   label: () => h(RouterLink, { to: '/im/messages' }, { default: () => '消息记录' }),
-        //   key: 'im-messages'
-        // }
       ]
     case 'llm':
-      return [
-        {
-          label: () => '后端管理',
-          key: 'llm-backends',
-          path: '/llm'
-        },
-        {
-          label: () => '模型管理',
-          key: 'llm-models',
-          path: '/llm/models'
-        },
-        {
-          label: () => '对话测试',
-          key: 'llm-chat',
-          path: '/llm/chat'
-        }
-      ]
+      return []
     case 'workflow':
       return [
         {
@@ -70,18 +41,7 @@ const menuOptions = computed<MenuOption[]>(() => {
         }
       ]
     case 'plugins':
-      return [
-        {
-          label: () => '已安装插件',
-          key: 'plugins-installed',
-          path: '/plugins'
-        },
-        {
-          label: () => '插件市场',
-          key: 'plugins-market',
-          path: '/plugins/market'
-        }
-      ]
+      return []
     case 'memory':
       return [
         {
@@ -127,6 +87,19 @@ const getDefaultSubModule = (module: string) => {
   }
 }
 
+const getMenuTitle = (key: string) => {
+  switch (key) {
+    case 'workflow':
+      return '工作流'
+    case 'plugins':
+      return '插件'
+    case 'memory':
+      return '记忆'
+    default:
+      return ''
+      
+  }
+}
 // 监听菜单变化，更新当前路由
 const handleUpdateValue = (key: string) => {
   const selectedMenu = menuOptions.value.find(option => option.key === key);
@@ -145,25 +118,52 @@ watch(() => menuOptions.value, () => {
 </script>
 
 <template>
-  <n-menu
-    v-if="menuOptions.length > 0"
-    :value="activeKey"
-    :options="menuOptions"
-    :collapsed="appStore.secondarySiderCollapsed"
-    @update:value="handleUpdateValue"
-  />
+  <div v-if="menuOptions.length > 0" class="secondary-menu-container">
+    <div class="secondary-menu-header">
+      <h3 class="secondary-menu-title">{{ getMenuTitle(appStore.currentModule) }}</h3>
+    </div>
+    <n-divider style="margin: 8px 0" />
+    <n-menu
+      :value="activeKey"
+      :options="menuOptions"
+      @update:value="handleUpdateValue"
+      class="secondary-menu"
+    />
+  </div>
 </template>
 
 <style scoped>
+.secondary-menu-container {
+  padding: 16px 0;
+}
+
+.secondary-menu-header {
+  padding: 0 24px;
+}
+
+.secondary-menu-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.secondary-menu {
+  margin-top: 8px;
+}
+
 :deep(.n-menu-item) {
   height: 40px;
+  margin: 4px 12px;
+  border-radius: var(--border-radius-small);
 }
 
 :deep(.n-menu-item-content) {
-  padding: 0 16px;
+  padding: 0 12px;
 }
 
 :deep(.n-menu-item-content-header) {
   font-size: 14px;
+  font-weight: 500;
 }
 </style> 

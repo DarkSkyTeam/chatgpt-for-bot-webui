@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NLayout, NButton, useMessage, NSpin, NResult } from 'naive-ui'
+import { useMessage } from 'naive-ui'
 import { getWorkflow, createWorkflow, updateWorkflow, type BlockInstance, type Wire } from '@/api/workflow'
 import { listBlockTypes, type BlockType } from '@/api/block'
 import WorkflowCanvas from '@/components/workflow/WorkflowCanvas.vue'
+import { LiteGraph } from '@comfyorg/litegraph'
 
 const route = useRoute()
 const router = useRouter()

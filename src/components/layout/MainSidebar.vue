@@ -81,11 +81,6 @@ const handleUpdateValue = (key: string) => {
 :deep(.n-menu-item) {
   height: 48px;
 }
-
-:deep(.n-menu-item-content) {
-  padding: 0 12px;
-}
-
 :deep(.n-menu-item-content__icon) {
   font-size: 20px;
 }

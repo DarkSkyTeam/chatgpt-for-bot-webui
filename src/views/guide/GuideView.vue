@@ -10,12 +10,15 @@ import {
   NGi,
   NStatistic,
   NButton,
-  useMessage
+  useMessage,
+  NIcon
 } from 'naive-ui'
 import { useAppStore } from '@/stores/app'
+import { ArrowForwardOutline } from '@vicons/ionicons5'
 
 const router = useRouter()
 const appStore = useAppStore()
+const message = useMessage()
 
 // 计算每个步骤的完成状态
 const stepsStatus = computed(() => {
@@ -81,13 +84,13 @@ const handleStepClick = (step: number, path: string) => {
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'normal':
-      return '#18a058'
+      return 'var(--success-color)'
     case 'warning':
-      return '#f0a020'
+      return 'var(--warning-color)'
     case 'error':
-      return '#d03050'
+      return 'var(--error-color)'
     default:
-      return '#d03050'
+      return 'var(--error-color)'
   }
 }
 </script>
@@ -101,11 +104,18 @@ const getStatusColor = (status: string) => {
           <n-step v-for="(step, index) in stepsStatus" :key="index" :title="step.title" :description="step.description"
             :status="step.completed ? 'finish' : index === currentStep ? 'process' : 'wait'">
             <template #default>
-              {{ step.description }}
-              <n-button text type="primary" @click="handleStepClick(index, step.path)"
-                :disabled="index !== currentStep && !step.completed" v-if="index === currentStep">
-                立刻前往
-              </n-button>
+              <div class="step-content">
+                <div class="step-description">{{ step.description }}</div>
+                <n-button text type="primary" @click="handleStepClick(index, step.path)"
+                  :disabled="index !== currentStep && !step.completed" v-if="index === currentStep" class="step-button">
+                  立刻前往
+                  <template #icon>
+                    <n-icon>
+                      <ArrowForwardOutline />
+                    </n-icon>
+                  </template>
+                </n-button>
+              </div>
             </template>
           </n-step>
         </n-steps>
@@ -113,22 +123,22 @@ const getStatusColor = (status: string) => {
       
       <!-- 系统状态卡片 -->
       <n-card title="系统概览" :bordered="false" class="status-card">
-        <n-grid :cols="5" :x-gap="12">
+        <n-grid :cols="5" :x-gap="12" responsive="screen">
           <n-gi>
-            <n-statistic label="已连接 IM" :value="appStore.systemStatus.activeAdapters" />
+            <n-statistic label="已连接 IM" :value="appStore.systemStatus.activeAdapters" class="statistic-item" />
           </n-gi>
           <n-gi>
-            <n-statistic label="已连接 LLM" :value="appStore.systemStatus.activeBackends" />
+            <n-statistic label="已连接 LLM" :value="appStore.systemStatus.activeBackends" class="statistic-item" />
           </n-gi>
           <n-gi>
-            <n-statistic label="已安装插件" :value="appStore.systemStatus.loadedPlugins" />
+            <n-statistic label="已安装插件" :value="appStore.systemStatus.loadedPlugins" class="statistic-item" />
           </n-gi>
           <n-gi>
-            <n-statistic label="工作流数量" :value="appStore.systemStatus.workflowCount" />
+            <n-statistic label="工作流数量" :value="appStore.systemStatus.workflowCount" class="statistic-item" />
           </n-gi>
           <n-gi>
             <n-statistic label="系统状态" :value="appStore.systemStatus.status === 'normal' ? '正常' : '异常'"
-              :value-style="{ color: getStatusColor(appStore.systemStatus.status) }" />
+              :value-style="{ color: getStatusColor(appStore.systemStatus.status) }" class="statistic-item" />
           </n-gi>
         </n-grid>
       </n-card>
@@ -144,19 +154,49 @@ const getStatusColor = (status: string) => {
 }
 
 .status-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
+  background: var(--card-bg-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  animation: fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .steps-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
+  background: var(--card-bg-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  animation: fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 24px;
 }
 
 .guide-steps {
   margin: 20px 0;
+}
+
+.step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.step-description {
+  color: var(--text-color-secondary);
+}
+
+.step-button {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.statistic-item {
+  padding: 16px;
+  border-radius: var(--border-radius-small);
+  transition: background-color 0.3s;
+}
+
+.statistic-item:hover {
+  background-color: rgba(64, 128, 255, 0.05);
 }
 
 :deep(.n-step) {
@@ -165,19 +205,31 @@ const getStatusColor = (status: string) => {
 
 :deep(.n-step.n-step--finish) {
   .n-step-indicator {
-    background-color: #18a058;
-    border-color: #18a058;
+    background-color: var(--success-color);
+    border-color: var(--success-color);
   }
 }
 
 :deep(.n-step.n-step--process) {
   .n-step-indicator {
-    background-color: #2080f0;
-    border-color: #2080f0;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
   }
 }
 
 :deep(.n-step.n-step--wait) {
   opacity: 0.6;
+}
+
+@media (max-width: 768px) {
+  .guide-container {
+    padding: 16px;
+  }
+  
+  :deep(.n-grid) {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
 }
 </style>

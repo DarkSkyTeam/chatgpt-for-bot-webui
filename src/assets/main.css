@@ -1,98 +1,238 @@
 @import './base.css';
 
+:root {
+  /* 主色调 */
+  --primary-color: #4080ff;
+  --primary-color-hover: #6699ff;
+  
+  /* 文本颜色 */
+  --text-color: #333639;
+  --text-color-secondary: #606266;
+  --text-color-tertiary: #909399;
+  
+  /* 背景颜色 */
+  --bg-color: #f5f7fa;
+  --card-bg-color: #ffffff;
+  --sidebar-bg-color: #ffffff;
+  
+  /* 边框颜色 */
+  --border-color: #e5e7eb;
+  
+  /* 状态颜色 */
+  --success-color: #18a058;
+  --warning-color: #f0a020;
+  --error-color: #d03050;
+  --info-color: #5c6ac4;
+  
+  /* 圆角 */
+  --border-radius: 8px;
+  --border-radius-small: 4px;
+  
+  /* 阴影 */
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --box-shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.12);
+  
+  /* 过渡 */
+  --transition-duration: 0.2s;
+  --transition-timing-function: ease;
+  --n-border-color: rgba(0, 0, 0, 0.1);
+
+  --n-padding-md: 20px;
+  --n-window-width: 1000px;
+}
+
+.dark {
+  /* 主色调 */
+  --primary-color: #4080ff;
+  --primary-color-hover: #6699ff;
+  
+  /* 文本颜色 */
+  --text-color: #e5e7eb;
+  --text-color-secondary: #c9cdd4;
+  --text-color-tertiary: #8b949e;
+  
+  /* 背景颜色 */
+  --bg-color: #121212;
+  --card-bg-color: #1e1e1e;
+  --sidebar-bg-color: #1e1e1e;
+  
+  /* 边框颜色 */
+  --border-color: #333639;
+  
+  /* 状态颜色 */
+  --success-color: #63e2b7;
+  --warning-color: #f3a769;
+  --error-color: #e88080;
+  --info-color: #7a89d0;
+  
+  /* 阴影 */
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  --box-shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color var(--transition-duration) var(--transition-timing-function);
+  margin: 0;
+  padding: 0;
+}
+
 #app {
   margin: 0 auto;
   font-weight: normal;
+  color: var(--text-color);
 }
 
-a,
-.green {
+a {
   text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
+  color: var(--primary-color);
+  transition: color var(--transition-duration) var(--transition-timing-function);
 }
 
 @media (hover: hover) {
   a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
+    color: var(--primary-color-hover);
   }
 }
 
+.container-window-style {
+  max-width: var(--n-window-width);
+  margin: 0 auto;
+  padding: var(--n-padding-md);
+  padding-top: 100px;
+  transition: all 0.2s ease;
 
-.sidebar a {
-  color: rgba(0, 0, 0, 0.6);
 }
-.sidebar {
+
+/* 卡片样式 */
+.n-card {
+  border-radius: var(--border-radius);
+  transition: box-shadow var(--transition-duration) var(--transition-timing-function),
+              transform var(--transition-duration) var(--transition-timing-function);
+  background-color: var(--card-bg-color);
+  border: 1px solid var(--border-color);
+}
+
+.n-card.n-card--hoverable:hover {
+  box-shadow: var(--box-shadow-hover);
+  transform: translateY(-2px);
+}
+
+/* 按钮样式 */
+.n-button {
+  border-radius: var(--border-radius-small);
+  transition: background-color var(--transition-duration) var(--transition-timing-function),
+              color var(--transition-duration) var(--transition-timing-function),
+              border-color var(--transition-duration) var(--transition-timing-function),
+              box-shadow var(--transition-duration) var(--transition-timing-function);
+}
+
+/* 标签样式 */
+.n-tag {
+  border-radius: 16px;
+  padding: 0 10px;
+  transition: background-color var(--transition-duration) var(--transition-timing-function);
+}
+
+/* 输入框样式 */
+.n-input {
+  border-radius: var(--border-radius-small);
+}
+
+.n-input:focus-within {
+  box-shadow: 0 0 0 2px rgba(64, 128, 255, 0.2);
+}
+
+/* 选择器样式 */
+.n-select {
+  border-radius: var(--border-radius-small);
+}
+
+/* 模态框样式 */
+.n-modal {
+  border-radius: var(--border-radius);
+}
+
+/* 侧边栏样式 */
+
+
+
+
+
+
+.n-menu-item-content-header {
+  font-weight: 500;
+}
+
+/* 表格样式 */
+.n-data-table {
+  border-radius: var(--border-radius);
+}
+
+.n-data-table-th {
+  background-color: var(--bg-color);
+  font-weight: 500;
+}
+
+/* 表单样式 */
+.n-form-item-label {
+  font-weight: 500;
+}
+
+/* 工作流卡片淡入动画 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 设置页面样式 */
+.settings-page {
+  padding: 24px;
+  background-color: var(--bg-color);
+}
+
+.settings-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin: 0;
-  /* padding: 20px 0; */
+  gap: 24px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-.sidebar-title {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 0px 20px;
-  height: 50px;
-}
-
-.sidebar-nav {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  width: 100%;
-}
-
-.sidebar-nav-item {
-  display: flex;
-  /* align-items: center; */
+/* 适配器卡片样式 */
+.adapter-card {
   cursor: pointer;
-  justify-content: space-between;
-  padding: 0 20px;
+  transition: all 0.3s;
+  border-radius: var(--border-radius);
+  background-color: var(--card-bg-color);
+  border: 1px solid var(--border-color);
 }
 
-
-.sidebar-nav-action {
-  align-self: flex-end;
-  display: none !important;
+.adapter-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--box-shadow-hover);
 }
 
-.sidebar-nav-item:hover .sidebar-nav-action {
-  display: flex !important;
+/* 主内容区域样式 */
+.main-content {
+  background-color: var(--bg-color);
 }
 
-.sidebar-nav-text {
-  font-size: 16px;
-  font-weight: 500;
-  align-self: flex-start;
-}
-
-.sidebar-nav-child {
-  list-style: none;
-  margin: 0;
-  padding: 5px 0;
-  background: var(--vt-c-gray);
-  transition: height 0.5s;
-}
-
-.sidebar-nav-sub-item {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  padding: 5px 20px;
-  transition: background-color 0.3s ease;
-}
-
-.sidebar-nav-sub-item:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-.sidebar-nav-sub-item-active {
-  background-color: rgba(0, 0, 0, 0.2) !important;
-}
-
-.sidebar-nav-sub-item-text {
-  font-size: 16px;
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 16px;
+  }
+  
+  .settings-container {
+    max-width: 100%;
+  }
 }
