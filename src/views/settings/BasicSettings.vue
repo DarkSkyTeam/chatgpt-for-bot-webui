@@ -10,7 +10,7 @@ import PasswordCard from './components/PasswordCard.vue'
 
 <template>
   <div class="settings-page">
-    <n-card title="系统设置">
+    <n-card title="系统设置" class="settings-card">
       <n-tabs type="line" animated class="settings-tabs">
         <n-tab-pane name="webservice" tab="Web服务">
           <n-space vertical :gap="32">
@@ -32,15 +32,15 @@ import PasswordCard from './components/PasswordCard.vue'
 
 <style scoped>
 .settings-page {
-  height: 100%;
   padding: 24px;
   background-color: var(--bg-color);
+  height: var(--n-window-height);
 }
 
 .settings-card {
-  max-width: 1000px;
   margin: 0 auto;
   animation: fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
 }
 
 .settings-tabs {

@@ -38,7 +38,9 @@
   --n-border-color: rgba(0, 0, 0, 0.1);
 
   --n-padding-md: 20px;
+  
   --n-window-width: 1000px;
+  --n-window-height: calc(100vh - 100px);
 }
 
 .dark {

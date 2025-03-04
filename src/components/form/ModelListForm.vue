@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { h, ref } from 'vue'
-import { NButton, NIcon, NCard, NTag, NScrollbar, NAvatar } from 'naive-ui'
+import { NButton, NIcon, NCard, NAvatar, NEmpty } from 'naive-ui'
 import { CloseOutline, PencilOutline } from '@vicons/ionicons5'
 
 const props = defineProps<{
@@ -117,7 +117,7 @@ const getRandomColor = (str: string) => {
         <component :is="renderModelCard(model, index)" v-for="(model, index) in value" :key="model || index" />
       </template>
       <div v-else class="empty-list">
-        <p>请在这里添加要使用的模型</p>
+        <n-empty description="请在这里添加要使用的模型" />
       </div>
     </div>
   </div>

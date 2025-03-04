@@ -104,6 +104,7 @@ onMounted(() => {
 .im-card {
   animation: fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   margin-bottom: 24px;
+  height: var(--n-window-height);
 }
 
 .im-view-description {

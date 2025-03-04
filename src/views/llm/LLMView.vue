@@ -399,7 +399,7 @@ onMounted(() => {
           </n-space>
         </div>
 
-        <n-scrollbar class="content-scroll">
+        <n-scrollbar style="height: var(--n-window-height);">
           <div class="content-body">
             <n-card class="config-section" title="基本信息">
               <n-form :model="currentAdapter" label-placement="left" label-width="120" class="form"
@@ -453,7 +453,7 @@ onMounted(() => {
                 </n-space>
               </template>
 
-              <n-scrollbar class="model-list-container">
+              <n-scrollbar style="height: 360px;">
                 <model-list-form v-model:value="currentAdapter.models" @edit="handleEditModel" />
               </n-scrollbar>
             </n-card>
@@ -572,11 +572,6 @@ onMounted(() => {
   margin: 0;
   font-size: 1.2rem;
   font-weight: 500;
-}
-
-.content-scroll {
-  flex: 1;
-  height: calc(100% - 60px);
 }
 
 .content-body {

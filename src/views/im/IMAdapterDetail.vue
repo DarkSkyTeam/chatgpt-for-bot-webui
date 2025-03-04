@@ -6,7 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 import {
     NCard, NSpace, NButton, NForm, NFormItem, NInput, NSpin,
     useMessage, NIcon, NTag, NDivider, NSwitch, NEmpty,
-    NPopconfirm, NAlert, NText, NThing, NAvatar
+    NPopconfirm, NAlert, NText, NThing, NAvatar, NScrollbar
 } from 'naive-ui'
 import DynamicConfigForm from '@/components/form/DynamicConfigForm.vue'
 import {
@@ -186,9 +186,10 @@ defineExpose({
 
 <template>
     <div class="adapter-detail">
-        <n-spin :show="loading || processing">
-            <n-card>
-                <template #header>
+        <n-scrollbar style="height: var(--n-window-height);">
+            <n-spin :show="loading || processing">
+                <n-card style="height: var(--n-window-height);">
+                    <template #header>
                     <div class="adapter-header">
                         <div class="adapter-title">
                             <n-button quaternary circle @click="goBack">
@@ -333,12 +334,12 @@ defineExpose({
                 </div>
             </n-card>
         </n-spin>
+        </n-scrollbar>
     </div>
 </template>
 
 <style scoped>
 .adapter-detail {
-    height: 100%;
     padding: var(--n-padding-md);
     transition: all 0.2s ease;
 }
@@ -359,6 +360,7 @@ defineExpose({
     display: flex;
     gap: 16px;
     margin-top: 16px;
+    height: 100%;
 }
 
 .instances-panel {
