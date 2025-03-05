@@ -20,6 +20,7 @@ export interface IMAdapterInfo {
   name: string
   localized_name: string | null
   localized_description: string | null
+  detail_info_markdown: string | null
 }
 
 export interface UserProfile {

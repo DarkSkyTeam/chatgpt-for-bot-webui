@@ -960,15 +960,10 @@ doctrine@^3.0.0:
   dependencies:
     esutils "^2.0.2"
 
-entities@^4.5.0:
+entities@^4.4.0, entities@^4.5.0:
   version "4.5.0"
   resolved "https://mirrors.cloud.tencent.com/npm/entities/-/entities-4.5.0.tgz"
   integrity sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==
-
-entities@~2.1.0:
-  version "2.1.0"
-  resolved "https://registry.npmmirror.com/entities/-/entities-2.1.0.tgz"
-  integrity sha512-hCx1oky9PFrJ611mf0ifBLBRW8lUUVRlFolb5gWRfIELabBlbp9xZvrqZLZAs+NxFnbfQoeGd8wDkygjg7U85w==
 
 error-ex@^1.3.1:
   version "1.3.2"
@@ -1460,11 +1455,6 @@ he@^1.2.0:
   resolved "https://registry.npmmirror.com/he/-/he-1.2.0.tgz"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
 
-highlight.js@^11.3.1:
-  version "11.8.0"
-  resolved "https://registry.npmjs.org/highlight.js/-/highlight.js-11.8.0.tgz"
-  integrity sha512-MedQhoqVdr0U6SSnWPzfiadUcDHfN/Wzq25AkXiQv9oiOO/sG0S7XkvpFIqWBl9Yq1UYyYOOVORs5UW2XlPyzg==
-
 highlight.js@^11.8.0:
   version "11.11.1"
   resolved "https://mirrors.cloud.tencent.com/npm/highlight.js/-/highlight.js-11.11.1.tgz"
@@ -1684,12 +1674,12 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
-linkify-it@^3.0.1:
-  version "3.0.3"
-  resolved "https://registry.npmmirror.com/linkify-it/-/linkify-it-3.0.3.tgz"
-  integrity sha512-ynTsyrFSdE5oZ/O9GEf00kPngmOfVwazR5GKDq6EYfhlpFug3J2zybX56a2PRRpc9P+FuSoGNAwjlbDs9jJBPQ==
+linkify-it@^5.0.0:
+  version "5.0.0"
+  resolved "https://mirrors.cloud.tencent.com/npm/linkify-it/-/linkify-it-5.0.0.tgz#9ef238bfa6dc70bd8e7f9572b52d369af569b421"
+  integrity sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ==
   dependencies:
-    uc.micro "^1.0.1"
+    uc.micro "^2.0.0"
 
 load-json-file@^4.0.0:
   version "4.0.0"
@@ -1712,11 +1702,6 @@ lodash-es@^4.17.21:
   version "4.17.21"
   resolved "https://mirrors.cloud.tencent.com/npm/lodash-es/-/lodash-es-4.17.21.tgz"
   integrity sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==
-
-lodash.flow@^3.5.0:
-  version "3.5.0"
-  resolved "https://registry.npmmirror.com/lodash.flow/-/lodash.flow-3.5.0.tgz"
-  integrity sha512-ff3BX/tSioo+XojX4MOsOMhJw0nZoUEF011LX8g8d3gvjVbxd89cCio4BCXronjxcTUIJUoqKEUA+n4CqvvRPw==
 
 lodash.merge@^4.6.2:
   version "4.6.2"
@@ -1749,84 +1734,22 @@ magic-string@^0.30.11:
   dependencies:
     "@jridgewell/sourcemap-codec" "^1.5.0"
 
-markdown-it-abbr@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.npmmirror.com/markdown-it-abbr/-/markdown-it-abbr-1.0.4.tgz"
-  integrity sha512-ZeA4Z4SaBbYysZap5iZcxKmlPL6bYA8grqhzJIHB1ikn7njnzaP8uwbtuXc4YXD5LicI4/2Xmc0VwmSiFV04gg==
-
-markdown-it-anchor@^8.4.1:
-  version "8.6.7"
-  resolved "https://registry.npmmirror.com/markdown-it-anchor/-/markdown-it-anchor-8.6.7.tgz"
-  integrity sha512-FlCHFwNnutLgVTflOYHPW2pPcl2AACqVzExlkGQNsi4CJgqOHN7YTgDd4LuhgN1BFO3TS0vLAruV1Td6dwWPJA==
-
-markdown-it-deflist@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.npmmirror.com/markdown-it-deflist/-/markdown-it-deflist-2.1.0.tgz"
-  integrity sha512-3OuqoRUlSxJiuQYu0cWTLHNhhq2xtoSFqsZK8plANg91+RJQU1ziQ6lA2LzmFAEes18uPBsHZpcX6We5l76Nzg==
-
-markdown-it-emoji@^2.0.0:
-  version "2.0.2"
-  resolved "https://registry.npmmirror.com/markdown-it-emoji/-/markdown-it-emoji-2.0.2.tgz"
-  integrity sha512-zLftSaNrKuYl0kR5zm4gxXjHaOI3FAOEaloKmRA5hijmJZvSjmxcokOLlzycb/HXlUFWzXqpIEoyEMCE4i9MvQ==
-
-markdown-it-footnote@^3.0.3:
-  version "3.0.3"
-  resolved "https://registry.npmmirror.com/markdown-it-footnote/-/markdown-it-footnote-3.0.3.tgz"
-  integrity sha512-YZMSuCGVZAjzKMn+xqIco9d1cLGxbELHZ9do/TSYVzraooV8ypsppKNmUJ0fVH5ljkCInQAtFpm8Rb3eXSrt5w==
-
-markdown-it-highlightjs@^3.6.0:
-  version "3.6.0"
-  resolved "https://registry.npmmirror.com/markdown-it-highlightjs/-/markdown-it-highlightjs-3.6.0.tgz"
-  integrity sha512-ex+Lq3cVkprh0GpGwFyc53A/rqY6GGzopPCG1xMsf8Ya3XtGC8Uw9tChN1rWbpyDae7tBBhVHVcMM29h4Btamw==
-  dependencies:
-    highlight.js "^11.3.1"
-    lodash.flow "^3.5.0"
-
-markdown-it-ins@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.npmmirror.com/markdown-it-ins/-/markdown-it-ins-3.0.1.tgz"
-  integrity sha512-32SSfZqSzqyAmmQ4SHvhxbFqSzPDqsZgMHDwxqPzp+v+t8RsmqsBZRG+RfRQskJko9PfKC2/oxyOs4Yg/CfiRw==
-
-markdown-it-mark@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.npmmirror.com/markdown-it-mark/-/markdown-it-mark-3.0.1.tgz"
-  integrity sha512-HyxjAu6BRsdt6Xcv6TKVQnkz/E70TdGXEFHRYBGLncRE9lBFwDNLVtFojKxjJWgJ+5XxUwLaHXy+2sGBbDn+4A==
-
-markdown-it-sub@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmmirror.com/markdown-it-sub/-/markdown-it-sub-1.0.0.tgz"
-  integrity sha512-z2Rm/LzEE1wzwTSDrI+FlPEveAAbgdAdPhdWarq/ZGJrGW/uCQbKAnhoCsE4hAbc3SEym26+W2z/VQB0cQiA9Q==
-
-markdown-it-sup@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmmirror.com/markdown-it-sup/-/markdown-it-sup-1.0.0.tgz"
-  integrity sha512-E32m0nV9iyhRR7CrhnzL5msqic7rL1juWre6TQNxsnApg7Uf+F97JOKxUijg5YwXz86lZ0mqfOnutoryyNdntQ==
-
-markdown-it-task-lists@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.npmmirror.com/markdown-it-task-lists/-/markdown-it-task-lists-2.1.1.tgz"
-  integrity sha512-TxFAc76Jnhb2OUu+n3yz9RMu4CwGfaT788br6HhEDlvWfdeJcLUsxk1Hgw2yJio0OXsxv7pyIPmvECY7bMbluA==
-
-markdown-it-toc-done-right@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.npmmirror.com/markdown-it-toc-done-right/-/markdown-it-toc-done-right-4.2.0.tgz"
-  integrity sha512-UB/IbzjWazwTlNAX0pvWNlJS8NKsOQ4syrXZQ/C72j+jirrsjVRT627lCaylrKJFBQWfRsPmIVQie8x38DEhAQ==
-
-markdown-it@^12.3.2:
-  version "12.3.2"
-  resolved "https://registry.npmmirror.com/markdown-it/-/markdown-it-12.3.2.tgz"
-  integrity sha512-TchMembfxfNVpHkbtriWltGWc+m3xszaRD0CZup7GFFhzIgQqxIfn3eGj1yZpfuflzPvfkt611B2Q/Bsk1YnGg==
+markdown-it@^14.1.0:
+  version "14.1.0"
+  resolved "https://mirrors.cloud.tencent.com/npm/markdown-it/-/markdown-it-14.1.0.tgz#3c3c5992883c633db4714ccb4d7b5935d98b7d45"
+  integrity sha512-a54IwgWPaeBCAAsv13YgmALOF1elABB08FxO9i+r4VFk5Vl4pKokRPeX8u5TCgSsPi6ec1otfLjdOpVcgbpshg==
   dependencies:
     argparse "^2.0.1"
-    entities "~2.1.0"
-    linkify-it "^3.0.1"
-    mdurl "^1.0.1"
-    uc.micro "^1.0.5"
+    entities "^4.4.0"
+    linkify-it "^5.0.0"
+    mdurl "^2.0.0"
+    punycode.js "^2.3.1"
+    uc.micro "^2.1.0"
 
-mdurl@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.npmmirror.com/mdurl/-/mdurl-1.0.1.tgz"
-  integrity sha512-/sKlQJCBYVY9Ers9hqzKou4H6V5UWc/M59TH2dvkt+84itfnq7uFOMLpOiOS4ujvHP4etln18fmIxA5R5fll0g==
+mdurl@^2.0.0:
+  version "2.0.0"
+  resolved "https://mirrors.cloud.tencent.com/npm/mdurl/-/mdurl-2.0.0.tgz#80676ec0433025dd3e17ee983d0fe8de5a2237e0"
+  integrity sha512-Lf+9+2r+Tdp5wXDXC4PcIBjTDtq4UKjCPMQhKIuzpJNW0b96kVqSwW0bT7FhRSfmAiFYgP+SCRvdrDozfh0U5w==
 
 memorystream@^0.3.1:
   version "0.3.1"
@@ -2123,6 +2046,11 @@ prettier@^2.8.8:
   resolved "https://registry.npmmirror.com/prettier/-/prettier-2.8.8.tgz"
   integrity sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==
 
+punycode.js@^2.3.1:
+  version "2.3.1"
+  resolved "https://mirrors.cloud.tencent.com/npm/punycode.js/-/punycode.js-2.3.1.tgz#6b53e56ad75588234e79f4affa90972c7dd8cdb7"
+  integrity sha512-uxFIHU0YlHYhDQtV4R9J6a52SLx28BCjT+4ieh7IGbgwVJWO+km431c4yRlREUAsAmt/uMjQUyQHNEPf0M39CA==
+
 punycode@^2.1.0:
   version "2.3.0"
   resolved "https://registry.npmmirror.com/punycode/-/punycode-2.3.0.tgz"
@@ -2418,10 +2346,10 @@ typescript@~5.0.4:
   resolved "https://registry.npmmirror.com/typescript/-/typescript-5.0.4.tgz"
   integrity sha512-cW9T5W9xY37cc+jfEnaUvX91foxtHkza3Nw3wkoF4sSlKn0MONdkdEndig/qPBWXNkmplh3NzayQzCiHM4/hqw==
 
-uc.micro@^1.0.1, uc.micro@^1.0.5:
-  version "1.0.6"
-  resolved "https://registry.npmmirror.com/uc.micro/-/uc.micro-1.0.6.tgz"
-  integrity sha512-8Y75pvTYkLJW2hWQHXxoqRgV7qb9B+9vFEtidML+7koHUFapnVJAZ6cKs+Qjz5Aw3aZWHMC6u0wJE3At+nSGwA==
+uc.micro@^2.0.0, uc.micro@^2.1.0:
+  version "2.1.0"
+  resolved "https://mirrors.cloud.tencent.com/npm/uc.micro/-/uc.micro-2.1.0.tgz#f8d3f7d0ec4c3dea35a7e3c8efa4cb8b45c9e7ee"
+  integrity sha512-ARDJmphmdvUk6Glw7y9DQ2bFkKBHwQHLi2lsaH6PPmz/Ka9sFOBsBluozhDltWmnv9u/cF6Rt87znRTPV+yp/A==
 
 unbox-primitive@^1.0.2:
   version "1.0.2"
@@ -2529,25 +2457,6 @@ vue-tsc@^1.6.4:
     "@volar/vue-language-core" "1.6.4"
     "@volar/vue-typescript" "1.6.4"
     semver "^7.3.8"
-
-vue3-markdown-it@^1.0.10:
-  version "1.0.10"
-  resolved "https://registry.npmmirror.com/vue3-markdown-it/-/vue3-markdown-it-1.0.10.tgz"
-  integrity sha512-mTvHu0zl7jrh7ojgaZ+tTpCLiS4CVg4bTgTu4KGhw/cRRY5YgIG8QgFAPu6kCzSW6Znc9a52Beb6hFvF4hSMkQ==
-  dependencies:
-    markdown-it "^12.3.2"
-    markdown-it-abbr "^1.0.4"
-    markdown-it-anchor "^8.4.1"
-    markdown-it-deflist "^2.1.0"
-    markdown-it-emoji "^2.0.0"
-    markdown-it-footnote "^3.0.3"
-    markdown-it-highlightjs "^3.6.0"
-    markdown-it-ins "^3.0.1"
-    markdown-it-mark "^3.0.1"
-    markdown-it-sub "^1.0.0"
-    markdown-it-sup "^1.0.0"
-    markdown-it-task-lists "^2.1.1"
-    markdown-it-toc-done-right "^4.2.0"
 
 vue@^3.2.47:
   version "3.5.13"

@@ -103,7 +103,7 @@ const resolveProperty = (property: SchemaProperty, key: string): SchemaProperty 
 const renderInputComponent = (itemType: string, property: SchemaProperty, itemValue: any, updateItemValue: (val: any) => void) => {
     const commonProps = {
         value: itemValue,
-        placeholder: property.examples?.[0] || property.default !== undefined ? String(property.default) : '',
+        placeholder: property.examples?.[0] || (property.default !== undefined && property.default !== null)? String(property.default) : '',
         onUpdateValue: updateItemValue,
         disabled: property.readOnly === true
     }

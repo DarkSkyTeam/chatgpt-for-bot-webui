@@ -15,7 +15,7 @@ import {
     SaveOutline,
 } from '@vicons/ionicons5'
 import type { FormInst } from 'naive-ui'
-
+import MarkdownIt from 'markdown-it';
 const route = useRoute()
 const router = useRouter()
 const message = useMessage()
@@ -29,6 +29,19 @@ const adapters = ref<IMAdapter[]>([])
 const currentAdapter = ref<IMAdapter | null>(null)
 const formRef = ref<FormInst | null>(null)
 const isEdit = ref(false)
+
+const md = new MarkdownIt()
+const defaultRender = md.renderer.rules.link_open || function (tokens, idx, options, env, self) {
+    return self.renderToken(tokens, idx, options);
+};
+
+md.renderer.rules.link_open = function (tokens, idx, options, env, self) {
+    // Add a new `target` attribute, or replace the value of the existing one.
+    tokens[idx].attrSet('target', '_blank');
+
+    // Pass the token to the default renderer.
+    return defaultRender(tokens, idx, options, env, self);
+};
 
 const adapterInfo = ref<IMAdapterInfo | null>(null)
 
@@ -190,136 +203,33 @@ defineExpose({
             <n-spin :show="loading || processing">
                 <n-card style="height: var(--n-window-height);">
                     <template #header>
-                    <div class="adapter-header">
-                        <div class="adapter-title">
-                            <n-button quaternary circle @click="goBack">
-                                <template #icon>
-                                    <n-icon>
-                                        <ArrowBackOutline />
-                                    </n-icon>
-                                </template>
-                            </n-button>
-                            <span>{{ adapterInfo?.localized_name || adapterType }}</span>
-                        </div>
-                    </div>
-                </template>
-
-                <div class="adapter-content">
-                    <!-- 左侧配置列表 -->
-                    <div class="instances-panel">
-                        <div class="panel-header">
-                            <n-space justify="space-between">
-                                <h3>实例列表</h3>
-                                <n-button type="primary" @click="addAdapter" size="small" v-if="adapters.length > 0">
-                                        <template #icon>
-                                            <n-icon>
-                                                <AddOutline />
-                                            </n-icon>
-                                        </template>
-                                        添加配置
-                                    </n-button>
-                            </n-space>
-                        </div>
-
-                        <div class="instances-list">
-                            <n-empty v-if="adapters.length === 0" description="暂无配置" />
-                            <n-card v-for="adapter in adapters" :key="adapter.name" hoverable @click="editAdapter(adapter)">
-                                <n-thing 
-                                    :title="adapter.name" 
-                                    :description="adapter.bot_profile 
-                                        ? adapter.bot_profile.display_name 
-                                        : ''">
-                                    <template #avatar>
-                                        <n-avatar v-if="adapter.bot_profile && adapter.bot_profile?.avatar_url" 
-                                            round 
-                                            :src="adapter.bot_profile?.avatar_url">
-                                        </n-avatar>
-                                        <n-avatar v-else round>
-                                            {{ (adapter.bot_profile 
-                                                ? adapter.bot_profile?.username 
-                                                : adapter.name).slice(0, 1).toUpperCase() }}
-                                        </n-avatar>
-                                    </template>
-                                    <template #header-extra>
-                                        <n-tag v-if="!adapter.enable" type="default">
-                                            未启用
-                                        </n-tag>
-                                        <n-tag v-else-if="adapter.is_running" type="success">
-                                            运行中
-                                        </n-tag>
-                                        <n-tag v-else type="warning">
-                                            已停止
-                                        </n-tag>
-                                    </template>
-                                    <template #action>
-                                        <n-space>
-                                            <n-button @click="editAdapter(adapter)" size="small">
-                                                编辑
-                                            </n-button>
-
-                                            <n-popconfirm @positive-click="deleteAdapter(adapter.name)" 
-                                                positive-text="确定"
-                                                negative-text="取消">
-                                                <template #trigger>
-                                                    <n-button size="small">
-                                                        删除
-                                                    </n-button>
-                                                </template>
-                                                确定要删除配置吗？
-                                            </n-popconfirm>
-                                            
-                                        </n-space>
-                                    </template>
-                                </n-thing>
-                            </n-card>
-                        </div>
-                    </div>
-
-                    <!-- 右侧配置表单 -->
-                    <div class="config-panel">
-                        <div class="panel-header">
-                            <n-space justify="space-between">
-                                <h3>
-                                    配置详情
-                                </h3>
-                                <n-button type="primary" size="small" @click="saveAdapter" :loading="processing" v-if="currentAdapter">
+                        <div class="adapter-header">
+                            <div class="adapter-title">
+                                <n-button quaternary circle @click="goBack">
                                     <template #icon>
                                         <n-icon>
-                                            <SaveOutline />
+                                            <ArrowBackOutline />
                                         </n-icon>
                                     </template>
-                                    保存配置
                                 </n-button>
-                            </n-space>
+                                <span>{{ adapterInfo?.localized_name || adapterType }}</span>
+                            </div>
                         </div>
+                    </template>
 
-                        <div v-if="currentAdapter" class="config-form">
-                            <n-form ref="formRef" :model="currentAdapter" label-placement="left" label-width="100"
-                                :rules="formRules">
-                                <n-form-item label="名称" path="name">
-                                    <n-input v-if="currentAdapter" v-model:value="currentAdapter!!.name"
-                                        placeholder="配置名称" />
-                                    <template #feedback>
-                                        <n-text depth="3">用于区分不同的配置，必须唯一</n-text>
-                                    </template>
-                                </n-form-item>
+                    <n-alert type="info" style="margin-bottom: 16px;" v-if="adapterInfo?.detail_info_markdown"
+                        :show-icon="false">
+                        <div v-html="md.render(adapterInfo?.detail_info_markdown)" />
+                    </n-alert>
 
-                                <n-form-item label="开启">
-                                    <n-switch v-if="currentAdapter" v-model:value="currentAdapter!!.enable" />
-                                </n-form-item>
-
-                                <n-divider />
-
-                                <div v-if="configSchema && currentAdapter">
-                                    <dynamic-config-form :schema="configSchema" v-model="currentAdapter!!.config" />
-                                </div>
-                            </n-form>
-                        </div>
-
-                        <div v-else class="empty-config">
-                            <n-empty description="请选择或添加一个配置">
-                                <template #extra v-if="adapters.length == 0">
-                                    <n-button type="primary" @click="addAdapter">
+                    <div class="adapter-content">
+                        <!-- 左侧配置列表 -->
+                        <div class="instances-panel">
+                            <div class="panel-header">
+                                <n-space justify="space-between">
+                                    <h3>实例列表</h3>
+                                    <n-button type="primary" @click="addAdapter" size="small"
+                                        v-if="adapters.length > 0">
                                         <template #icon>
                                             <n-icon>
                                                 <AddOutline />
@@ -327,13 +237,120 @@ defineExpose({
                                         </template>
                                         添加配置
                                     </n-button>
-                                </template>
-                            </n-empty>
+                                </n-space>
+                            </div>
+
+                            <div class="instances-list">
+                                <n-empty v-if="adapters.length === 0" description="暂无配置" />
+                                <n-card v-for="adapter in adapters" :key="adapter.name" hoverable
+                                    @click="editAdapter(adapter)">
+                                    <n-thing :title="adapter.name" :description="adapter.bot_profile
+                                        ? adapter.bot_profile.display_name
+                                        : ''">
+                                        <template #avatar>
+                                            <n-avatar v-if="adapter.bot_profile && adapter.bot_profile?.avatar_url"
+                                                round :src="adapter.bot_profile?.avatar_url">
+                                            </n-avatar>
+                                            <n-avatar v-else round>
+                                                {{ (adapter.bot_profile
+                                                    ? adapter.bot_profile?.username
+                                                    : adapter.name).slice(0, 1).toUpperCase() }}
+                                            </n-avatar>
+                                        </template>
+                                        <template #header-extra>
+                                            <n-tag v-if="!adapter.enable" type="default">
+                                                未启用
+                                            </n-tag>
+                                            <n-tag v-else-if="adapter.is_running" type="success">
+                                                运行中
+                                            </n-tag>
+                                            <n-tag v-else type="warning">
+                                                已停止
+                                            </n-tag>
+                                        </template>
+                                        <template #action>
+                                            <n-space>
+                                                <n-button @click="editAdapter(adapter)" size="small">
+                                                    编辑
+                                                </n-button>
+
+                                                <n-popconfirm @positive-click="deleteAdapter(adapter.name)"
+                                                    positive-text="确定" negative-text="取消">
+                                                    <template #trigger>
+                                                        <n-button size="small">
+                                                            删除
+                                                        </n-button>
+                                                    </template>
+                                                    确定要删除配置吗？
+                                                </n-popconfirm>
+
+                                            </n-space>
+                                        </template>
+                                    </n-thing>
+                                </n-card>
+                            </div>
+                        </div>
+
+                        <!-- 右侧配置表单 -->
+                        <div class="config-panel">
+                            <div class="panel-header">
+                                <n-space justify="space-between">
+                                    <h3>
+                                        配置详情
+                                    </h3>
+                                    <n-button type="primary" size="small" @click="saveAdapter" :loading="processing"
+                                        v-if="currentAdapter">
+                                        <template #icon>
+                                            <n-icon>
+                                                <SaveOutline />
+                                            </n-icon>
+                                        </template>
+                                        保存配置
+                                    </n-button>
+                                </n-space>
+                            </div>
+
+                            <div v-if="currentAdapter" class="config-form">
+                                <n-form ref="formRef" :model="currentAdapter" label-placement="left" label-width="100"
+                                    :rules="formRules">
+                                    <n-form-item label="名称" path="name">
+                                        <n-input v-if="currentAdapter" v-model:value="currentAdapter!!.name"
+                                            placeholder="配置名称" />
+                                        <template #feedback>
+                                            <n-text depth="3">用于区分不同的配置，必须唯一</n-text>
+                                        </template>
+                                    </n-form-item>
+
+                                    <n-form-item label="开启">
+                                        <n-switch v-if="currentAdapter" v-model:value="currentAdapter!!.enable" />
+                                    </n-form-item>
+
+                                    <n-divider />
+
+                                    <div v-if="configSchema && currentAdapter">
+                                        <dynamic-config-form :schema="configSchema" v-model="currentAdapter!!.config" />
+                                    </div>
+                                </n-form>
+                            </div>
+
+                            <div v-else class="empty-config">
+                                <n-empty description="请选择或添加一个配置">
+                                    <template #extra v-if="adapters.length == 0">
+                                        <n-button type="primary" @click="addAdapter">
+                                            <template #icon>
+                                                <n-icon>
+                                                    <AddOutline />
+                                                </n-icon>
+                                            </template>
+                                            添加配置
+                                        </n-button>
+                                    </template>
+                                </n-empty>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </n-card>
-        </n-spin>
+                </n-card>
+            </n-spin>
         </n-scrollbar>
     </div>
 </template>
