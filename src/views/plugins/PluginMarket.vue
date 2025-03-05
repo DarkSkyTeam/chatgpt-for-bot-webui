@@ -154,9 +154,11 @@ const handleToggleStatus = async (plugin: MarketPlugin) => {
     await pluginApi.togglePlugin(plugin.name, !plugin.isEnabled)
     message.success(`插件${plugin.isEnabled ? '禁用' : '启用'}成功`)
     await fetchPlugins()
-  } catch (error) {
+  } catch (error: any) {
     console.error('切换插件状态失败:', error)
     message.error('切换插件状态失败')
+    errorMessage.value = error.message || '未知错误'
+    errorModal.value = true
   } finally {
     setOperationState(plugin, null, false)
     loadingBar.finish()
@@ -290,13 +292,13 @@ onMounted(() => {
                       </template>
                       主页
                     </n-button>
-                    <n-button quaternary size="small" tag="a" :href="`https://github.com/lss233/chatgpt-mirai-qq-bot-plugin-${plugin.pypiPackage}/issues`" target="_blank">
+                    <n-button quaternary size="small" tag="a" :href="plugin.pypiInfo.bugTrackerUrl" target="_blank" v-if="plugin.pypiInfo.bugTrackerUrl">
                       <template #icon>
                         <n-icon><HelpCircleOutline /></n-icon>
                       </template>
                       问题反馈
                     </n-button>
-                    <n-button quaternary size="small" tag="a" :href="`https://github.com/lss233/chatgpt-mirai-qq-bot-plugin-${plugin.pypiPackage}#readme`" target="_blank">
+                    <n-button quaternary size="small" tag="a" :href="plugin.pypiInfo.documentUrl" target="_blank" v-if="plugin.pypiInfo.documentUrl">
                       <template #icon>
                         <n-icon><DocumentTextOutline /></n-icon>
                       </template>
@@ -336,7 +338,8 @@ onMounted(() => {
           </div>
         </n-card>
 
-        <n-modal v-model:show="errorModal" title="操作失败" preset="dialog">
+        <n-modal v-model:show="errorModal" title="操作失败" preset="dialog" type="error" style="width: 600px;">
+          错误信息：
           <div class="error-message">{{ errorMessage }}</div>
           <template #action>
             <n-button @click="errorModal = false">关闭</n-button>
@@ -479,6 +482,7 @@ onMounted(() => {
   background-color: var(--bg-color);
   border-radius: var(--border-radius-small);
   margin-bottom: 16px;
+  color: var(--error-color);
 }
 
 @media (max-width: 768px) {
