@@ -41,6 +41,8 @@
   
   --n-window-width: 1000px;
   --n-window-height: calc(100vh - 100px);
+
+  --sidebar-title-height: 56px;
 }
 
 .dark {

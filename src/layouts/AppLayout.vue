@@ -74,6 +74,7 @@ const handleHasSecondarySiderContentUpdate = (hasContent: boolean) => {
   height: 100vh;
   background: var(--sidebar-bg-color);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  z-index: 0;
 }
 
 .main-content {
@@ -99,6 +100,7 @@ const handleHasSecondarySiderContentUpdate = (hasContent: boolean) => {
   padding: 16px 0;
   border-bottom: 1px solid var(--border-color);
   transition: all 0.2s ease;
+  height: var(--sidebar-title-height);
 }
 
 .logo {

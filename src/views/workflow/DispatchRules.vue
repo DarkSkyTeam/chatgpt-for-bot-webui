@@ -321,18 +321,18 @@ onMounted(async () => {
                     <!-- 基本信息 -->
                     <div class="rule-basic-form">
                         <n-form label-placement="left" label-width="80" :rules="validationRules" ref="formRef">
-                            <n-form-item label="名称" required>
+                            <n-form-item label="名称" required feedback="用于区分不同的规则，必须保持唯一">
                                 <n-input v-model:value="currentRule.name" placeholder="请输入名称" />
                             </n-form-item>
-                            <n-form-item label="描述">
+                            <n-form-item label="描述" feedback="用于描述规则的用途，方便你理解">
                                 <n-input v-model:value="currentRule.description" type="textarea" placeholder="请输入描述" />
                             </n-form-item>
-                            <n-form-item label="工作流" required>
+                            <n-form-item label="工作流" required feedback="指定触发规则的工作流">
                                 <n-select v-model:value="currentRule.workflow_id"
                                     :options="workflows.map(workflow => ({ label: workflow.name + ' (' + workflow.group_id + ':' + workflow.workflow_id + ')', value: `${workflow.group_id}:${workflow.workflow_id}` }))"
                                     placeholder="请选择工作流" />
                             </n-form-item>
-                            <n-form-item label="优先级" required>
+                            <n-form-item label="优先级" required feedback="数值越大优先级越高，会优先被判断">
                                 <n-input-number v-model:value="currentRule.priority" :min="0" :max="100" />
                             </n-form-item>
                             <n-form-item label="启用状态">

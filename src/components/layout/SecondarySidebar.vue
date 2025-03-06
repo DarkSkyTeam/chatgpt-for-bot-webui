@@ -122,7 +122,6 @@ watch(() => menuOptions.value, () => {
     <div class="secondary-menu-header">
       <h3 class="secondary-menu-title">{{ getMenuTitle(appStore.currentModule) }}</h3>
     </div>
-    <n-divider style="margin: 8px 0" />
     <n-menu
       :value="activeKey"
       :options="menuOptions"
@@ -133,12 +132,12 @@ watch(() => menuOptions.value, () => {
 </template>
 
 <style scoped>
-.secondary-menu-container {
-  padding: 16px 0;
-}
-
 .secondary-menu-header {
   padding: 0 24px;
+  height: var(--sidebar-title-height);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
 }
 
 .secondary-menu-title {

@@ -122,6 +122,7 @@ const renderInputComponent = (itemType: string, property: SchemaProperty, itemVa
             return h(NInput, {
                 ...commonProps,
                 type: isSecretField(property.title) ? 'password' : 'text',
+                showPasswordOn: 'click',
             })
         case 'number':
         case 'integer':

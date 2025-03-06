@@ -26,6 +26,7 @@ import {
   NCheckbox,
   NDivider,
   NTooltip,
+  NMarquee,
   type FormItemRule
 } from 'naive-ui'
 import { llmApi } from '@/api/llm'
@@ -150,10 +151,10 @@ const handleAdapterSelect = async (adapter: LLMBackend) => {
 }
 
 // 创建新配置
-const handleCreateAdapter = async () => {
+const handleCreateAdapter = async (adapter: string | null = null) => {
   currentAdapter.value = {
     name: '',
-    adapter: '',
+    adapter: adapter ?? '',
     config: {},
     enable: true,
     models: []
@@ -349,7 +350,7 @@ onMounted(() => {
               <n-icon><search-icon /></n-icon>
             </template>
           </n-input>
-          <n-button type="primary" @click="handleCreateAdapter">
+          <n-button type="primary" @click="handleCreateAdapter()">
             <template #icon>
               <n-icon><add-icon /></n-icon>
             </template>
@@ -404,11 +405,11 @@ onMounted(() => {
             <n-card class="config-section" title="基本信息">
               <n-form :model="currentAdapter" label-placement="left" label-width="120" class="form"
                 :rules="adapterRules" ref="formRef">
-                <n-form-item label="配置名称" path="name" required>
-                  <n-input v-model:value="currentAdapter.name" placeholder="用于区分不同的配置，必须保持唯一" />
+                <n-form-item label="配置名称" path="name" feedback="用于区分不同的配置，必须保持唯一" required>
+                  <n-input v-model:value="currentAdapter.name" placeholder="请输入配置名称" />
                 </n-form-item>
 
-                <n-form-item label="接口类型" path="adapter" required>
+                <n-form-item label="接口类型" path="adapter" feedback="指定模型供应商，使用与模型供应商一致的 API 接口请求模型" required>
                   <n-select v-model:value="currentAdapter.adapter"
                     :options="adapterTypes.map(type => ({ label: type, value: type }))" placeholder="请选择接口类型" />
                 </n-form-item>
@@ -461,18 +462,20 @@ onMounted(() => {
         </n-scrollbar>
       </template>
 
-      <div class="empty-state" v-else-if="adapters.length">
-        <n-empty description="在这里配置 KiraraAI 可以使用的模型 API，请选择或添加一个配置。" />
-      </div>
       <div class="empty-state" v-else>
-        <n-space vertical align="center">
-          <n-empty description="暂无模型配置" />
-          <n-text>
-            在这里配置 KiraraAI 可以使用的模型 API，详细配置请参考<a href="https://kirara-docs.app.lss233.com/guide/configuration/llm.html" target="_blank">文档</a>。
-          </n-text>
-          <n-button type="primary" @click="handleCreateAdapter" style="margin: 0 auto;">
-            点击这里连接你的第一个模型
-          </n-button>
+        <n-space vertical align="center" style="width: 100%;">
+          <n-text strong style="font-size: 24px;">海量模型，一网打尽</n-text>
+          <n-text style="font-size: 16px;">选择一个模型供应商，然后添加模型，即可开始使用，<a href="https://kirara-docs.app.lss233.com/guide/configuration/llm.html" target="_blank">查看文档</a>。</n-text>
+          <div style="width: 100%; height: 120px;">
+            <n-marquee auto-fill :speed="40">
+              <n-space class="adapter-list-marquee">
+                <n-card v-for="adapter in adapterTypes" hoverable @click="handleCreateAdapter(adapter)"
+                  style="width: 120px; height: 120px; position: relative; overflow: hidden;">
+                  <img :src="getAdapterIcon(adapter)" style="width: 100%; height: 100%; object-fit: contain;">
+                </n-card>
+              </n-space>
+            </n-marquee>
+          </div>
         </n-space>
       </div>
     </div>
@@ -532,15 +535,16 @@ onMounted(() => {
 }
 
 .sidebar {
-  display: flex;
-  flex-direction: column;
   border-right: 1px solid var(--n-border-color);
   background-color: var(--n-card-color);
 }
 
 .search-bar {
-  padding: 16px;
   border-bottom: 1px solid var(--n-border-color);
+  height: var(--sidebar-title-height);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
 }
 
 .adapter-list-scroll {
@@ -566,6 +570,7 @@ onMounted(() => {
   padding: 16px 20px;
   background-color: var(--n-card-color);
   border-bottom: 1px solid var(--n-border-color);
+  height: var(--sidebar-title-height);
 }
 
 .content-header h2 {
@@ -603,5 +608,10 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+}
+
+.adapter-list-marquee {
+  padding: 0 6px;
 }
 </style>
