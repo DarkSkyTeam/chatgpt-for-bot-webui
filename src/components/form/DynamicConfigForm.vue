@@ -238,8 +238,8 @@ const renderField = (key: string, property: SchemaProperty) => {
         return null
     }
 
-    if (value === undefined && property.examples?.length) {
-        value = property.examples[0]
+    if (value === undefined && property.default) {
+        value = property.default
         updateValue(key, value)
     }
 

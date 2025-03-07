@@ -180,13 +180,14 @@ const isCreating = computed(() => {
 
 // 保存配置
 const handleSave = async () => {
-
-  const result = await formRef.value?.validate()
-  if (result?.warnings?.length) {
+  try {
+    await formRef.value?.validate()
+  } catch (error: any) {
+    $message.error(`保存失败: 请检查配置信息填写是否正确`)
     return false
   }
-
   try {
+
     if (!currentAdapter.value?.name || !currentAdapter.value?.adapter) {
       throw new Error('请输入完整的配置信息')
     }
@@ -366,8 +367,8 @@ onMounted(() => {
           </n-button>
         </n-input-group>
       </div>
-      <n-scrollbar>
-        <n-list hoverable clickable class="adapter-list-scroll">
+      <n-list hoverable clickable class="adapter-list-scroll">
+        <n-scrollbar>
           <n-list-item v-for="adapter in filteredAdapters" :key="adapter.name" @click="handleAdapterSelect(adapter)"
             :class="{ active: selectedAdapter === adapter.name, 'n-list-item': true }">
             <template #prefix>
@@ -390,8 +391,8 @@ onMounted(() => {
           <n-list-item v-if="adapters.length === 0">
             <n-empty description="暂无模型配置" />
           </n-list-item>
-        </n-list>
-      </n-scrollbar>
+        </n-scrollbar>
+      </n-list>
     </div>
 
     <div class="content-area">
@@ -473,7 +474,8 @@ onMounted(() => {
       <div class="empty-state" v-else>
         <n-space vertical align="center" style="width: 100%;">
           <n-text strong style="font-size: 24px;">海量模型，一网打尽</n-text>
-          <n-text style="font-size: 16px;">选择一个模型供应商，然后添加模型，即可开始使用，<a href="https://kirara-docs.app.lss233.com/guide/configuration/llm.html" target="_blank">查看文档</a>。</n-text>
+          <n-text style="font-size: 16px;">选择一个模型供应商，然后添加模型，即可开始使用，<a
+              href="https://kirara-docs.app.lss233.com/guide/configuration/llm.html" target="_blank">查看文档</a>。</n-text>
           <div style="width: 100%; height: 120px;">
             <n-marquee auto-fill :speed="40">
               <n-space class="adapter-list-marquee">
@@ -545,6 +547,7 @@ onMounted(() => {
 .sidebar {
   border-right: 1px solid var(--n-border-color);
   background-color: var(--n-card-color);
+  height: calc(100vh - 28px);
 }
 
 .search-bar {
@@ -557,8 +560,8 @@ onMounted(() => {
 
 .adapter-list-scroll {
   flex: 1;
-  height: calc(100% - 64px);
-  margin: 12px;
+  height: calc(100% - 56px - 28px);
+  margin: 12px 6px;
 }
 
 .adapter-list-scroll .n-list-item {
