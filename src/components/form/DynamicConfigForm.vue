@@ -12,6 +12,8 @@ interface SchemaProperty {
     type?: string
     description?: string
     default?: any
+    hidden_unset?: boolean
+    textType?: boolean
     minimum?: number
     maximum?: number
     enum?: any[]
@@ -103,7 +105,7 @@ const resolveProperty = (property: SchemaProperty, key: string): SchemaProperty 
 const renderInputComponent = (itemType: string, property: SchemaProperty, itemValue: any, updateItemValue: (val: any) => void) => {
     const commonProps = {
         value: itemValue,
-        placeholder: property.examples?.[0] || (property.default !== undefined && property.default !== null)? String(property.default) : '',
+        placeholder: property.examples?.[0] || (property.default !== undefined && property.default !== null) ? String(property.default) : '',
         onUpdateValue: updateItemValue,
         disabled: property.readOnly === true
     }
@@ -146,9 +148,9 @@ const isSecretField = (title: string): boolean => {
 const renderArrayField = (key: string, property: SchemaProperty, formItemProps: any) => {
     const itemType = property.items?.type
     if (!itemType) return null
-    
+
     let arrayValue = props.modelValue[key] as any[] || []
-    
+
     const renderArrayItem = (index: number) => {
         const itemValue = arrayValue[index]
         const removeItem = () => {
@@ -225,13 +227,22 @@ const renderArrayField = (key: string, property: SchemaProperty, formItemProps: 
     })
 }
 
+const renderWebhookUrlText = (key: string, value: string) => {
+    return h(NText, value)
+}
+
 const renderField = (key: string, property: SchemaProperty) => {
     let value = props.modelValue[key]
+
+    if (property.hidden_unset && value === undefined) {
+        return null
+    }
+
     if (value === undefined && property.examples?.length) {
         value = property.examples[0]
         updateValue(key, value)
     }
-    
+
     const required = props.schema.required?.includes(key)
     const formItemProps = {
         label: property.title,
@@ -245,14 +256,20 @@ const renderField = (key: string, property: SchemaProperty) => {
         return renderArrayField(key, property, formItemProps)
     }
 
-    return h(NFormItem, formItemProps, {
-        default: () => renderInputComponent(
-            property.type || 'string', 
-            property, 
-            value || property.examples?.[0] || property.default || null,
-            (val) => updateValue(key, val)
-        )
-    })
+    if (property.textType) {
+        return h(NFormItem, formItemProps, {
+            default: () => renderWebhookUrlText(key, value || property.examples?.[0] || property.default || null)
+        })
+    } else {
+        return h(NFormItem, formItemProps, {
+            default: () => renderInputComponent(
+                property.type || 'string',
+                property,
+                value || property.examples?.[0] || property.default || null,
+                (val) => updateValue(key, val)
+            )
+        })
+    }
 }
 
 defineExpose({

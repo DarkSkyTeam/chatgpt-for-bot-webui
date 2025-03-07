@@ -17,7 +17,7 @@ const fetchAdapterTypes = async () => {
   try {
     const { types, adapters } = await imApi.getAdapterTypes()
     adapterTypes.value = types
-    adapterInfos.value = adapters
+    adapterInfos.value = adapters ?? {}
 
   } catch (error) {
     message.error('获取适配器类型失败: ' + error)
@@ -74,7 +74,7 @@ onMounted(() => {
                 <div class="adapter-card-header">
                   <n-space>
                     <n-avatar :size="30" round 
-                    :src="'http://localhost:8080/assets/icons/im/' + type + '.svg'" 
+                    :src="'http://localhost:8080/assets/icons/im/' + type + '.png'" 
                     fallback-src="/assets/icons/im/fallback-im.svg" />
                     <span class="adapter-type">{{ adapterInfos[type]?.localized_name || type }}</span>
                   </n-space>

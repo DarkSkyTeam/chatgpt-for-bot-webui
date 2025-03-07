@@ -118,8 +118,14 @@ const saveAdapter = async () => {
 
     try {
         processing.value = true
-        const errors = await formRef.value?.validate()
-        if (errors?.warnings?.length) return
+        try {
+            const errors = await formRef.value?.validate()
+            if (errors?.warnings?.length) return
+        } catch (error) {
+            message.error('保存适配器失败: 请检查输入内容')
+            return
+        }
+
         if (isEdit.value) {
             await imApi.updateAdapter(currentAdapter.value.name, currentAdapter.value)
         } else {
@@ -180,7 +186,11 @@ const formRules = {
 // 获取适配器信息
 const fetchAdapterInfo = async () => {
     const { adapters } = await imApi.getAdapterTypes()
-    adapterInfo.value = adapters[adapterType.value] || null
+    if (adapters) {
+        adapterInfo.value = adapters[adapterType.value] || null
+    } else {
+        adapterInfo.value = null
+    }
 }
 
 onMounted(async () => {
@@ -311,7 +321,7 @@ defineExpose({
                             </div>
 
                             <div v-if="currentAdapter" class="config-form">
-                                <n-form ref="formRef" :model="currentAdapter" label-placement="left" label-width="100"
+                                <n-form ref="formRef" :model="currentAdapter" label-placement="left" label-width="150"
                                     :rules="formRules">
                                     <n-form-item label="名称" path="name">
                                         <n-input v-if="currentAdapter" v-model:value="currentAdapter!!.name"

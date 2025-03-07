@@ -137,6 +137,7 @@ const fetchAdapterConfigSchema = async (adapterType: string) => {
     configSchema.value = configSchemaData
   } catch (error: any) {
     $message.error(`获取适配器配置模式失败: ${error.message || error}`)
+    configSchema.value = null
   } finally {
     loading.value = false
   }
@@ -145,6 +146,13 @@ const fetchAdapterConfigSchema = async (adapterType: string) => {
 // 处理适配器选择
 const handleAdapterSelect = async (adapter: LLMBackend) => {
   selectedAdapter.value = adapter.name
+  currentAdapter.value = {
+    name: '',
+    adapter: '',
+    config: {},
+    enable: true,
+    models: []
+  }
   currentAdapter.value = { ...adapter }
   originalAdapterName.value = adapter.name
   await fetchAdapterConfigSchema(adapter.adapter)
@@ -314,11 +322,11 @@ const confirmDelete = async () => {
     }
     await llmApi.deleteBackend(currentAdapter.value.name)
     $message.success('删除成功')
-    await fetchAdapters()
     currentAdapter.value = null
   } catch (error: any) {
     $message.error(`删除失败: ${error.message || '未知错误'}`)
   } finally {
+    await fetchAdapters()
     showDeleteConfirmModal.value = false
   }
 }
