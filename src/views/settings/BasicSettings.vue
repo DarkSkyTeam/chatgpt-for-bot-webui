@@ -6,6 +6,7 @@ import PluginMarketCard from './components/PluginMarketCard.vue'
 import UpdateRegistryCard from './components/UpdateRegistryCard.vue'
 import PasswordCard from './components/PasswordCard.vue'
 import FrpServiceCard from './components/FrpServiceCard.vue'
+import TimezoneCard from './components/TimezoneCard.vue'
 </script>
 
 <template>
@@ -17,6 +18,12 @@ import FrpServiceCard from './components/FrpServiceCard.vue'
               <WebServiceCard />
               <PasswordCard />
               <FrpServiceCard />
+            </n-space>
+          </n-tab-pane>
+
+          <n-tab-pane name="system" tab="系统设置">
+            <n-space vertical :gap="32">
+              <TimezoneCard />
             </n-space>
           </n-tab-pane>
 
