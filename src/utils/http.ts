@@ -3,21 +3,32 @@
 const BASE_URL = '/backend-api/api'
 
 class Http {
-//   private message = useMessage()
+  //   private message = useMessage()
 
   private async request<T>(path: string, config: RequestInit): Promise<T> {
     try {
-      const response = await fetch(`${BASE_URL}${path}`, {
-        ...config,
-        headers: {
+      let actualPath = path
+      let headers: Record<string, any> = {}
+      if (!path.startsWith('http://') && !path.startsWith('https://')) {
+        actualPath = `${BASE_URL}${path}`
+        headers = {
           'Content-Type': 'application/json',
-          ...this.getAuthHeader(),
+          ...headers,
           ...config.headers,
-        },
+          ...this.getAuthHeader(),
+        }
+        config = {
+          ...config,
+          credentials: 'include'
+        }
+      }
+      const response = await fetch(actualPath, {
+        ...config,
+        headers: headers,
       })
 
       const data = await response.json()
-      
+
       if (!response.ok) {
         throw new Error(data.error || '请求失败')
       }
@@ -25,7 +36,7 @@ class Http {
       return data as T
     } catch (error) {
       const message = error instanceof Error ? error.message : '请求失败'
-    //   this.message.error(message)
+      //   this.message.error(message)
       throw error
     }
   }

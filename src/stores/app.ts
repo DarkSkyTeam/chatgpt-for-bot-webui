@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-interface SystemStatus {
+export interface SystemStatus {
   status: string
   apiConnected: boolean
   memoryUsage: number

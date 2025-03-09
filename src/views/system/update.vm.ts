@@ -4,6 +4,16 @@ import { useAppStore } from '@/stores/app'
 import { http } from '@/utils/http'
 import { version } from '@/utils/version'
 
+export interface PypiResponse {
+    info: {
+        version: string,
+    },
+    urls: {
+        url: string,
+        packagetype: string
+    }[]
+}
+
 export interface UpdateResponse {
     current_backend_version: string
     latest_backend_version: string
@@ -52,10 +62,34 @@ export function useUpdateViewModel() {
         }
     }
 
+    const getLatestBackendVersion = async () => {
+        return await http.get<PypiResponse>('https://pypi.org/pypi/kirara-ai/json')
+    }
+
     // 检查更新
     const checkUpdate = async () => {
         try {
             const data = await http.get<UpdateResponse>('/system/check-update')
+
+            if (data.latest_backend_version == '0.0.0') {
+                console.log('无法获取后端最新版本号，尝试本地获取')
+                // 已知最新后端版本
+                try {
+
+                    const pypiData = await getLatestBackendVersion()
+                    data.latest_backend_version = pypiData.info.version
+                    data.backend_download_url = pypiData.urls.find(url => url.packagetype === 'bdist_wheel')?.url ?? null
+                    console.log('已知最新后端版本', data.latest_backend_version)
+                } catch (error) {
+                    message.error('无法获取后端最新版本号，请检查网络连接')
+                    console.error(error)
+                }
+                try {
+                    data.backend_update_available = version.compare(data.latest_backend_version, data.current_backend_version) > 0
+                } catch (error) {
+                    data.backend_update_available = false
+                }
+            }
 
             // 获取当前前端版本
             const current_webui_version = version.getCurrentVersion()
@@ -71,6 +105,7 @@ export function useUpdateViewModel() {
 
             if (updateInfo.backend_update_available || updateInfo.webui_update_available) {
                 showUpdateModal.value = appStore.setUpdateInfo(updateInfo)
+                console.log('showUpdateModal', showUpdateModal.value)
             }
         } catch (error: any) {
             handleError(error, '检查更新失败')

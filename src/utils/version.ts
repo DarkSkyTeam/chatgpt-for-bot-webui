@@ -15,7 +15,12 @@ export const version = {
    * @returns 如果 version1 > version2 返回 1，如果 version1 < version2 返回 -1，如果相等返回 0
    */
   compare(version1: string, version2: string): number {
-    const result = semverCompare(version1, version2)
-    return result === null ? 0 : result
+    try {
+      const result = semverCompare(version1, version2)
+      return result === null ? 0 : result
+    } catch (error) {
+      console.error('版本号格式错误', error)
+      return 0
+    }
   }
 } 

@@ -4,6 +4,8 @@ import { NSpace, NText, NBadge, NTooltip } from 'naive-ui'
 import { useAppStore } from '@/stores/app'
 import { useUpdateViewModel } from '@/views/system/update.vm'
 import UpdateChecker from '@/components/UpdateChecker.vue'
+import { http } from '@/utils/http'
+import type { SystemStatus } from '@/stores/app'
 const updateCheckerRef = ref<InstanceType<typeof UpdateChecker> | null>(null)
 const appStore = useAppStore()
 // 连接状态
@@ -13,8 +15,7 @@ const connecting = ref(false)
 const webUIVersion = import.meta.env.VITE_APP_VERSION || 'unknown'
 
 const fetchStatus = () => {
-  fetch('/backend-api/api/system/status')
-    .then(response => response.json())
+  http.get<{ status: SystemStatus }>('/system/status')
     .then(data => {
       connecting.value = false
       appStore.updateSystemStatus({
