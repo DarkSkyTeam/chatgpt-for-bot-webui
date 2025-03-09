@@ -138,13 +138,13 @@ export function useUpdateViewModel() {
                 throw new Error('重启系统失败')
             } catch (error: any) {
                 // 这个请求不可能成功
-                updateProgress.value = { step: '更新完成，等待系统启动...', percentage: 100 }
+                updateProgress.value = { step: '更新完成，等待系统启动...（若无响应，请手动刷新页面）', percentage: 100 }
 
-                // 5秒后刷新页面
+                // 10秒后刷新页面
                 setTimeout(() => {
                     // 重新加载页面， 设置一个 query t=来重置缓存
                     window.location.href = window.location.href.split('?')[0] + '?t=' + Date.now()
-                }, 5000)
+                }, 10000)
             }
 
 
