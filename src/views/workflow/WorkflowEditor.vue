@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { routerKey, useRoute, useRouter } from 'vue-router'
 import { useMessage } from 'naive-ui'
 import { getWorkflow, createWorkflow, updateWorkflow, type BlockInstance, type Wire } from '@/api/workflow'
 import { listBlockTypes, type BlockType } from '@/api/block'
@@ -40,7 +40,7 @@ const handleSave = async (workflowName: string, workflowDesc: string, newWorkflo
       if (groupId.value !== group || workflowId.value !== workflow) {
         groupId.value = group
         workflowId.value = workflow
-        router.replace(`/workflow/editor/${data.group_id}:${data.workflow_id}`)
+        router.push(`/workflow/editor/${data.group_id}:${data.workflow_id}`)
       }
       name.value = data.name
       description.value = data.description
@@ -51,8 +51,13 @@ const handleSave = async (workflowName: string, workflowDesc: string, newWorkflo
       message.success('保存成功')
     } else {
       await createWorkflow(data.group_id, data.workflow_id, data)
+      groupId.value = data.group_id
+      workflowId.value = data.workflow_id
+      description.value = data.description
+      name.value = data.name
+      document.title = `工作流 - ${data.name}`
       message.success('创建成功')
-      router.replace(`/workflow/editor/${data.group_id}:${data.workflow_id}`)
+      router.push(`/workflow/editor/${data.group_id}:${data.workflow_id}`)
     }
   } catch (error: any) {
     message.error('保存失败')
