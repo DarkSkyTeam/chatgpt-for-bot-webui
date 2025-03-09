@@ -424,7 +424,7 @@ onMounted(() => {
                 </n-form-item>
 
                 <n-form-item label="启用" path="enable">
-                  <n-switch v-model:value="currentAdapter.enable" @update:value="toggleEnable" />
+                  <n-switch v-model:value="currentAdapter.enable" />
                 </n-form-item>
 
                 <n-spin :show="loading">
