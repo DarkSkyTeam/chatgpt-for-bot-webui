@@ -10,7 +10,8 @@ import {
   GitNetworkOutline,
   BookOutline,
   HomeOutline,
-  SettingsOutline
+  SettingsOutline,
+  TerminalOutline
 } from '@vicons/ionicons5'
 import { NIcon } from 'naive-ui'
 import { useAppStore } from '@/stores/app'
@@ -28,6 +29,11 @@ const menuOptions: MenuOption[] = [
     label: () => '快速开始',
     key: 'guide',
     icon: renderIcon(HomeOutline)
+  },
+  {
+    label: () => '控制台',
+    key: 'console',
+    icon: renderIcon(TerminalOutline)
   },
   {
     label: () => '聊天平台管理',

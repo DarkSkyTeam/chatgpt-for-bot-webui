@@ -13,6 +13,11 @@ const router = createRouter({
           redirect: '/guide'
         },
         {
+          path: '/console',
+          name: 'console',
+          component: () => import('@/views/console/Console.vue')
+        },
+        {
           path: '/im',
           name: 'im',
           component: () => import('@/views/im/IMView.vue')
